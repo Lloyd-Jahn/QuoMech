@@ -1,0 +1,303 @@
+{
+  "solver": {
+    "n_acc_cases": 1000,
+    "ros2_rtol1e-6": {
+      "ok_count": 1000,
+      "radau_ok_count": 1000,
+      "both_ok_count": 1000,
+      "max_abs_err_all_species": 3.98234454968005e-07,
+      "p99_abs_err_all_species": 3.192644954952417e-07,
+      "median_abs_err_all_species": 3.240743380594768e-08,
+      "max_abs_err_obs_species": 3.98234454968005e-07,
+      "max_conservation_err": 1.2967404927621828e-13,
+      "median_conservation_err": 6.217248937900877e-15,
+      "elapsed_1k_s": 0.2198511241003871,
+      "radau_elapsed_1k_s": 14.133987186010927
+    },
+    "ros2_rtol1e-5": {
+      "both_ok_count": 1000,
+      "max_abs_err_all_species": 3.955783710818395e-06,
+      "p99_abs_err_all_species": 3.1407699992413995e-06,
+      "median_abs_err_all_species": 3.2432832122730737e-07
+    },
+    "throughput": {
+      "rtol1e-6": {
+        "n_traj": 100000,
+        "elapsed_s": 10.15997458808124,
+        "traj_per_sec": 9842.544302946477,
+        "fail_count": 0,
+        "fail_rate": 0.0
+      },
+      "rtol1e-5": {
+        "n_traj": 100000,
+        "elapsed_s": 3.2742760190740228,
+        "traj_per_sec": 30541.102649091987,
+        "fail_count": 0,
+        "fail_rate": 0.0
+      }
+    }
+  },
+  "prior_probe": {
+    "prior_means": {
+      "bimol": 2.2,
+      "bimol_cat": 3.5,
+      "unimol": 1.6,
+      "act": 0.6,
+      "deact1": 0.4,
+      "deact2": 1.7,
+      "bg": -1.2
+    },
+    "n_draws_per_mech": 2000,
+    "elapsed_s": 82.94752441300079,
+    "overall_acceptance": {
+      "min": 0.034,
+      "p05": 0.0745,
+      "p10": 0.0975,
+      "median": 0.2075,
+      "mean": 0.23085099337748344,
+      "max": 0.5985,
+      "n_below_3pct": 0,
+      "n_below_5pct": 3,
+      "n_below_10pct": 16
+    },
+    "solver_fail_overall": {
+      "mean": 0.0,
+      "max": 0.0
+    },
+    "conv_pass_mean": {
+      "ge_25pct": 0.6713543046357616,
+      "le_98pct": 0.897317880794702
+    },
+    "by_k_active": {
+      "k=0": {
+        "count": 1,
+        "min": 0.5985,
+        "median": 0.5985,
+        "mean": 0.5985,
+        "max": 0.5985
+      },
+      "k=1": {
+        "count": 10,
+        "min": 0.344,
+        "median": 0.40675,
+        "mean": 0.44089999999999996,
+        "max": 0.588
+      },
+      "k=2": {
+        "count": 42,
+        "min": 0.132,
+        "median": 0.28574999999999995,
+        "mean": 0.29047619047619044,
+        "max": 0.562
+      },
+      "k=3": {
+        "count": 98,
+        "min": 0.034,
+        "median": 0.177,
+        "mean": 0.18011224489795918,
+        "max": 0.391
+      }
+    },
+    "by_module_individual_pass": {
+      "M1": {
+        "mean_pass": 0.6502906976744186,
+        "min_pass": 0.627,
+        "median_pass": 0.649
+      },
+      "M2": {
+        "mean_pass": 0.5963563218390805,
+        "min_pass": 0.3665,
+        "median_pass": 0.5825
+      },
+      "M3": {
+        "mean_pass": 0.6844418604651162,
+        "min_pass": 0.537,
+        "median_pass": 0.706
+      },
+      "M4": {
+        "mean_pass": 0.6916627906976744,
+        "min_pass": 0.5335,
+        "median_pass": 0.6735
+      },
+      "M5": {
+        "mean_pass": 0.6498139534883721,
+        "min_pass": 0.3595,
+        "median_pass": 0.696
+      },
+      "M6": {
+        "mean_pass": 0.5628255813953489,
+        "min_pass": 0.4535,
+        "median_pass": 0.5715
+      },
+      "M7": {
+        "mean_pass": 0.9359186046511627,
+        "min_pass": 0.892,
+        "median_pass": 0.939
+      },
+      "M8": {
+        "mean_pass": 0.8434999999999999,
+        "min_pass": 0.765,
+        "median_pass": 0.846
+      }
+    },
+    "worst_10": [
+      {
+        "mech_id": 61,
+        "name": "M1+M2:complex+M5",
+        "acc_rate": 0.034,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.47,
+          "conv_high": 0.951,
+          "M1": 0.663,
+          "M2": 0.408,
+          "M5": 0.4055
+        }
+      },
+      {
+        "mech_id": 60,
+        "name": "M1+M2:free2+M5",
+        "acc_rate": 0.044,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.5205,
+          "conv_high": 0.9395,
+          "M1": 0.6545,
+          "M2": 0.3665,
+          "M5": 0.4015
+        }
+      },
+      {
+        "mech_id": 72,
+        "name": "M1+M3+M5",
+        "acc_rate": 0.048,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.4395,
+          "conv_high": 0.9565,
+          "M1": 0.6415,
+          "M3": 0.542,
+          "M5": 0.3595
+        }
+      },
+      {
+        "mech_id": 59,
+        "name": "M1+M2:free1+M5",
+        "acc_rate": 0.0555,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.4495,
+          "conv_high": 0.9545,
+          "M1": 0.6545,
+          "M2": 0.6095,
+          "M5": 0.3655
+        }
+      },
+      {
+        "mech_id": 76,
+        "name": "M1+M4+M5",
+        "acc_rate": 0.0685,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.4935,
+          "conv_high": 0.969,
+          "M1": 0.6355,
+          "M4": 0.6435,
+          "M5": 0.3775
+        }
+      },
+      {
+        "mech_id": 91,
+        "name": "M2:complex+M3+M5",
+        "acc_rate": 0.07,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.5125,
+          "conv_high": 0.9425,
+          "M2": 0.413,
+          "M3": 0.6675,
+          "M5": 0.6645
+        }
+      },
+      {
+        "mech_id": 55,
+        "name": "M1+M2:complex+M3",
+        "acc_rate": 0.0725,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.4865,
+          "conv_high": 0.934,
+          "M1": 0.6595,
+          "M2": 0.372,
+          "M3": 0.566
+        }
+      },
+      {
+        "mech_id": 90,
+        "name": "M2:free2+M3+M5",
+        "acc_rate": 0.073,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.5235,
+          "conv_high": 0.944,
+          "M2": 0.421,
+          "M3": 0.6585,
+          "M5": 0.663
+        }
+      },
+      {
+        "mech_id": 54,
+        "name": "M1+M2:free2+M3",
+        "acc_rate": 0.076,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.4925,
+          "conv_high": 0.932,
+          "M1": 0.647,
+          "M2": 0.422,
+          "M3": 0.564
+        }
+      },
+      {
+        "mech_id": 103,
+        "name": "M2:complex+M4+M5",
+        "acc_rate": 0.081,
+        "diag": {
+          "solver_ok": 1.0,
+          "conv_low": 0.5405,
+          "conv_high": 0.9555,
+          "M2": 0.436,
+          "M4": 0.6545,
+          "M5": 0.6845
+        }
+      }
+    ],
+    "best_5": [
+      {
+        "mech_id": 0,
+        "name": "Core",
+        "acc_rate": 0.5985
+      },
+      {
+        "mech_id": 9,
+        "name": "M7",
+        "acc_rate": 0.588
+      },
+      {
+        "mech_id": 52,
+        "name": "M7+M8",
+        "acc_rate": 0.562
+      },
+      {
+        "mech_id": 6,
+        "name": "M4",
+        "acc_rate": 0.552
+      },
+      {
+        "mech_id": 10,
+        "name": "M8",
+        "acc_rate": 0.5115
+      }
+    ]
+  }
+}

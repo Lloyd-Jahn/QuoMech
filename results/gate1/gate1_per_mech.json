@@ -1,0 +1,2202 @@
+[
+  {
+    "mech_id": 0,
+    "name": "Core",
+    "k_active": 0,
+    "acc_rate": 0.5985,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8385,
+      "conv_high": 0.76
+    }
+  },
+  {
+    "mech_id": 1,
+    "name": "M1",
+    "k_active": 1,
+    "acc_rate": 0.3875,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.687,
+      "conv_high": 0.861,
+      "M1": 0.6605
+    }
+  },
+  {
+    "mech_id": 2,
+    "name": "M2:free1",
+    "k_active": 1,
+    "acc_rate": 0.4355,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6735,
+      "conv_high": 0.876,
+      "M2": 0.827
+    }
+  },
+  {
+    "mech_id": 3,
+    "name": "M2:free2",
+    "k_active": 1,
+    "acc_rate": 0.4035,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.727,
+      "conv_high": 0.8695,
+      "M2": 0.7305
+    }
+  },
+  {
+    "mech_id": 4,
+    "name": "M2:complex",
+    "k_active": 1,
+    "acc_rate": 0.344,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7335,
+      "conv_high": 0.8545,
+      "M2": 0.574
+    }
+  },
+  {
+    "mech_id": 5,
+    "name": "M3",
+    "k_active": 1,
+    "acc_rate": 0.3955,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6935,
+      "conv_high": 0.8575,
+      "M3": 0.7365
+    }
+  },
+  {
+    "mech_id": 6,
+    "name": "M4",
+    "k_active": 1,
+    "acc_rate": 0.552,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.753,
+      "conv_high": 0.912,
+      "M4": 0.814
+    }
+  },
+  {
+    "mech_id": 7,
+    "name": "M5",
+    "k_active": 1,
+    "acc_rate": 0.3815,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6925,
+      "conv_high": 0.872,
+      "M5": 0.731
+    }
+  },
+  {
+    "mech_id": 8,
+    "name": "M6",
+    "k_active": 1,
+    "acc_rate": 0.41,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.904,
+      "conv_high": 0.772,
+      "M6": 0.5395
+    }
+  },
+  {
+    "mech_id": 9,
+    "name": "M7",
+    "k_active": 1,
+    "acc_rate": 0.588,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7655,
+      "conv_high": 0.8575,
+      "M7": 0.9545
+    }
+  },
+  {
+    "mech_id": 10,
+    "name": "M8",
+    "k_active": 1,
+    "acc_rate": 0.5115,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.9005,
+      "conv_high": 0.6475,
+      "M8": 0.9195
+    }
+  },
+  {
+    "mech_id": 11,
+    "name": "M1+M2:free1",
+    "k_active": 2,
+    "acc_rate": 0.2075,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5165,
+      "conv_high": 0.916,
+      "M1": 0.6425,
+      "M2": 0.6875
+    }
+  },
+  {
+    "mech_id": 12,
+    "name": "M1+M2:free2",
+    "k_active": 2,
+    "acc_rate": 0.2055,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.608,
+      "conv_high": 0.919,
+      "M1": 0.644,
+      "M2": 0.551
+    }
+  },
+  {
+    "mech_id": 13,
+    "name": "M1+M2:complex",
+    "k_active": 2,
+    "acc_rate": 0.1695,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.573,
+      "conv_high": 0.9075,
+      "M1": 0.649,
+      "M2": 0.452
+    }
+  },
+  {
+    "mech_id": 14,
+    "name": "M1+M3",
+    "k_active": 2,
+    "acc_rate": 0.183,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.529,
+      "conv_high": 0.9195,
+      "M1": 0.662,
+      "M3": 0.5815
+    }
+  },
+  {
+    "mech_id": 15,
+    "name": "M1+M4",
+    "k_active": 2,
+    "acc_rate": 0.295,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5895,
+      "conv_high": 0.945,
+      "M1": 0.6565,
+      "M4": 0.7425
+    }
+  },
+  {
+    "mech_id": 16,
+    "name": "M1+M5",
+    "k_active": 2,
+    "acc_rate": 0.132,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5395,
+      "conv_high": 0.935,
+      "M1": 0.644,
+      "M5": 0.4555
+    }
+  },
+  {
+    "mech_id": 17,
+    "name": "M1+M6",
+    "k_active": 2,
+    "acc_rate": 0.2845,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8105,
+      "conv_high": 0.8395,
+      "M1": 0.6625,
+      "M6": 0.587
+    }
+  },
+  {
+    "mech_id": 18,
+    "name": "M1+M7",
+    "k_active": 2,
+    "acc_rate": 0.3425,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.607,
+      "conv_high": 0.919,
+      "M1": 0.639,
+      "M7": 0.934
+    }
+  },
+  {
+    "mech_id": 19,
+    "name": "M1+M8",
+    "k_active": 2,
+    "acc_rate": 0.362,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7615,
+      "conv_high": 0.8135,
+      "M1": 0.6395,
+      "M8": 0.8485
+    }
+  },
+  {
+    "mech_id": 20,
+    "name": "M2:free1+M3",
+    "k_active": 2,
+    "acc_rate": 0.2255,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5575,
+      "conv_high": 0.9135,
+      "M2": 0.6995,
+      "M3": 0.716
+    }
+  },
+  {
+    "mech_id": 21,
+    "name": "M2:free2+M3",
+    "k_active": 2,
+    "acc_rate": 0.195,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6005,
+      "conv_high": 0.9025,
+      "M2": 0.5875,
+      "M3": 0.7305
+    }
+  },
+  {
+    "mech_id": 22,
+    "name": "M2:complex+M3",
+    "k_active": 2,
+    "acc_rate": 0.1805,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.62,
+      "conv_high": 0.884,
+      "M2": 0.4575,
+      "M3": 0.736
+    }
+  },
+  {
+    "mech_id": 23,
+    "name": "M2:free1+M4",
+    "k_active": 2,
+    "acc_rate": 0.253,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6215,
+      "conv_high": 0.936,
+      "M2": 0.74,
+      "M4": 0.6275
+    }
+  },
+  {
+    "mech_id": 24,
+    "name": "M2:free2+M4",
+    "k_active": 2,
+    "acc_rate": 0.2145,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6565,
+      "conv_high": 0.9315,
+      "M2": 0.558,
+      "M4": 0.7335
+    }
+  },
+  {
+    "mech_id": 25,
+    "name": "M2:complex+M4",
+    "k_active": 2,
+    "acc_rate": 0.1905,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.647,
+      "conv_high": 0.9295,
+      "M2": 0.496,
+      "M4": 0.716
+    }
+  },
+  {
+    "mech_id": 26,
+    "name": "M2:free1+M5",
+    "k_active": 2,
+    "acc_rate": 0.2175,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.564,
+      "conv_high": 0.924,
+      "M2": 0.718,
+      "M5": 0.7105
+    }
+  },
+  {
+    "mech_id": 27,
+    "name": "M2:free2+M5",
+    "k_active": 2,
+    "acc_rate": 0.171,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.653,
+      "conv_high": 0.896,
+      "M2": 0.505,
+      "M5": 0.696
+    }
+  },
+  {
+    "mech_id": 28,
+    "name": "M2:complex+M5",
+    "k_active": 2,
+    "acc_rate": 0.153,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6125,
+      "conv_high": 0.925,
+      "M2": 0.482,
+      "M5": 0.6965
+    }
+  },
+  {
+    "mech_id": 29,
+    "name": "M2:free1+M6",
+    "k_active": 2,
+    "acc_rate": 0.2955,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7995,
+      "conv_high": 0.864,
+      "M2": 0.824,
+      "M6": 0.5595
+    }
+  },
+  {
+    "mech_id": 30,
+    "name": "M2:free2+M6",
+    "k_active": 2,
+    "acc_rate": 0.28,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.835,
+      "conv_high": 0.8515,
+      "M2": 0.7645,
+      "M6": 0.5795
+    }
+  },
+  {
+    "mech_id": 31,
+    "name": "M2:complex+M6",
+    "k_active": 2,
+    "acc_rate": 0.244,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8505,
+      "conv_high": 0.8395,
+      "M2": 0.572,
+      "M6": 0.5695
+    }
+  },
+  {
+    "mech_id": 32,
+    "name": "M2:free1+M7",
+    "k_active": 2,
+    "acc_rate": 0.362,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6175,
+      "conv_high": 0.9195,
+      "M2": 0.7505,
+      "M7": 0.939
+    }
+  },
+  {
+    "mech_id": 33,
+    "name": "M2:free2+M7",
+    "k_active": 2,
+    "acc_rate": 0.307,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.667,
+      "conv_high": 0.887,
+      "M2": 0.6225,
+      "M7": 0.948
+    }
+  },
+  {
+    "mech_id": 34,
+    "name": "M2:complex+M7",
+    "k_active": 2,
+    "acc_rate": 0.2735,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6665,
+      "conv_high": 0.9085,
+      "M2": 0.5,
+      "M7": 0.9345
+    }
+  },
+  {
+    "mech_id": 35,
+    "name": "M2:free1+M8",
+    "k_active": 2,
+    "acc_rate": 0.4175,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7345,
+      "conv_high": 0.822,
+      "M2": 0.8775,
+      "M8": 0.8825
+    }
+  },
+  {
+    "mech_id": 36,
+    "name": "M2:free2+M8",
+    "k_active": 2,
+    "acc_rate": 0.4325,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.785,
+      "conv_high": 0.7955,
+      "M2": 0.867,
+      "M8": 0.8835
+    }
+  },
+  {
+    "mech_id": 37,
+    "name": "M2:complex+M8",
+    "k_active": 2,
+    "acc_rate": 0.3345,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.792,
+      "conv_high": 0.7905,
+      "M2": 0.6095,
+      "M8": 0.8975
+    }
+  },
+  {
+    "mech_id": 38,
+    "name": "M3+M4",
+    "k_active": 2,
+    "acc_rate": 0.281,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.597,
+      "conv_high": 0.941,
+      "M3": 0.7195,
+      "M4": 0.7
+    }
+  },
+  {
+    "mech_id": 39,
+    "name": "M3+M5",
+    "k_active": 2,
+    "acc_rate": 0.195,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5635,
+      "conv_high": 0.926,
+      "M3": 0.6645,
+      "M5": 0.709
+    }
+  },
+  {
+    "mech_id": 40,
+    "name": "M3+M6",
+    "k_active": 2,
+    "acc_rate": 0.29,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.843,
+      "conv_high": 0.8455,
+      "M3": 0.7255,
+      "M6": 0.5685
+    }
+  },
+  {
+    "mech_id": 41,
+    "name": "M3+M7",
+    "k_active": 2,
+    "acc_rate": 0.339,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.624,
+      "conv_high": 0.918,
+      "M3": 0.7245,
+      "M7": 0.9215
+    }
+  },
+  {
+    "mech_id": 42,
+    "name": "M3+M8",
+    "k_active": 2,
+    "acc_rate": 0.3615,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.755,
+      "conv_high": 0.789,
+      "M3": 0.762,
+      "M8": 0.863
+    }
+  },
+  {
+    "mech_id": 43,
+    "name": "M4+M5",
+    "k_active": 2,
+    "acc_rate": 0.255,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.632,
+      "conv_high": 0.933,
+      "M4": 0.7125,
+      "M5": 0.693
+    }
+  },
+  {
+    "mech_id": 44,
+    "name": "M4+M6",
+    "k_active": 2,
+    "acc_rate": 0.37,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8455,
+      "conv_high": 0.9045,
+      "M4": 0.846,
+      "M6": 0.5735
+    }
+  },
+  {
+    "mech_id": 45,
+    "name": "M4+M7",
+    "k_active": 2,
+    "acc_rate": 0.38,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6805,
+      "conv_high": 0.934,
+      "M4": 0.646,
+      "M7": 0.9195
+    }
+  },
+  {
+    "mech_id": 46,
+    "name": "M4+M8",
+    "k_active": 2,
+    "acc_rate": 0.51,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7815,
+      "conv_high": 0.8785,
+      "M4": 0.8865,
+      "M8": 0.8765
+    }
+  },
+  {
+    "mech_id": 47,
+    "name": "M5+M6",
+    "k_active": 2,
+    "acc_rate": 0.287,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8125,
+      "conv_high": 0.88,
+      "M5": 0.7435,
+      "M6": 0.5695
+    }
+  },
+  {
+    "mech_id": 48,
+    "name": "M5+M7",
+    "k_active": 2,
+    "acc_rate": 0.325,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.638,
+      "conv_high": 0.9165,
+      "M5": 0.6995,
+      "M7": 0.944
+    }
+  },
+  {
+    "mech_id": 49,
+    "name": "M5+M8",
+    "k_active": 2,
+    "acc_rate": 0.401,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7305,
+      "conv_high": 0.8545,
+      "M5": 0.819,
+      "M8": 0.837
+    }
+  },
+  {
+    "mech_id": 50,
+    "name": "M6+M7",
+    "k_active": 2,
+    "acc_rate": 0.403,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8735,
+      "conv_high": 0.854,
+      "M6": 0.5445,
+      "M7": 0.9695
+    }
+  },
+  {
+    "mech_id": 51,
+    "name": "M6+M8",
+    "k_active": 2,
+    "acc_rate": 0.312,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.9465,
+      "conv_high": 0.6705,
+      "M6": 0.4535,
+      "M8": 0.927
+    }
+  },
+  {
+    "mech_id": 52,
+    "name": "M7+M8",
+    "k_active": 2,
+    "acc_rate": 0.562,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8495,
+      "conv_high": 0.7805,
+      "M7": 0.975,
+      "M8": 0.9195
+    }
+  },
+  {
+    "mech_id": 53,
+    "name": "M1+M2:free1+M3",
+    "k_active": 3,
+    "acc_rate": 0.081,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.42,
+      "conv_high": 0.951,
+      "M1": 0.653,
+      "M2": 0.574,
+      "M3": 0.537
+    }
+  },
+  {
+    "mech_id": 54,
+    "name": "M1+M2:free2+M3",
+    "k_active": 3,
+    "acc_rate": 0.076,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4925,
+      "conv_high": 0.932,
+      "M1": 0.647,
+      "M2": 0.422,
+      "M3": 0.564
+    }
+  },
+  {
+    "mech_id": 55,
+    "name": "M1+M2:complex+M3",
+    "k_active": 3,
+    "acc_rate": 0.0725,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4865,
+      "conv_high": 0.934,
+      "M1": 0.6595,
+      "M2": 0.372,
+      "M3": 0.566
+    }
+  },
+  {
+    "mech_id": 56,
+    "name": "M1+M2:free1+M4",
+    "k_active": 3,
+    "acc_rate": 0.1155,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.467,
+      "conv_high": 0.9665,
+      "M1": 0.649,
+      "M2": 0.6145,
+      "M4": 0.5665
+    }
+  },
+  {
+    "mech_id": 57,
+    "name": "M1+M2:free2+M4",
+    "k_active": 3,
+    "acc_rate": 0.1115,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.532,
+      "conv_high": 0.9585,
+      "M1": 0.6545,
+      "M2": 0.4235,
+      "M4": 0.6735
+    }
+  },
+  {
+    "mech_id": 58,
+    "name": "M1+M2:complex+M4",
+    "k_active": 3,
+    "acc_rate": 0.0935,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.498,
+      "conv_high": 0.9645,
+      "M1": 0.665,
+      "M2": 0.417,
+      "M4": 0.6515
+    }
+  },
+  {
+    "mech_id": 59,
+    "name": "M1+M2:free1+M5",
+    "k_active": 3,
+    "acc_rate": 0.0555,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4495,
+      "conv_high": 0.9545,
+      "M1": 0.6545,
+      "M2": 0.6095,
+      "M5": 0.3655
+    }
+  },
+  {
+    "mech_id": 60,
+    "name": "M1+M2:free2+M5",
+    "k_active": 3,
+    "acc_rate": 0.044,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5205,
+      "conv_high": 0.9395,
+      "M1": 0.6545,
+      "M2": 0.3665,
+      "M5": 0.4015
+    }
+  },
+  {
+    "mech_id": 61,
+    "name": "M1+M2:complex+M5",
+    "k_active": 3,
+    "acc_rate": 0.034,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.47,
+      "conv_high": 0.951,
+      "M1": 0.663,
+      "M2": 0.408,
+      "M5": 0.4055
+    }
+  },
+  {
+    "mech_id": 62,
+    "name": "M1+M2:free1+M6",
+    "k_active": 3,
+    "acc_rate": 0.1665,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7025,
+      "conv_high": 0.9035,
+      "M1": 0.6655,
+      "M2": 0.6915,
+      "M6": 0.583
+    }
+  },
+  {
+    "mech_id": 63,
+    "name": "M1+M2:free2+M6",
+    "k_active": 3,
+    "acc_rate": 0.1575,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7705,
+      "conv_high": 0.897,
+      "M1": 0.649,
+      "M2": 0.5725,
+      "M6": 0.5965
+    }
+  },
+  {
+    "mech_id": 64,
+    "name": "M1+M2:complex+M6",
+    "k_active": 3,
+    "acc_rate": 0.1455,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7435,
+      "conv_high": 0.903,
+      "M1": 0.6445,
+      "M2": 0.477,
+      "M6": 0.605
+    }
+  },
+  {
+    "mech_id": 65,
+    "name": "M1+M2:free1+M7",
+    "k_active": 3,
+    "acc_rate": 0.194,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4995,
+      "conv_high": 0.945,
+      "M1": 0.6505,
+      "M2": 0.6665,
+      "M7": 0.921
+    }
+  },
+  {
+    "mech_id": 66,
+    "name": "M1+M2:free2+M7",
+    "k_active": 3,
+    "acc_rate": 0.1445,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.544,
+      "conv_high": 0.9435,
+      "M1": 0.637,
+      "M2": 0.4515,
+      "M7": 0.9215
+    }
+  },
+  {
+    "mech_id": 67,
+    "name": "M1+M2:complex+M7",
+    "k_active": 3,
+    "acc_rate": 0.1255,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.501,
+      "conv_high": 0.9435,
+      "M1": 0.643,
+      "M2": 0.4325,
+      "M7": 0.9105
+    }
+  },
+  {
+    "mech_id": 68,
+    "name": "M1+M2:free1+M8",
+    "k_active": 3,
+    "acc_rate": 0.2055,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.598,
+      "conv_high": 0.896,
+      "M1": 0.645,
+      "M2": 0.7555,
+      "M8": 0.777
+    }
+  },
+  {
+    "mech_id": 69,
+    "name": "M1+M2:free2+M8",
+    "k_active": 3,
+    "acc_rate": 0.239,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6685,
+      "conv_high": 0.883,
+      "M1": 0.627,
+      "M2": 0.6735,
+      "M8": 0.817
+    }
+  },
+  {
+    "mech_id": 70,
+    "name": "M1+M2:complex+M8",
+    "k_active": 3,
+    "acc_rate": 0.18,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6555,
+      "conv_high": 0.8715,
+      "M1": 0.6685,
+      "M2": 0.54,
+      "M8": 0.812
+    }
+  },
+  {
+    "mech_id": 71,
+    "name": "M1+M3+M4",
+    "k_active": 3,
+    "acc_rate": 0.1095,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4575,
+      "conv_high": 0.968,
+      "M1": 0.658,
+      "M3": 0.5525,
+      "M4": 0.62
+    }
+  },
+  {
+    "mech_id": 72,
+    "name": "M1+M3+M5",
+    "k_active": 3,
+    "acc_rate": 0.048,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4395,
+      "conv_high": 0.9565,
+      "M1": 0.6415,
+      "M3": 0.542,
+      "M5": 0.3595
+    }
+  },
+  {
+    "mech_id": 73,
+    "name": "M1+M3+M6",
+    "k_active": 3,
+    "acc_rate": 0.1505,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7185,
+      "conv_high": 0.9095,
+      "M1": 0.648,
+      "M3": 0.5675,
+      "M6": 0.597
+    }
+  },
+  {
+    "mech_id": 74,
+    "name": "M1+M3+M7",
+    "k_active": 3,
+    "acc_rate": 0.1565,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.489,
+      "conv_high": 0.9495,
+      "M1": 0.6665,
+      "M3": 0.592,
+      "M7": 0.892
+    }
+  },
+  {
+    "mech_id": 75,
+    "name": "M1+M3+M8",
+    "k_active": 3,
+    "acc_rate": 0.181,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6095,
+      "conv_high": 0.8835,
+      "M1": 0.633,
+      "M3": 0.638,
+      "M8": 0.7845
+    }
+  },
+  {
+    "mech_id": 76,
+    "name": "M1+M4+M5",
+    "k_active": 3,
+    "acc_rate": 0.0685,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4935,
+      "conv_high": 0.969,
+      "M1": 0.6355,
+      "M4": 0.6435,
+      "M5": 0.3775
+    }
+  },
+  {
+    "mech_id": 77,
+    "name": "M1+M4+M6",
+    "k_active": 3,
+    "acc_rate": 0.2175,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7495,
+      "conv_high": 0.922,
+      "M1": 0.648,
+      "M4": 0.7825,
+      "M6": 0.585
+    }
+  },
+  {
+    "mech_id": 78,
+    "name": "M1+M4+M7",
+    "k_active": 3,
+    "acc_rate": 0.2105,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5635,
+      "conv_high": 0.958,
+      "M1": 0.6425,
+      "M4": 0.591,
+      "M7": 0.899
+    }
+  },
+  {
+    "mech_id": 79,
+    "name": "M1+M4+M8",
+    "k_active": 3,
+    "acc_rate": 0.277,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6645,
+      "conv_high": 0.918,
+      "M1": 0.6525,
+      "M4": 0.8,
+      "M8": 0.7945
+    }
+  },
+  {
+    "mech_id": 80,
+    "name": "M1+M5+M6",
+    "k_active": 3,
+    "acc_rate": 0.1135,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.715,
+      "conv_high": 0.923,
+      "M1": 0.646,
+      "M5": 0.468,
+      "M6": 0.6095
+    }
+  },
+  {
+    "mech_id": 81,
+    "name": "M1+M5+M7",
+    "k_active": 3,
+    "acc_rate": 0.1035,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5125,
+      "conv_high": 0.9505,
+      "M1": 0.642,
+      "M5": 0.386,
+      "M7": 0.911
+    }
+  },
+  {
+    "mech_id": 82,
+    "name": "M1+M5+M8",
+    "k_active": 3,
+    "acc_rate": 0.1365,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6185,
+      "conv_high": 0.907,
+      "M1": 0.6575,
+      "M5": 0.5455,
+      "M8": 0.765
+    }
+  },
+  {
+    "mech_id": 83,
+    "name": "M1+M6+M7",
+    "k_active": 3,
+    "acc_rate": 0.2585,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.752,
+      "conv_high": 0.9095,
+      "M1": 0.65,
+      "M6": 0.603,
+      "M7": 0.945
+    }
+  },
+  {
+    "mech_id": 84,
+    "name": "M1+M6+M8",
+    "k_active": 3,
+    "acc_rate": 0.227,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8625,
+      "conv_high": 0.801,
+      "M1": 0.659,
+      "M6": 0.5445,
+      "M8": 0.8485
+    }
+  },
+  {
+    "mech_id": 85,
+    "name": "M1+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.3255,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.706,
+      "conv_high": 0.8565,
+      "M1": 0.653,
+      "M7": 0.9545,
+      "M8": 0.8425
+    }
+  },
+  {
+    "mech_id": 86,
+    "name": "M2:free1+M3+M4",
+    "k_active": 3,
+    "acc_rate": 0.1135,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4985,
+      "conv_high": 0.9575,
+      "M2": 0.6435,
+      "M3": 0.701,
+      "M4": 0.5455
+    }
+  },
+  {
+    "mech_id": 87,
+    "name": "M2:free2+M3+M4",
+    "k_active": 3,
+    "acc_rate": 0.0845,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5555,
+      "conv_high": 0.951,
+      "M2": 0.465,
+      "M3": 0.7025,
+      "M4": 0.6385
+    }
+  },
+  {
+    "mech_id": 88,
+    "name": "M2:complex+M3+M4",
+    "k_active": 3,
+    "acc_rate": 0.096,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5625,
+      "conv_high": 0.949,
+      "M2": 0.41,
+      "M3": 0.729,
+      "M4": 0.652
+    }
+  },
+  {
+    "mech_id": 89,
+    "name": "M2:free1+M3+M5",
+    "k_active": 3,
+    "acc_rate": 0.0975,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.4845,
+      "conv_high": 0.9505,
+      "M2": 0.6425,
+      "M3": 0.643,
+      "M5": 0.657
+    }
+  },
+  {
+    "mech_id": 90,
+    "name": "M2:free2+M3+M5",
+    "k_active": 3,
+    "acc_rate": 0.073,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5235,
+      "conv_high": 0.944,
+      "M2": 0.421,
+      "M3": 0.6585,
+      "M5": 0.663
+    }
+  },
+  {
+    "mech_id": 91,
+    "name": "M2:complex+M3+M5",
+    "k_active": 3,
+    "acc_rate": 0.07,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5125,
+      "conv_high": 0.9425,
+      "M2": 0.413,
+      "M3": 0.6675,
+      "M5": 0.6645
+    }
+  },
+  {
+    "mech_id": 92,
+    "name": "M2:free1+M3+M6",
+    "k_active": 3,
+    "acc_rate": 0.1765,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7275,
+      "conv_high": 0.9115,
+      "M2": 0.725,
+      "M3": 0.7055,
+      "M6": 0.6005
+    }
+  },
+  {
+    "mech_id": 93,
+    "name": "M2:free2+M3+M6",
+    "k_active": 3,
+    "acc_rate": 0.1465,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7895,
+      "conv_high": 0.8815,
+      "M2": 0.62,
+      "M3": 0.6885,
+      "M6": 0.5715
+    }
+  },
+  {
+    "mech_id": 94,
+    "name": "M2:complex+M3+M6",
+    "k_active": 3,
+    "acc_rate": 0.136,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7855,
+      "conv_high": 0.878,
+      "M2": 0.4675,
+      "M3": 0.724,
+      "M6": 0.575
+    }
+  },
+  {
+    "mech_id": 95,
+    "name": "M2:free1+M3+M7",
+    "k_active": 3,
+    "acc_rate": 0.173,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5185,
+      "conv_high": 0.941,
+      "M2": 0.6665,
+      "M3": 0.706,
+      "M7": 0.9095
+    }
+  },
+  {
+    "mech_id": 96,
+    "name": "M2:free2+M3+M7",
+    "k_active": 3,
+    "acc_rate": 0.15,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.549,
+      "conv_high": 0.9325,
+      "M2": 0.521,
+      "M3": 0.725,
+      "M7": 0.9325
+    }
+  },
+  {
+    "mech_id": 97,
+    "name": "M2:complex+M3+M7",
+    "k_active": 3,
+    "acc_rate": 0.1515,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.563,
+      "conv_high": 0.937,
+      "M2": 0.4245,
+      "M3": 0.7205,
+      "M7": 0.9175
+    }
+  },
+  {
+    "mech_id": 98,
+    "name": "M2:free1+M3+M8",
+    "k_active": 3,
+    "acc_rate": 0.2105,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5845,
+      "conv_high": 0.8965,
+      "M2": 0.758,
+      "M3": 0.74,
+      "M8": 0.8215
+    }
+  },
+  {
+    "mech_id": 99,
+    "name": "M2:free2+M3+M8",
+    "k_active": 3,
+    "acc_rate": 0.2135,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.685,
+      "conv_high": 0.8615,
+      "M2": 0.6885,
+      "M3": 0.747,
+      "M8": 0.8175
+    }
+  },
+  {
+    "mech_id": 100,
+    "name": "M2:complex+M3+M8",
+    "k_active": 3,
+    "acc_rate": 0.1955,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.697,
+      "conv_high": 0.841,
+      "M2": 0.5,
+      "M3": 0.7615,
+      "M8": 0.824
+    }
+  },
+  {
+    "mech_id": 101,
+    "name": "M2:free1+M4+M5",
+    "k_active": 3,
+    "acc_rate": 0.1165,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5255,
+      "conv_high": 0.9605,
+      "M2": 0.679,
+      "M4": 0.6045,
+      "M5": 0.679
+    }
+  },
+  {
+    "mech_id": 102,
+    "name": "M2:free2+M4+M5",
+    "k_active": 3,
+    "acc_rate": 0.087,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.561,
+      "conv_high": 0.948,
+      "M2": 0.419,
+      "M4": 0.6715,
+      "M5": 0.685
+    }
+  },
+  {
+    "mech_id": 103,
+    "name": "M2:complex+M4+M5",
+    "k_active": 3,
+    "acc_rate": 0.081,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5405,
+      "conv_high": 0.9555,
+      "M2": 0.436,
+      "M4": 0.6545,
+      "M5": 0.6845
+    }
+  },
+  {
+    "mech_id": 104,
+    "name": "M2:free1+M4+M6",
+    "k_active": 3,
+    "acc_rate": 0.1835,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.762,
+      "conv_high": 0.9325,
+      "M2": 0.75,
+      "M4": 0.6425,
+      "M6": 0.575
+    }
+  },
+  {
+    "mech_id": 105,
+    "name": "M2:free2+M4+M6",
+    "k_active": 3,
+    "acc_rate": 0.156,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7865,
+      "conv_high": 0.92,
+      "M2": 0.5825,
+      "M4": 0.7485,
+      "M6": 0.5915
+    }
+  },
+  {
+    "mech_id": 106,
+    "name": "M2:complex+M4+M6",
+    "k_active": 3,
+    "acc_rate": 0.1405,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.796,
+      "conv_high": 0.929,
+      "M2": 0.485,
+      "M4": 0.7455,
+      "M6": 0.5835
+    }
+  },
+  {
+    "mech_id": 107,
+    "name": "M2:free1+M4+M7",
+    "k_active": 3,
+    "acc_rate": 0.1875,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5645,
+      "conv_high": 0.95,
+      "M2": 0.6985,
+      "M4": 0.5335,
+      "M7": 0.913
+    }
+  },
+  {
+    "mech_id": 108,
+    "name": "M2:free2+M4+M7",
+    "k_active": 3,
+    "acc_rate": 0.1375,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.593,
+      "conv_high": 0.9535,
+      "M2": 0.5175,
+      "M4": 0.6065,
+      "M7": 0.9145
+    }
+  },
+  {
+    "mech_id": 109,
+    "name": "M2:complex+M4+M7",
+    "k_active": 3,
+    "acc_rate": 0.1375,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.598,
+      "conv_high": 0.959,
+      "M2": 0.4765,
+      "M4": 0.582,
+      "M7": 0.9105
+    }
+  },
+  {
+    "mech_id": 110,
+    "name": "M2:free1+M4+M8",
+    "k_active": 3,
+    "acc_rate": 0.248,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6665,
+      "conv_high": 0.9175,
+      "M2": 0.777,
+      "M4": 0.676,
+      "M8": 0.86
+    }
+  },
+  {
+    "mech_id": 111,
+    "name": "M2:free2+M4+M8",
+    "k_active": 3,
+    "acc_rate": 0.234,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7255,
+      "conv_high": 0.8915,
+      "M2": 0.6555,
+      "M4": 0.7765,
+      "M8": 0.8535
+    }
+  },
+  {
+    "mech_id": 112,
+    "name": "M2:complex+M4+M8",
+    "k_active": 3,
+    "acc_rate": 0.2025,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.71,
+      "conv_high": 0.901,
+      "M2": 0.5415,
+      "M4": 0.758,
+      "M8": 0.8425
+    }
+  },
+  {
+    "mech_id": 113,
+    "name": "M2:free1+M5+M6",
+    "k_active": 3,
+    "acc_rate": 0.1775,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.736,
+      "conv_high": 0.918,
+      "M2": 0.7315,
+      "M5": 0.707,
+      "M6": 0.584
+    }
+  },
+  {
+    "mech_id": 114,
+    "name": "M2:free2+M5+M6",
+    "k_active": 3,
+    "acc_rate": 0.125,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7895,
+      "conv_high": 0.893,
+      "M2": 0.5255,
+      "M5": 0.718,
+      "M6": 0.593
+    }
+  },
+  {
+    "mech_id": 115,
+    "name": "M2:complex+M5+M6",
+    "k_active": 3,
+    "acc_rate": 0.1115,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7745,
+      "conv_high": 0.905,
+      "M2": 0.4765,
+      "M5": 0.703,
+      "M6": 0.58
+    }
+  },
+  {
+    "mech_id": 116,
+    "name": "M2:free1+M5+M7",
+    "k_active": 3,
+    "acc_rate": 0.204,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5725,
+      "conv_high": 0.9435,
+      "M2": 0.68,
+      "M5": 0.688,
+      "M7": 0.925
+    }
+  },
+  {
+    "mech_id": 117,
+    "name": "M2:free2+M5+M7",
+    "k_active": 3,
+    "acc_rate": 0.1295,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5765,
+      "conv_high": 0.936,
+      "M2": 0.4375,
+      "M5": 0.687,
+      "M7": 0.939
+    }
+  },
+  {
+    "mech_id": 118,
+    "name": "M2:complex+M5+M7",
+    "k_active": 3,
+    "acc_rate": 0.126,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.545,
+      "conv_high": 0.9515,
+      "M2": 0.4495,
+      "M5": 0.6915,
+      "M7": 0.9175
+    }
+  },
+  {
+    "mech_id": 119,
+    "name": "M2:free1+M5+M8",
+    "k_active": 3,
+    "acc_rate": 0.2175,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.616,
+      "conv_high": 0.9075,
+      "M2": 0.76,
+      "M5": 0.7455,
+      "M8": 0.8015
+    }
+  },
+  {
+    "mech_id": 120,
+    "name": "M2:free2+M5+M8",
+    "k_active": 3,
+    "acc_rate": 0.1855,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6805,
+      "conv_high": 0.889,
+      "M2": 0.587,
+      "M5": 0.7565,
+      "M8": 0.812
+    }
+  },
+  {
+    "mech_id": 121,
+    "name": "M2:complex+M5+M8",
+    "k_active": 3,
+    "acc_rate": 0.1475,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.685,
+      "conv_high": 0.882,
+      "M2": 0.5105,
+      "M5": 0.754,
+      "M8": 0.794
+    }
+  },
+  {
+    "mech_id": 122,
+    "name": "M2:free1+M6+M7",
+    "k_active": 3,
+    "acc_rate": 0.2375,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7755,
+      "conv_high": 0.9055,
+      "M2": 0.7525,
+      "M6": 0.536,
+      "M7": 0.95
+    }
+  },
+  {
+    "mech_id": 123,
+    "name": "M2:free2+M6+M7",
+    "k_active": 3,
+    "acc_rate": 0.207,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7965,
+      "conv_high": 0.879,
+      "M2": 0.621,
+      "M6": 0.566,
+      "M7": 0.9635
+    }
+  },
+  {
+    "mech_id": 124,
+    "name": "M2:complex+M6+M7",
+    "k_active": 3,
+    "acc_rate": 0.183,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.812,
+      "conv_high": 0.91,
+      "M2": 0.503,
+      "M6": 0.5655,
+      "M7": 0.9405
+    }
+  },
+  {
+    "mech_id": 125,
+    "name": "M2:free1+M6+M8",
+    "k_active": 3,
+    "acc_rate": 0.284,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8415,
+      "conv_high": 0.814,
+      "M2": 0.9045,
+      "M6": 0.5125,
+      "M8": 0.889
+    }
+  },
+  {
+    "mech_id": 126,
+    "name": "M2:free2+M6+M8",
+    "k_active": 3,
+    "acc_rate": 0.2415,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8765,
+      "conv_high": 0.781,
+      "M2": 0.8545,
+      "M6": 0.4875,
+      "M8": 0.8745
+    }
+  },
+  {
+    "mech_id": 127,
+    "name": "M2:complex+M6+M8",
+    "k_active": 3,
+    "acc_rate": 0.2095,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.888,
+      "conv_high": 0.778,
+      "M2": 0.606,
+      "M6": 0.507,
+      "M8": 0.8865
+    }
+  },
+  {
+    "mech_id": 128,
+    "name": "M2:free1+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.384,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.71,
+      "conv_high": 0.87,
+      "M2": 0.8275,
+      "M7": 0.953,
+      "M8": 0.847
+    }
+  },
+  {
+    "mech_id": 129,
+    "name": "M2:free2+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.3535,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.735,
+      "conv_high": 0.8535,
+      "M2": 0.7715,
+      "M7": 0.9785,
+      "M8": 0.847
+    }
+  },
+  {
+    "mech_id": 130,
+    "name": "M2:complex+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.283,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.751,
+      "conv_high": 0.8555,
+      "M2": 0.58,
+      "M7": 0.9555,
+      "M8": 0.868
+    }
+  },
+  {
+    "mech_id": 131,
+    "name": "M3+M4+M5",
+    "k_active": 3,
+    "acc_rate": 0.1215,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5185,
+      "conv_high": 0.958,
+      "M3": 0.6685,
+      "M4": 0.64,
+      "M5": 0.655
+    }
+  },
+  {
+    "mech_id": 132,
+    "name": "M3+M4+M6",
+    "k_active": 3,
+    "acc_rate": 0.214,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7955,
+      "conv_high": 0.931,
+      "M3": 0.7255,
+      "M4": 0.732,
+      "M6": 0.5985
+    }
+  },
+  {
+    "mech_id": 133,
+    "name": "M3+M4+M7",
+    "k_active": 3,
+    "acc_rate": 0.223,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.579,
+      "conv_high": 0.957,
+      "M3": 0.7345,
+      "M4": 0.583,
+      "M7": 0.911
+    }
+  },
+  {
+    "mech_id": 134,
+    "name": "M3+M4+M8",
+    "k_active": 3,
+    "acc_rate": 0.291,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.693,
+      "conv_high": 0.911,
+      "M3": 0.7685,
+      "M4": 0.762,
+      "M8": 0.8275
+    }
+  },
+  {
+    "mech_id": 135,
+    "name": "M3+M5+M6",
+    "k_active": 3,
+    "acc_rate": 0.1655,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.746,
+      "conv_high": 0.905,
+      "M3": 0.6835,
+      "M5": 0.699,
+      "M6": 0.576
+    }
+  },
+  {
+    "mech_id": 136,
+    "name": "M3+M5+M7",
+    "k_active": 3,
+    "acc_rate": 0.1705,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.526,
+      "conv_high": 0.9475,
+      "M3": 0.6525,
+      "M5": 0.7065,
+      "M7": 0.917
+    }
+  },
+  {
+    "mech_id": 137,
+    "name": "M3+M5+M8",
+    "k_active": 3,
+    "acc_rate": 0.1935,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.636,
+      "conv_high": 0.896,
+      "M3": 0.681,
+      "M5": 0.742,
+      "M8": 0.776
+    }
+  },
+  {
+    "mech_id": 138,
+    "name": "M3+M6+M7",
+    "k_active": 3,
+    "acc_rate": 0.2715,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7915,
+      "conv_high": 0.893,
+      "M3": 0.7335,
+      "M6": 0.563,
+      "M7": 0.945
+    }
+  },
+  {
+    "mech_id": 139,
+    "name": "M3+M6+M8",
+    "k_active": 3,
+    "acc_rate": 0.247,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8815,
+      "conv_high": 0.7635,
+      "M3": 0.744,
+      "M6": 0.5105,
+      "M8": 0.854
+    }
+  },
+  {
+    "mech_id": 140,
+    "name": "M3+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.36,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.709,
+      "conv_high": 0.86,
+      "M3": 0.7645,
+      "M7": 0.949,
+      "M8": 0.846
+    }
+  },
+  {
+    "mech_id": 141,
+    "name": "M4+M5+M6",
+    "k_active": 3,
+    "acc_rate": 0.1875,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.77,
+      "conv_high": 0.9335,
+      "M4": 0.7315,
+      "M5": 0.703,
+      "M6": 0.5865
+    }
+  },
+  {
+    "mech_id": 142,
+    "name": "M4+M5+M7",
+    "k_active": 3,
+    "acc_rate": 0.1875,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.5805,
+      "conv_high": 0.9495,
+      "M4": 0.622,
+      "M5": 0.6765,
+      "M7": 0.9175
+    }
+  },
+  {
+    "mech_id": 143,
+    "name": "M4+M5+M8",
+    "k_active": 3,
+    "acc_rate": 0.2505,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.6715,
+      "conv_high": 0.925,
+      "M4": 0.7695,
+      "M5": 0.724,
+      "M8": 0.788
+    }
+  },
+  {
+    "mech_id": 144,
+    "name": "M4+M6+M7",
+    "k_active": 3,
+    "acc_rate": 0.265,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8235,
+      "conv_high": 0.9245,
+      "M4": 0.67,
+      "M6": 0.5645,
+      "M7": 0.94
+    }
+  },
+  {
+    "mech_id": 145,
+    "name": "M4+M6+M8",
+    "k_active": 3,
+    "acc_rate": 0.317,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.899,
+      "conv_high": 0.8545,
+      "M4": 0.896,
+      "M6": 0.517,
+      "M8": 0.876
+    }
+  },
+  {
+    "mech_id": 146,
+    "name": "M4+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.391,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.76,
+      "conv_high": 0.9075,
+      "M4": 0.747,
+      "M7": 0.9515,
+      "M8": 0.8435
+    }
+  },
+  {
+    "mech_id": 147,
+    "name": "M5+M6+M7",
+    "k_active": 3,
+    "acc_rate": 0.244,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.7805,
+      "conv_high": 0.9095,
+      "M5": 0.714,
+      "M6": 0.565,
+      "M7": 0.942
+    }
+  },
+  {
+    "mech_id": 148,
+    "name": "M5+M6+M8",
+    "k_active": 3,
+    "acc_rate": 0.237,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.8325,
+      "conv_high": 0.8215,
+      "M5": 0.8065,
+      "M6": 0.5395,
+      "M8": 0.8225
+    }
+  },
+  {
+    "mech_id": 149,
+    "name": "M5+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.334,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.704,
+      "conv_high": 0.884,
+      "M5": 0.7695,
+      "M7": 0.9725,
+      "M8": 0.797
+    }
+  },
+  {
+    "mech_id": 150,
+    "name": "M6+M7+M8",
+    "k_active": 3,
+    "acc_rate": 0.349,
+    "solver_fail_rate": 0.0,
+    "diag": {
+      "solver_ok": 1.0,
+      "conv_low": 0.924,
+      "conv_high": 0.7805,
+      "M6": 0.4845,
+      "M7": 0.985,
+      "M8": 0.906
+    }
+  }
+]

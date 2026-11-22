@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Compiled shared libraries
+quomech/csrc/*.so
+*.o
+
+# Large datasets, model checkpoints, and cached binary pools
+data/
+*.npy
+*.npz
+*.pt
+*.pth
+*.h5
+*.zarr/
+*.ckpt
+
+# Logs & temporary files
+*.log
+.DS_Store
