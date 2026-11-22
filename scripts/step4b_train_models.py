@@ -18,10 +18,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--head", type=str, choices=["factorized", "flat"], required=True)
     ap.add_argument("--gpu", type=int, default=0)
-    ap.add_argument("--steps", type=int, default=40000)
-    ap.add_argument("--batch-size", type=int, default=256)
-    ap.add_argument("--grad-accum", type=int, default=2)
-    ap.add_argument("--lr", type=float, default=5e-4)
+    ap.add_argument("--steps", type=int, default=35000)
+    ap.add_argument("--batch-size", type=int, default=128)
+    ap.add_argument("--grad-accum", type=int, default=1)
+    ap.add_argument("--lr", type=float, default=6e-4)
     ap.add_argument("--eval-every", type=int, default=2500)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--seed", type=int, default=42)
@@ -46,8 +46,9 @@ def main():
         num_workers=args.workers,
         seed=args.seed,
     )
-    print(f"\n[Train:{args.head}] COMPLETE! Best val loss={summary['best_val_loss']:.4f}, "
-          f"elapsed={summary['elapsed_s']:.1f}s")
+    if summary:
+        print(f"\n[Train:{args.head}] COMPLETE! Best val loss={summary['best_val_loss']:.4f}, "
+              f"elapsed={summary['elapsed_s']:.1f}s")
 
 
 if __name__ == "__main__":

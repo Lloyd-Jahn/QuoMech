@@ -1,0 +1,1503 @@
+{
+  "analytic_check": {
+    "single_loading_c0.05": {
+      "pass_1to2": 1.0,
+      "pass_2to1": 1.0,
+      "max_rms": 8.326672684688674e-15
+    },
+    "two_loadings_0.05_0.10": {
+      "pass_1to2": 0.0,
+      "pass_2to1": 0.0,
+      "median_rms_1to2": 8.741650844187786,
+      "median_rms_2to1": 9.31074840681686
+    }
+  },
+  "tier_summary": {
+    "D0": {
+      "design_names": [
+        "D0"
+      ],
+      "n_classes": 14,
+      "n_singleton": 2,
+      "n_nontrivial_classes": 12,
+      "n_mechs_in_nontrivial": 149,
+      "max_class_size": 34,
+      "size_histogram": {
+        "1": 2,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "15": 1,
+        "18": 1,
+        "19": 1,
+        "28": 1,
+        "34": 1
+      },
+      "n_passing_edges": 3430,
+      "n_components_gt2": 1,
+      "n_non_transitive_components": 1,
+      "non_transitive_fraction_of_gt2": 1.0,
+      "sensitivity": {
+        "sig_0.5pct_pr_80pct": {
+          "n_classes": 19,
+          "n_nontrivial_classes": 18,
+          "n_mechs_in_nontrivial": 150,
+          "max_class_size": 21,
+          "n_passing_edges": 2085,
+          "n_non_transitive": 2
+        },
+        "sig_0.5pct_pr_85pct": {
+          "n_classes": 27,
+          "n_nontrivial_classes": 25,
+          "n_mechs_in_nontrivial": 149,
+          "max_class_size": 18,
+          "n_passing_edges": 1431,
+          "n_non_transitive": 2
+        },
+        "sig_0.5pct_pr_90pct": {
+          "n_classes": 41,
+          "n_nontrivial_classes": 25,
+          "n_mechs_in_nontrivial": 135,
+          "max_class_size": 15,
+          "n_passing_edges": 1150,
+          "n_non_transitive": 2
+        },
+        "sig_1.0pct_pr_80pct": {
+          "n_classes": 13,
+          "n_nontrivial_classes": 12,
+          "n_mechs_in_nontrivial": 150,
+          "max_class_size": 42,
+          "n_passing_edges": 4344,
+          "n_non_transitive": 1
+        },
+        "sig_1.0pct_pr_85pct": {
+          "n_classes": 14,
+          "n_nontrivial_classes": 12,
+          "n_mechs_in_nontrivial": 149,
+          "max_class_size": 34,
+          "n_passing_edges": 3430,
+          "n_non_transitive": 1
+        },
+        "sig_1.0pct_pr_90pct": {
+          "n_classes": 17,
+          "n_nontrivial_classes": 15,
+          "n_mechs_in_nontrivial": 149,
+          "max_class_size": 29,
+          "n_passing_edges": 2897,
+          "n_non_transitive": 2
+        },
+        "sig_2.0pct_pr_80pct": {
+          "n_classes": 6,
+          "n_nontrivial_classes": 6,
+          "n_mechs_in_nontrivial": 151,
+          "max_class_size": 68,
+          "n_passing_edges": 6279,
+          "n_non_transitive": 1
+        },
+        "sig_2.0pct_pr_85pct": {
+          "n_classes": 7,
+          "n_nontrivial_classes": 6,
+          "n_mechs_in_nontrivial": 150,
+          "max_class_size": 62,
+          "n_passing_edges": 5880,
+          "n_non_transitive": 1
+        },
+        "sig_2.0pct_pr_90pct": {
+          "n_classes": 9,
+          "n_nontrivial_classes": 8,
+          "n_mechs_in_nontrivial": 150,
+          "max_class_size": 58,
+          "n_passing_edges": 5584,
+          "n_non_transitive": 1
+        }
+      },
+      "elapsed_total_s": 564.3738744868897,
+      "spotlight_pairs": {
+        "M2:free1 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:complex vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M4 vs M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.90625,
+            1.0
+          ],
+          "mean_rms_1pct": 0.7700201762627168
+        },
+        "M2:free1 vs M2:free2": {
+          "same_class": false,
+          "direct_edge": true,
+          "pass_rates": [
+            0.9375,
+            0.9375
+          ],
+          "mean_rms_1pct": 0.7026313526538553
+        },
+        "M2:free1 vs M2:complex": {
+          "same_class": false,
+          "direct_edge": true,
+          "pass_rates": [
+            1.0,
+            1.0
+          ],
+          "mean_rms_1pct": 0.6781688011651509
+        },
+        "M2:free2 vs M2:complex": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.96875,
+            0.96875
+          ],
+          "mean_rms_1pct": 0.6993502437862328
+        },
+        "M2:free2 vs M5": {
+          "same_class": false,
+          "direct_edge": true,
+          "pass_rates": [
+            0.96875,
+            1.0
+          ],
+          "mean_rms_1pct": 0.774096612818912
+        },
+        "M5 vs M8": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            1.0,
+            0.9375
+          ],
+          "mean_rms_1pct": 0.7085202977433552
+        },
+        "Core vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M2:free1": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1+M4 vs M2:free1+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            1.0,
+            1.0
+          ],
+          "mean_rms_1pct": 0.7219401180624827
+        },
+        "M1+M4 vs M1+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.96875,
+            1.0
+          ],
+          "mean_rms_1pct": 0.663863850283762
+        },
+        "M3+M4 vs M3+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            1.0,
+            1.0
+          ],
+          "mean_rms_1pct": 0.7225342679041296
+        },
+        "M2:free1+M5 vs M2:free2+M5": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            1.0,
+            1.0
+          ],
+          "mean_rms_1pct": 0.6479488621343015
+        }
+      },
+      "top_nontrivial_classes": [
+        {
+          "class_id": 0,
+          "size": 34,
+          "members": [
+            "M2:free1+M4",
+            "M2:free2+M4",
+            "M2:complex+M4",
+            "M2:free1+M7",
+            "M2:free2+M7",
+            "M2:complex+M7",
+            "M2:free2+M3+M4",
+            "M2:free1+M3+M5",
+            "M2:free2+M3+M5",
+            "M2:complex+M3+M5",
+            "M2:free2+M3+M6",
+            "M2:free2+M3+M8",
+            "M2:complex+M3+M8",
+            "M2:free1+M4+M5",
+            "M2:free2+M4+M5",
+            "M2:complex+M4+M5",
+            "M2:free1+M4+M6",
+            "M2:free2+M4+M6",
+            "M2:complex+M4+M6",
+            "M2:free1+M4+M7",
+            "M2:free2+M4+M7",
+            "M2:free1+M4+M8",
+            "M2:free2+M4+M8",
+            "M2:complex+M4+M8",
+            "M2:free1+M5+M7",
+            "M2:free2+M5+M7",
+            "M2:complex+M5+M7",
+            "M2:free1+M6+M7",
+            "M2:free2+M6+M7",
+            "M2:complex+M6+M7",
+            "M2:complex+M6+M8",
+            "M2:free1+M7+M8",
+            "M2:free2+M7+M8",
+            "M2:complex+M7+M8"
+          ]
+        },
+        {
+          "class_id": 1,
+          "size": 28,
+          "members": [
+            "M1+M2:free2",
+            "M1+M2:complex",
+            "M1+M4",
+            "M1+M5",
+            "M1+M7",
+            "M1+M2:free1+M3",
+            "M1+M2:free2+M3",
+            "M1+M2:complex+M3",
+            "M1+M2:free1+M4",
+            "M1+M2:free2+M4",
+            "M1+M2:complex+M4",
+            "M1+M2:free1+M5",
+            "M1+M2:free2+M5",
+            "M1+M2:complex+M5",
+            "M1+M2:free1+M6",
+            "M1+M2:free2+M6",
+            "M1+M2:complex+M6",
+            "M1+M2:free1+M7",
+            "M1+M2:free2+M7",
+            "M1+M2:complex+M7",
+            "M1+M2:complex+M8",
+            "M1+M3+M5",
+            "M1+M4+M5",
+            "M1+M4+M6",
+            "M1+M5+M7",
+            "M1+M5+M8",
+            "M1+M6+M7",
+            "M1+M7+M8"
+          ]
+        },
+        {
+          "class_id": 2,
+          "size": 19,
+          "members": [
+            "M2:free2",
+            "M2:complex",
+            "M2:free1+M5",
+            "M2:free2+M5",
+            "M2:complex+M5",
+            "M2:free1+M6",
+            "M2:free2+M6",
+            "M2:complex+M6",
+            "M2:free1+M8",
+            "M2:free2+M8",
+            "M2:complex+M8",
+            "M2:free1+M5+M6",
+            "M2:free2+M5+M6",
+            "M2:complex+M5+M6",
+            "M2:free1+M5+M8",
+            "M2:free2+M5+M8",
+            "M2:complex+M5+M8",
+            "M2:free1+M6+M8",
+            "M2:free2+M6+M8"
+          ]
+        },
+        {
+          "class_id": 3,
+          "size": 18,
+          "members": [
+            "M4",
+            "M7",
+            "M4+M5",
+            "M4+M6",
+            "M4+M7",
+            "M4+M8",
+            "M5+M7",
+            "M6+M7",
+            "M7+M8",
+            "M4+M5+M6",
+            "M4+M5+M7",
+            "M4+M5+M8",
+            "M4+M6+M7",
+            "M4+M6+M8",
+            "M4+M7+M8",
+            "M5+M6+M7",
+            "M5+M7+M8",
+            "M6+M7+M8"
+          ]
+        },
+        {
+          "class_id": 4,
+          "size": 15,
+          "members": [
+            "M2:free2+M3",
+            "M2:complex+M3",
+            "M3+M4",
+            "M3+M7",
+            "M2:free1+M3+M4",
+            "M2:free1+M3+M6",
+            "M2:complex+M3+M6",
+            "M2:free2+M3+M7",
+            "M3+M4+M5",
+            "M3+M4+M6",
+            "M3+M4+M7",
+            "M3+M4+M8",
+            "M3+M5+M7",
+            "M3+M6+M7",
+            "M3+M7+M8"
+          ]
+        },
+        {
+          "class_id": 5,
+          "size": 8,
+          "members": [
+            "Core",
+            "M5",
+            "M6",
+            "M8",
+            "M5+M6",
+            "M5+M8",
+            "M6+M8",
+            "M5+M6+M8"
+          ]
+        },
+        {
+          "class_id": 6,
+          "size": 7,
+          "members": [
+            "M3",
+            "M3+M5",
+            "M3+M6",
+            "M3+M8",
+            "M3+M5+M6",
+            "M3+M5+M8",
+            "M3+M6+M8"
+          ]
+        },
+        {
+          "class_id": 7,
+          "size": 6,
+          "members": [
+            "M1",
+            "M1+M3",
+            "M1+M6",
+            "M1+M8",
+            "M1+M5+M6",
+            "M1+M6+M8"
+          ]
+        },
+        {
+          "class_id": 8,
+          "size": 5,
+          "members": [
+            "M2:free1+M3",
+            "M2:complex+M3+M4",
+            "M2:free1+M3+M7",
+            "M2:complex+M3+M7",
+            "M2:free1+M3+M8"
+          ]
+        },
+        {
+          "class_id": 9,
+          "size": 4,
+          "members": [
+            "M1+M3+M4",
+            "M1+M3+M6",
+            "M1+M3+M7",
+            "M1+M3+M8"
+          ]
+        },
+        {
+          "class_id": 10,
+          "size": 3,
+          "members": [
+            "M1+M2:free1",
+            "M1+M2:free1+M8",
+            "M1+M2:free2+M8"
+          ]
+        },
+        {
+          "class_id": 11,
+          "size": 2,
+          "members": [
+            "M1+M4+M7",
+            "M1+M4+M8"
+          ]
+        }
+      ]
+    },
+    "no_P": {
+      "design_names": [
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ],
+      "n_classes": 93,
+      "n_singleton": 56,
+      "n_nontrivial_classes": 37,
+      "n_mechs_in_nontrivial": 95,
+      "max_class_size": 5,
+      "size_histogram": {
+        "1": 56,
+        "2": 23,
+        "3": 10,
+        "4": 1,
+        "5": 3
+      },
+      "n_passing_edges": 149,
+      "n_components_gt2": 10,
+      "n_non_transitive_components": 7,
+      "non_transitive_fraction_of_gt2": 0.7,
+      "sensitivity": {
+        "sig_0.5pct_pr_80pct": {
+          "n_classes": 108,
+          "n_nontrivial_classes": 32,
+          "n_mechs_in_nontrivial": 75,
+          "max_class_size": 4,
+          "n_passing_edges": 70,
+          "n_non_transitive": 8
+        },
+        "sig_0.5pct_pr_85pct": {
+          "n_classes": 115,
+          "n_nontrivial_classes": 30,
+          "n_mechs_in_nontrivial": 66,
+          "max_class_size": 3,
+          "n_passing_edges": 49,
+          "n_non_transitive": 5
+        },
+        "sig_0.5pct_pr_90pct": {
+          "n_classes": 118,
+          "n_nontrivial_classes": 27,
+          "n_mechs_in_nontrivial": 60,
+          "max_class_size": 3,
+          "n_passing_edges": 44,
+          "n_non_transitive": 3
+        },
+        "sig_1.0pct_pr_80pct": {
+          "n_classes": 83,
+          "n_nontrivial_classes": 34,
+          "n_mechs_in_nontrivial": 102,
+          "max_class_size": 8,
+          "n_passing_edges": 229,
+          "n_non_transitive": 6
+        },
+        "sig_1.0pct_pr_85pct": {
+          "n_classes": 93,
+          "n_nontrivial_classes": 37,
+          "n_mechs_in_nontrivial": 95,
+          "max_class_size": 5,
+          "n_passing_edges": 149,
+          "n_non_transitive": 7
+        },
+        "sig_1.0pct_pr_90pct": {
+          "n_classes": 98,
+          "n_nontrivial_classes": 37,
+          "n_mechs_in_nontrivial": 90,
+          "max_class_size": 5,
+          "n_passing_edges": 108,
+          "n_non_transitive": 7
+        },
+        "sig_2.0pct_pr_80pct": {
+          "n_classes": 38,
+          "n_nontrivial_classes": 31,
+          "n_mechs_in_nontrivial": 144,
+          "max_class_size": 14,
+          "n_passing_edges": 1240,
+          "n_non_transitive": 1
+        },
+        "sig_2.0pct_pr_85pct": {
+          "n_classes": 54,
+          "n_nontrivial_classes": 31,
+          "n_mechs_in_nontrivial": 128,
+          "max_class_size": 11,
+          "n_passing_edges": 797,
+          "n_non_transitive": 3
+        },
+        "sig_2.0pct_pr_90pct": {
+          "n_classes": 66,
+          "n_nontrivial_classes": 29,
+          "n_mechs_in_nontrivial": 114,
+          "max_class_size": 10,
+          "n_passing_edges": 547,
+          "n_non_transitive": 3
+        }
+      },
+      "elapsed_total_s": 1201.0641496642493,
+      "spotlight_pairs": {
+        "M2:free1 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:complex vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M4 vs M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.875,
+            1.0
+          ],
+          "mean_rms_1pct": 0.7643732695661877
+        },
+        "M2:free1 vs M2:free2": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1 vs M2:complex": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M2:complex": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M5": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M5 vs M8": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M2:free1": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1+M4 vs M2:free1+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.96875,
+            1.0
+          ],
+          "mean_rms_1pct": 0.712439560440411
+        },
+        "M1+M4 vs M1+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.96875,
+            1.0
+          ],
+          "mean_rms_1pct": 0.6791348177571632
+        },
+        "M3+M4 vs M3+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.9375,
+            1.0
+          ],
+          "mean_rms_1pct": 0.701679252312668
+        },
+        "M2:free1+M5 vs M2:free2+M5": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        }
+      },
+      "top_nontrivial_classes": [
+        {
+          "class_id": 0,
+          "size": 5,
+          "members": [
+            "M1+M5",
+            "M1+M2:free1+M5",
+            "M1+M2:free2+M5",
+            "M1+M2:complex+M5",
+            "M1+M5+M7"
+          ]
+        },
+        {
+          "class_id": 1,
+          "size": 5,
+          "members": [
+            "M4+M5",
+            "M5+M7",
+            "M2:free1+M4+M5",
+            "M2:free2+M4+M5",
+            "M2:free2+M5+M7"
+          ]
+        },
+        {
+          "class_id": 2,
+          "size": 5,
+          "members": [
+            "M4+M6",
+            "M6+M7",
+            "M4+M5+M6",
+            "M4+M6+M7",
+            "M4+M6+M8"
+          ]
+        },
+        {
+          "class_id": 3,
+          "size": 4,
+          "members": [
+            "M1+M4",
+            "M1+M7",
+            "M1+M2:free1+M4",
+            "M1+M4+M7"
+          ]
+        },
+        {
+          "class_id": 4,
+          "size": 3,
+          "members": [
+            "M4",
+            "M7",
+            "M4+M7"
+          ]
+        },
+        {
+          "class_id": 5,
+          "size": 3,
+          "members": [
+            "M5",
+            "M2:free2+M5",
+            "M5+M8"
+          ]
+        },
+        {
+          "class_id": 6,
+          "size": 3,
+          "members": [
+            "M2:free1+M4",
+            "M2:free1+M7",
+            "M2:free1+M4+M7"
+          ]
+        },
+        {
+          "class_id": 7,
+          "size": 3,
+          "members": [
+            "M2:free2+M4",
+            "M2:free2+M7",
+            "M2:free2+M4+M7"
+          ]
+        },
+        {
+          "class_id": 8,
+          "size": 3,
+          "members": [
+            "M2:complex+M4",
+            "M2:complex+M7",
+            "M2:complex+M4+M7"
+          ]
+        },
+        {
+          "class_id": 9,
+          "size": 3,
+          "members": [
+            "M2:free1+M5",
+            "M2:free1+M5+M7",
+            "M2:free1+M5+M8"
+          ]
+        },
+        {
+          "class_id": 10,
+          "size": 3,
+          "members": [
+            "M2:complex+M5",
+            "M2:complex+M5+M7",
+            "M2:complex+M5+M8"
+          ]
+        },
+        {
+          "class_id": 11,
+          "size": 3,
+          "members": [
+            "M2:free2+M6",
+            "M5+M6",
+            "M2:free2+M5+M6"
+          ]
+        },
+        {
+          "class_id": 12,
+          "size": 3,
+          "members": [
+            "M3+M4",
+            "M3+M7",
+            "M3+M4+M7"
+          ]
+        },
+        {
+          "class_id": 13,
+          "size": 3,
+          "members": [
+            "M1+M2:free2+M4",
+            "M1+M2:free2+M7",
+            "M1+M4+M5"
+          ]
+        },
+        {
+          "class_id": 14,
+          "size": 2,
+          "members": [
+            "M2:free1+M6",
+            "M2:free1+M6+M8"
+          ]
+        }
+      ]
+    },
+    "basic": {
+      "design_names": [
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6"
+      ],
+      "n_classes": 98,
+      "n_singleton": 63,
+      "n_nontrivial_classes": 35,
+      "n_mechs_in_nontrivial": 88,
+      "max_class_size": 5,
+      "size_histogram": {
+        "1": 63,
+        "2": 23,
+        "3": 8,
+        "4": 2,
+        "5": 2
+      },
+      "n_passing_edges": 109,
+      "n_components_gt2": 15,
+      "n_non_transitive_components": 11,
+      "non_transitive_fraction_of_gt2": 0.7333333333333333,
+      "sensitivity": {
+        "sig_0.5pct_pr_80pct": {
+          "n_classes": 110,
+          "n_nontrivial_classes": 31,
+          "n_mechs_in_nontrivial": 72,
+          "max_class_size": 4,
+          "n_passing_edges": 64,
+          "n_non_transitive": 9
+        },
+        "sig_0.5pct_pr_85pct": {
+          "n_classes": 120,
+          "n_nontrivial_classes": 27,
+          "n_mechs_in_nontrivial": 58,
+          "max_class_size": 3,
+          "n_passing_edges": 43,
+          "n_non_transitive": 6
+        },
+        "sig_0.5pct_pr_90pct": {
+          "n_classes": 127,
+          "n_nontrivial_classes": 21,
+          "n_mechs_in_nontrivial": 45,
+          "max_class_size": 3,
+          "n_passing_edges": 32,
+          "n_non_transitive": 3
+        },
+        "sig_1.0pct_pr_80pct": {
+          "n_classes": 88,
+          "n_nontrivial_classes": 34,
+          "n_mechs_in_nontrivial": 97,
+          "max_class_size": 7,
+          "n_passing_edges": 158,
+          "n_non_transitive": 10
+        },
+        "sig_1.0pct_pr_85pct": {
+          "n_classes": 98,
+          "n_nontrivial_classes": 35,
+          "n_mechs_in_nontrivial": 88,
+          "max_class_size": 5,
+          "n_passing_edges": 109,
+          "n_non_transitive": 11
+        },
+        "sig_1.0pct_pr_90pct": {
+          "n_classes": 105,
+          "n_nontrivial_classes": 32,
+          "n_mechs_in_nontrivial": 78,
+          "max_class_size": 4,
+          "n_passing_edges": 82,
+          "n_non_transitive": 9
+        },
+        "sig_2.0pct_pr_80pct": {
+          "n_classes": 44,
+          "n_nontrivial_classes": 31,
+          "n_mechs_in_nontrivial": 138,
+          "max_class_size": 13,
+          "n_passing_edges": 836,
+          "n_non_transitive": 2
+        },
+        "sig_2.0pct_pr_85pct": {
+          "n_classes": 62,
+          "n_nontrivial_classes": 37,
+          "n_mechs_in_nontrivial": 126,
+          "max_class_size": 10,
+          "n_passing_edges": 505,
+          "n_non_transitive": 3
+        },
+        "sig_2.0pct_pr_90pct": {
+          "n_classes": 72,
+          "n_nontrivial_classes": 35,
+          "n_mechs_in_nontrivial": 114,
+          "max_class_size": 9,
+          "n_passing_edges": 373,
+          "n_non_transitive": 5
+        }
+      },
+      "elapsed_total_s": 1057.899187691044,
+      "spotlight_pairs": {
+        "M2:free1 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:complex vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M4 vs M7": {
+          "same_class": false,
+          "direct_edge": true,
+          "pass_rates": [
+            0.875,
+            1.0
+          ],
+          "mean_rms_1pct": 0.8211564302885387
+        },
+        "M2:free1 vs M2:free2": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1 vs M2:complex": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M2:complex": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M5": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M5 vs M8": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M2:free1": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1+M4 vs M2:free1+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.90625,
+            1.0
+          ],
+          "mean_rms_1pct": 0.7606357912320311
+        },
+        "M1+M4 vs M1+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.96875,
+            1.0
+          ],
+          "mean_rms_1pct": 0.7021990487005565
+        },
+        "M3+M4 vs M3+M7": {
+          "same_class": true,
+          "direct_edge": true,
+          "pass_rates": [
+            0.90625,
+            1.0
+          ],
+          "mean_rms_1pct": 0.7277014103904934
+        },
+        "M2:free1+M5 vs M2:free2+M5": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        }
+      },
+      "top_nontrivial_classes": [
+        {
+          "class_id": 0,
+          "size": 5,
+          "members": [
+            "M1+M5",
+            "M1+M2:free1+M5",
+            "M1+M2:free2+M5",
+            "M1+M2:complex+M5",
+            "M1+M5+M8"
+          ]
+        },
+        {
+          "class_id": 1,
+          "size": 5,
+          "members": [
+            "M4+M5",
+            "M5+M7",
+            "M2:free2+M4+M5",
+            "M2:free2+M5+M7",
+            "M4+M5+M7"
+          ]
+        },
+        {
+          "class_id": 2,
+          "size": 4,
+          "members": [
+            "M1+M4",
+            "M1+M7",
+            "M1+M2:free1+M4",
+            "M1+M4+M7"
+          ]
+        },
+        {
+          "class_id": 3,
+          "size": 4,
+          "members": [
+            "M2:free2+M4+M6",
+            "M2:free2+M6+M7",
+            "M4+M5+M6",
+            "M5+M6+M7"
+          ]
+        },
+        {
+          "class_id": 4,
+          "size": 3,
+          "members": [
+            "M5",
+            "M2:free2+M5",
+            "M5+M8"
+          ]
+        },
+        {
+          "class_id": 5,
+          "size": 3,
+          "members": [
+            "M2:free1+M4",
+            "M2:free1+M7",
+            "M2:free1+M4+M7"
+          ]
+        },
+        {
+          "class_id": 6,
+          "size": 3,
+          "members": [
+            "M2:free2+M4",
+            "M2:free2+M7",
+            "M2:free2+M4+M7"
+          ]
+        },
+        {
+          "class_id": 7,
+          "size": 3,
+          "members": [
+            "M2:complex+M4",
+            "M2:complex+M7",
+            "M2:complex+M4+M7"
+          ]
+        },
+        {
+          "class_id": 8,
+          "size": 3,
+          "members": [
+            "M3+M4",
+            "M3+M7",
+            "M3+M4+M7"
+          ]
+        },
+        {
+          "class_id": 9,
+          "size": 3,
+          "members": [
+            "M4+M6",
+            "M4+M6+M7",
+            "M4+M6+M8"
+          ]
+        },
+        {
+          "class_id": 10,
+          "size": 3,
+          "members": [
+            "M5+M6",
+            "M2:free2+M5+M6",
+            "M5+M6+M8"
+          ]
+        },
+        {
+          "class_id": 11,
+          "size": 3,
+          "members": [
+            "M1+M2:free2+M4",
+            "M1+M2:free2+M7",
+            "M1+M4+M5"
+          ]
+        },
+        {
+          "class_id": 12,
+          "size": 2,
+          "members": [
+            "M4",
+            "M4+M7"
+          ]
+        },
+        {
+          "class_id": 13,
+          "size": 2,
+          "members": [
+            "M2:free1+M5",
+            "M2:free1+M5+M8"
+          ]
+        },
+        {
+          "class_id": 14,
+          "size": 2,
+          "members": [
+            "M2:complex+M5",
+            "M2:complex+M5+M8"
+          ]
+        }
+      ]
+    },
+    "full": {
+      "design_names": [
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6",
+        "D7",
+        "D8",
+        "D9"
+      ],
+      "n_classes": 128,
+      "n_singleton": 114,
+      "n_nontrivial_classes": 14,
+      "n_mechs_in_nontrivial": 37,
+      "max_class_size": 5,
+      "size_histogram": {
+        "1": 114,
+        "2": 9,
+        "3": 3,
+        "5": 2
+      },
+      "n_passing_edges": 43,
+      "n_components_gt2": 5,
+      "n_non_transitive_components": 2,
+      "non_transitive_fraction_of_gt2": 0.4,
+      "sensitivity": {
+        "sig_0.5pct_pr_80pct": {
+          "n_classes": 139,
+          "n_nontrivial_classes": 10,
+          "n_mechs_in_nontrivial": 22,
+          "max_class_size": 3,
+          "n_passing_edges": 15,
+          "n_non_transitive": 1
+        },
+        "sig_0.5pct_pr_85pct": {
+          "n_classes": 145,
+          "n_nontrivial_classes": 5,
+          "n_mechs_in_nontrivial": 11,
+          "max_class_size": 3,
+          "n_passing_edges": 7,
+          "n_non_transitive": 0
+        },
+        "sig_0.5pct_pr_90pct": {
+          "n_classes": 148,
+          "n_nontrivial_classes": 3,
+          "n_mechs_in_nontrivial": 6,
+          "max_class_size": 2,
+          "n_passing_edges": 3,
+          "n_non_transitive": 0
+        },
+        "sig_1.0pct_pr_80pct": {
+          "n_classes": 118,
+          "n_nontrivial_classes": 21,
+          "n_mechs_in_nontrivial": 54,
+          "max_class_size": 5,
+          "n_passing_edges": 66,
+          "n_non_transitive": 5
+        },
+        "sig_1.0pct_pr_85pct": {
+          "n_classes": 128,
+          "n_nontrivial_classes": 14,
+          "n_mechs_in_nontrivial": 37,
+          "max_class_size": 5,
+          "n_passing_edges": 43,
+          "n_non_transitive": 2
+        },
+        "sig_1.0pct_pr_90pct": {
+          "n_classes": 137,
+          "n_nontrivial_classes": 10,
+          "n_mechs_in_nontrivial": 24,
+          "max_class_size": 3,
+          "n_passing_edges": 22,
+          "n_non_transitive": 4
+        },
+        "sig_2.0pct_pr_80pct": {
+          "n_classes": 62,
+          "n_nontrivial_classes": 34,
+          "n_mechs_in_nontrivial": 123,
+          "max_class_size": 8,
+          "n_passing_edges": 480,
+          "n_non_transitive": 5
+        },
+        "sig_2.0pct_pr_85pct": {
+          "n_classes": 81,
+          "n_nontrivial_classes": 33,
+          "n_mechs_in_nontrivial": 103,
+          "max_class_size": 7,
+          "n_passing_edges": 268,
+          "n_non_transitive": 7
+        },
+        "sig_2.0pct_pr_90pct": {
+          "n_classes": 96,
+          "n_nontrivial_classes": 29,
+          "n_mechs_in_nontrivial": 84,
+          "max_class_size": 6,
+          "n_passing_edges": 181,
+          "n_non_transitive": 9
+        }
+      },
+      "elapsed_total_s": 1175.845315313898,
+      "spotlight_pairs": {
+        "M2:free1 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:complex vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M4 vs M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1 vs M2:free2": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1 vs M2:complex": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M2:complex": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free2 vs M5": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M5 vs M8": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M4": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "Core vs M2:free1": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1+M4 vs M2:free1+M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M1+M4 vs M1+M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M3+M4 vs M3+M7": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        },
+        "M2:free1+M5 vs M2:free2+M5": {
+          "same_class": false,
+          "direct_edge": false,
+          "pass_rates": null,
+          "mean_rms_1pct": null
+        }
+      },
+      "top_nontrivial_classes": [
+        {
+          "class_id": 0,
+          "size": 5,
+          "members": [
+            "M1+M5",
+            "M1+M2:free1+M5",
+            "M1+M2:free2+M5",
+            "M1+M2:complex+M5",
+            "M1+M5+M8"
+          ]
+        },
+        {
+          "class_id": 1,
+          "size": 5,
+          "members": [
+            "M4+M5",
+            "M2:free1+M4+M5",
+            "M2:free2+M4+M5",
+            "M2:complex+M4+M5",
+            "M4+M5+M8"
+          ]
+        },
+        {
+          "class_id": 2,
+          "size": 3,
+          "members": [
+            "M5",
+            "M2:free2+M5",
+            "M5+M8"
+          ]
+        },
+        {
+          "class_id": 3,
+          "size": 3,
+          "members": [
+            "M3+M5",
+            "M2:free2+M3+M5",
+            "M2:complex+M3+M5"
+          ]
+        },
+        {
+          "class_id": 4,
+          "size": 3,
+          "members": [
+            "M5+M6",
+            "M2:free2+M5+M6",
+            "M5+M6+M8"
+          ]
+        },
+        {
+          "class_id": 5,
+          "size": 2,
+          "members": [
+            "M2:free1+M5",
+            "M2:free1+M5+M8"
+          ]
+        },
+        {
+          "class_id": 6,
+          "size": 2,
+          "members": [
+            "M2:complex+M5",
+            "M2:complex+M5+M8"
+          ]
+        },
+        {
+          "class_id": 7,
+          "size": 2,
+          "members": [
+            "M2:free1+M6",
+            "M2:free1+M5+M6"
+          ]
+        },
+        {
+          "class_id": 8,
+          "size": 2,
+          "members": [
+            "M2:free2+M6",
+            "M2:free2+M6+M8"
+          ]
+        },
+        {
+          "class_id": 9,
+          "size": 2,
+          "members": [
+            "M4+M6",
+            "M4+M6+M8"
+          ]
+        },
+        {
+          "class_id": 10,
+          "size": 2,
+          "members": [
+            "M5+M7",
+            "M2:free2+M5+M7"
+          ]
+        },
+        {
+          "class_id": 11,
+          "size": 2,
+          "members": [
+            "M1+M2:free1+M4",
+            "M1+M2:complex+M4"
+          ]
+        },
+        {
+          "class_id": 12,
+          "size": 2,
+          "members": [
+            "M2:free2+M3+M6",
+            "M3+M5+M6"
+          ]
+        },
+        {
+          "class_id": 13,
+          "size": 2,
+          "members": [
+            "M2:free2+M4+M6",
+            "M4+M5+M6"
+          ]
+        }
+      ]
+    }
+  }
+}

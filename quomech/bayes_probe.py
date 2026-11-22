@@ -28,6 +28,64 @@ from quomech.grammar import ReactionGrammar
 from quomech.simulator import ODESimulator, sample_accepted_thetas
 
 
+def load_is_particle_bank_from_pool(
+    grammar: ReactionGrammar,
+    pool_train_dir: Path,
+    n_per_mech: int = 2048,
+    n_t: int = 20,
+    sigma_ref: float = 0.01,
+) -> Dict[str, np.ndarray]:
+    """Build exact IS particle bank directly from pre-simulated accepted train split (zero extra ODEs)."""
+    from quomech.data_gen import get_observable_channel_indices
+
+    M = grammar.n_mechs
+    obs_ch = get_observable_channel_indices(grammar)
+    all_mids = np.load(pool_train_dir / "mech_ids.npy", mmap_mode="r")
+    all_trajs = np.load(pool_train_dir / "trajs.npy", mmap_mode="r")
+    t_grid_full = np.load(pool_train_dir / "t_grid.npy")
+    t_eval = np.linspace(0.0, 1.0, n_t)
+
+    # Linear interpolation weights from dense t_grid_full onto standard [0, 1.0] n_t grid
+    # (exact match to Gate 2 equivalence reference grid t in [0, 1.0]!)
+    hi_idx = np.clip(np.searchsorted(t_grid_full, t_eval, side="right"), 1, len(t_grid_full) - 1)
+    lo_idx = hi_idx - 1
+    w_hi = ((t_eval - t_grid_full[lo_idx]) / np.maximum(t_grid_full[hi_idx] - t_grid_full[lo_idx], 1e-12)).astype(np.float32)
+    w_lo = (1.0 - w_hi).astype(np.float32)
+
+    sel_idx = np.empty((M, n_per_mech), dtype=np.int64)
+    for m in range(M):
+        idxs = np.where(all_mids == m)[0]
+        if len(idxs) < n_per_mech:
+            raise RuntimeError(f"Pool train split only has {len(idxs)} < {n_per_mech} for mech {m}")
+        sel_idx[m] = idxs[:n_per_mech]
+
+    curves_scaled = []
+    sigmas = []
+    for d_idx, des in enumerate(grammar.catalog):
+        cat0 = des.cat_mult * grammar.c0_base
+        raw_d = np.asarray(all_trajs[sel_idx.ravel(), d_idx], dtype=np.float32)  # (M*S, 80, C)
+        sub_y = (
+            raw_d[:, lo_idx, :] * w_lo[None, :, None] + raw_d[:, hi_idx, :] * w_hi[None, :, None]
+        ).reshape(M, n_per_mech, n_t, len(obs_ch))
+        chunks = []
+        sig_chunks = []
+        for sp in des.obs_species:
+            ch_i = obs_ch.index(sp)
+            scale = cat0 if grammar.species[sp].is_catalyst else des.A0
+            sig = sigma_ref * scale
+            chunks.append(sub_y[:, :, :, ch_i] / np.float32(sig))
+            sig_chunks.append(np.full(n_t, sig, dtype=np.float64))
+        curves_scaled.append(np.concatenate(chunks, axis=2))  # (M, S, n_obs*n_t) float32
+        sigmas.append(np.concatenate(sig_chunks, axis=0))
+
+    return {
+        "curves_scaled": curves_scaled,
+        "sigmas": sigmas,
+        "t_eval": t_eval,
+        "sigma_ref": sigma_ref,
+    }
+
+
 def build_is_particle_bank(
     grammar: ReactionGrammar,
     sim: ODESimulator,

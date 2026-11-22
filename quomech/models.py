@@ -24,18 +24,21 @@ from quomech.flows import ConditionalNSF
 
 
 class TimeEncoding(nn.Module):
-    """Combined linear + sinusoidal Fourier encoding for continuous irregular timestamps t in [0, 1]."""
+    """Multi-scale linear + log1p + Fourier encoding for variable-window timestamps t in [0, 4.0]."""
 
-    def __init__(self, out_dim: int, n_freqs: int = 16) -> None:
+    def __init__(self, out_dim: int, n_freqs: int = 16, t_max: float = 4.0) -> None:
         super().__init__()
-        freqs = torch.exp(torch.linspace(0.0, math.log(50.0), n_freqs))
+        self.t_max = t_max
+        freqs = torch.exp(torch.linspace(0.0, math.log(64.0), n_freqs))
         self.register_buffer("freqs", freqs)
-        self.proj = nn.Linear(1 + 2 * n_freqs, out_dim)
+        self.proj = nn.Linear(2 + 2 * n_freqs, out_dim)
 
     def forward(self, t: torch.Tensor) -> torch.Tensor:
-        # t: (..., 1)
-        ang = t * self.freqs * math.pi
-        feats = torch.cat([t, torch.sin(ang), torch.cos(ang)], dim=-1)
+        # t: (..., 1) in [0, t_max]
+        t_norm = t / self.t_max
+        t_log = torch.log1p(t.clamp(min=0.0))
+        ang = t_norm * self.freqs * math.pi
+        feats = torch.cat([t_norm, t_log, torch.sin(ang), torch.cos(ang)], dim=-1)
         return self.proj(feats)
 
 
@@ -379,6 +382,22 @@ class QuoMechNet(nn.Module):
         sd = self.prior_std[mech_ids]
         mask = self.param_mask[mech_ids]
         return mask * (mu + sd * z_theta) + (1.0 - mask) * z_theta
+
+    def forward(
+        self,
+        design_feats: torch.Tensor,
+        times: torch.Tensor,
+        obs_vals: torch.Tensor,
+        obs_masks: torch.Tensor,
+        time_pad_mask: torch.Tensor,
+        exp_pad_mask: torch.Tensor,
+        mech_ids: torch.Tensor,
+        thetas: torch.Tensor,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """DDP-compatible forward alias calling forward_loss."""
+        return self.forward_loss(
+            design_feats, times, obs_vals, obs_masks, time_pad_mask, exp_pad_mask, mech_ids, thetas
+        )
 
     def forward_loss(
         self,

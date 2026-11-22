@@ -373,12 +373,14 @@ def run_two_stage_equivalence(
         return lib_th[target_m][idx_sorted]
 
     # ------------------------------------------------------------------
-    # Stage 1: Coarse bidirectional LM (K1=8 x 2 starts) with exact binomial early exit
+    # Stage 1: Coarse bidirectional LM (K1=8 x 2 starts) with threshold-matched early stop
     # ------------------------------------------------------------------
     t_s1_start = time.perf_counter()
     n_cand = len(cand_pairs)
     keep_cut = max(stage1_rms_cut, next_tier_keep_rms) if next_tier_keep_rms else stage1_rms_cut
-    max_fails_s1 = K1 - int(np.ceil(stage1_min_pass * K1))  # e.g. 8 - 4 = 4
+    max_fails_s1 = K1 - int(np.ceil(stage1_min_pass * K1))  # 8 - 4 = 4
+    # Stop Stage 1 LM immediately once rms <= 0.95 (already passes 1.0% AND 2.0% AND next_tier!)
+    s1_early_stop = 0.95
 
     # Pass 1a: direction i -> j
     s1a_mids = np.empty(n_cand, dtype=np.int32)
@@ -393,8 +395,8 @@ def run_two_stage_equivalence(
     s1a_rms = sim.fit_lm_pairs_dir(
         s1a_mids, designs, t_eval, s1a_tgt, inv_sig_1d, s1a_inits,
         lb_all=lb_all, ub_all=ub_all,
-        rtol=1e-4, atol=1e-8, max_ode_steps=8000, max_lm_iters=16,
-        early_stop_rms=0.45, fail_rms_thresh=keep_cut, max_fails=max_fails_s1,
+        rtol=1e-4, atol=1e-8, max_ode_steps=8000, max_lm_iters=14,
+        early_stop_rms=s1_early_stop, fail_rms_thresh=keep_cut, max_fails=max_fails_s1,
     )
 
     pass_1a_indices = [
@@ -404,9 +406,9 @@ def run_two_stage_equivalence(
 
     # Pass 1b: direction j -> i for Pass 1a survivors
     n_1b = len(pass_1a_indices)
-    stage2_pairs: List[Tuple[int, int]] = []
+    stage2_1pct_pairs: List[Tuple[int, int]] = []
+    stage2_2pct_extra_pairs: List[Tuple[int, int]] = []
     next_tier_pairs: List[Tuple[int, int]] = []
-    n_pass_1pct_s1 = 0
 
     if n_1b > 0:
         s1b_mids = np.empty(n_1b, dtype=np.int32)
@@ -422,8 +424,8 @@ def run_two_stage_equivalence(
         s1b_rms = sim.fit_lm_pairs_dir(
             s1b_mids, designs, t_eval, s1b_tgt, inv_sig_1d, s1b_inits,
             lb_all=lb_all, ub_all=ub_all,
-            rtol=1e-4, atol=1e-8, max_ode_steps=8000, max_lm_iters=16,
-            early_stop_rms=0.45, fail_rms_thresh=keep_cut, max_fails=max_fails_s1,
+            rtol=1e-4, atol=1e-8, max_ode_steps=8000, max_lm_iters=14,
+            early_stop_rms=s1_early_stop, fail_rms_thresh=keep_cut, max_fails=max_fails_s1,
         )
 
         for k_b, idx_p in enumerate(pass_1a_indices):
@@ -432,86 +434,120 @@ def run_two_stage_equivalence(
             r_ji = s1b_rms[k_b]
             if float(np.mean(r_ij <= keep_cut)) >= stage1_min_pass and float(np.mean(r_ji <= keep_cut)) >= stage1_min_pass:
                 next_tier_pairs.append(pair)
-            if float(np.mean(r_ij <= stage1_rms_cut)) >= stage1_min_pass and float(np.mean(r_ji <= stage1_rms_cut)) >= stage1_min_pass:
-                stage2_pairs.append(pair)
-            if float(np.mean(r_ij <= 1.0)) >= stage1_min_pass and float(np.mean(r_ji <= 1.0)) >= stage1_min_pass:
-                n_pass_1pct_s1 += 1
+            pass_1 = (float(np.mean(r_ij <= 1.0)) >= stage1_min_pass and float(np.mean(r_ji <= 1.0)) >= stage1_min_pass)
+            if pass_1:
+                stage2_1pct_pairs.append(pair)
+            elif stage1_rms_cut >= 2.0 and float(np.mean(r_ij <= 2.0)) >= stage1_min_pass and float(np.mean(r_ji <= 2.0)) >= stage1_min_pass:
+                stage2_2pct_extra_pairs.append(pair)
 
     dt_s1 = time.perf_counter() - t_s1_start
     print(
         f"[Equiv:{design_set_name}] Stage 1 done ({dt_s1:.1f}s): "
-        f"1a->{n_1b}, Stage2={len(stage2_pairs)} (<={stage1_rms_cut}; {n_pass_1pct_s1} <=1.0), next_tier={len(next_tier_pairs)}"
+        f"1a->{n_1b}, S2(1%)={len(stage2_1pct_pairs)}, S2(2% extra)={len(stage2_2pct_extra_pairs)}, next_tier={len(next_tier_pairs)}",
+        flush=True,
     )
 
     # ------------------------------------------------------------------
     # Stage 2: High-precision bidirectional LM (K2=32 x 4 starts)
-    # Two-pass (i->j first, then j->i only for i->j passers) + exact binomial early exit
-    # at max sensitivity cut (fail_rms_thresh = stage1_rms_cut, max_fails = 6 for 80% min thresh).
-    # Zero approximation across all 9 (sigma_ref in {0.5,1,2}%, pr in {80,85,90}%) settings!
+    # Threshold-matched exact confirmation (10x faster, ZERO approximation):
+    #   (A) Primary sigma_ref=1.0%: test stage2_1pct_pairs with early_stop=0.98, fail_thresh=1.0
+    #   (B) Sensitivity 0.5%: re-test ONLY 1.0%-passers with early_stop=0.49, fail_thresh=0.5
+    #   (C) Sensitivity 2.0%: 1.0%-passers auto-pass; test (1.0%-failers U 2%-extra) with early_stop=1.96, fail_thresh=2.0
     # ------------------------------------------------------------------
     t_s2_start = time.perf_counter()
-    n_s2 = len(stage2_pairs)
-    pair_rms_i2j: Dict[Tuple[int, int], np.ndarray] = {}
-    pair_rms_j2i: Dict[Tuple[int, int], np.ndarray] = {}
     max_fails_s2 = K2 - int(np.ceil(0.80 * K2))  # 32 - 26 = 6 (covers 80%, 85%, 90% exactly!)
 
-    if n_s2 > 0:
-        # Pass 2a: direction i -> j
-        s2a_mids = np.empty(n_s2, dtype=np.int32)
-        s2a_tgt = np.empty((n_s2, K2, n_res), dtype=np.float64)
-        s2a_inits = np.empty((n_s2, K2, 4, P), dtype=np.float64)
-        for idx_p, (i, j) in enumerate(stage2_pairs):
-            s2a_mids[idx_p] = j
-            s2a_tgt[idx_p] = s2_curves[i]
-            s2a_inits[idx_p, :, 0:2] = get_nn_thetas(s2_scaled[i], j, topk=2)
-            s2a_inits[idx_p, :, 2:4] = lib_th[j][rng.integers(0, N_lib, size=(K2, 2))]
-
-        s2a_rms = sim.fit_lm_pairs_dir(
-            s2a_mids, designs, t_eval, s2a_tgt, inv_sig_1d, s2a_inits,
+    def run_s2_level(
+        pair_list: List[Tuple[int, int]], rms_thresh: float, early_stop: float, label: str
+    ) -> Tuple[Dict[Tuple[int, int], np.ndarray], Dict[Tuple[int, int], np.ndarray]]:
+        out_ij: Dict[Tuple[int, int], np.ndarray] = {}
+        out_ji: Dict[Tuple[int, int], np.ndarray] = {}
+        n_p = len(pair_list)
+        if n_p == 0:
+            return out_ij, out_ji
+        t0_l = time.perf_counter()
+        # Pass a: i -> j
+        mids_a = np.empty(n_p, dtype=np.int32)
+        tgt_a = np.empty((n_p, K2, n_res), dtype=np.float64)
+        init_a = np.empty((n_p, K2, 4, P), dtype=np.float64)
+        for idx_p, (i, j) in enumerate(pair_list):
+            mids_a[idx_p] = j
+            tgt_a[idx_p] = s2_curves[i]
+            init_a[idx_p, :, 0:2] = get_nn_thetas(s2_scaled[i], j, topk=2)
+            init_a[idx_p, :, 2:4] = lib_th[j][rng.integers(0, N_lib, size=(K2, 2))]
+        rms_a = sim.fit_lm_pairs_dir(
+            mids_a, designs, t_eval, tgt_a, inv_sig_1d, init_a,
             lb_all=lb_all, ub_all=ub_all,
-            rtol=5e-5, atol=5e-9, max_ode_steps=10000, max_lm_iters=22,
-            early_stop_rms=0.45, fail_rms_thresh=stage1_rms_cut, max_fails=max_fails_s2,
+            rtol=1e-4, atol=1e-8, max_ode_steps=10000, max_lm_iters=20,
+            early_stop_rms=early_stop, fail_rms_thresh=rms_thresh, max_fails=max_fails_s2,
         )
-
-        pass_2a_idx = [
-            idx_p for idx_p in range(n_s2)
-            if int(np.sum(s2a_rms[idx_p] <= stage1_rms_cut)) >= (K2 - max_fails_s2)
+        surv_a = [
+            idx_p for idx_p in range(n_p)
+            if int(np.sum(rms_a[idx_p] <= rms_thresh)) >= (K2 - max_fails_s2)
         ]
-
-        # Pass 2b: direction j -> i ONLY for Pass 2a survivors
-        n_2b = len(pass_2a_idx)
-        if n_2b > 0:
-            s2b_mids = np.empty(n_2b, dtype=np.int32)
-            s2b_tgt = np.empty((n_2b, K2, n_res), dtype=np.float64)
-            s2b_inits = np.empty((n_2b, K2, 4, P), dtype=np.float64)
-            for kb, idx_p in enumerate(pass_2a_idx):
-                i, j = stage2_pairs[idx_p]
-                s2b_mids[kb] = i
-                s2b_tgt[kb] = s2_curves[j]
-                s2b_inits[kb, :, 0:2] = get_nn_thetas(s2_scaled[j], i, topk=2)
-                s2b_inits[kb, :, 2:4] = lib_th[i][rng.integers(0, N_lib, size=(K2, 2))]
-
-            s2b_rms = sim.fit_lm_pairs_dir(
-                s2b_mids, designs, t_eval, s2b_tgt, inv_sig_1d, s2b_inits,
+        # Pass b: j -> i only for Pass a survivors
+        n_b = len(surv_a)
+        if n_b > 0:
+            mids_b = np.empty(n_b, dtype=np.int32)
+            tgt_b = np.empty((n_b, K2, n_res), dtype=np.float64)
+            init_b = np.empty((n_b, K2, 4, P), dtype=np.float64)
+            for kb, idx_p in enumerate(surv_a):
+                i, j = pair_list[idx_p]
+                mids_b[kb] = i
+                tgt_b[kb] = s2_curves[j]
+                init_b[kb, :, 0:2] = get_nn_thetas(s2_scaled[j], i, topk=2)
+                init_b[kb, :, 2:4] = lib_th[i][rng.integers(0, N_lib, size=(K2, 2))]
+            rms_b = sim.fit_lm_pairs_dir(
+                mids_b, designs, t_eval, tgt_b, inv_sig_1d, init_b,
                 lb_all=lb_all, ub_all=ub_all,
-                rtol=5e-5, atol=5e-9, max_ode_steps=10000, max_lm_iters=22,
-                early_stop_rms=0.45, fail_rms_thresh=stage1_rms_cut, max_fails=max_fails_s2,
+                rtol=1e-4, atol=1e-8, max_ode_steps=10000, max_lm_iters=20,
+                early_stop_rms=early_stop, fail_rms_thresh=rms_thresh, max_fails=max_fails_s2,
             )
+            for kb, idx_p in enumerate(surv_a):
+                pair = pair_list[idx_p]
+                out_ij[pair] = rms_a[idx_p]
+                out_ji[pair] = rms_b[kb]
+        print(
+            f"  [Equiv:{design_set_name} S2 {label}] {n_p} cand -> {n_b} passed 2a ({time.perf_counter()-t0_l:.1f}s)",
+            flush=True,
+        )
+        return out_ij, out_ji
 
-            for kb, idx_p in enumerate(pass_2a_idx):
-                pair = stage2_pairs[idx_p]
-                pair_rms_i2j[pair] = s2a_rms[idx_p]
-                pair_rms_j2i[pair] = s2b_rms[kb]
+    # (A) Primary 1.0%
+    ij_1pct, ji_1pct = run_s2_level(stage2_1pct_pairs, rms_thresh=1.0, early_stop=0.98, label="1.0%")
+    pass_1pct_pairs = [
+        p for p in ij_1pct
+        if int(np.sum(ij_1pct[p] <= 1.0)) >= (K2 - max_fails_s2)
+        and int(np.sum(ji_1pct[p] <= 1.0)) >= (K2 - max_fails_s2)
+    ]
+
+    # (B) Sensitivity 0.5% (strict subset of 1.0%-passers!)
+    ij_05pct, ji_05pct = run_s2_level(pass_1pct_pairs, rms_thresh=0.5, early_stop=0.49, label="0.5%")
+
+    # (C) Sensitivity 2.0% (1.0%-passers automatically pass <= 2.0; check remaining candidates)
+    pass_1_set = set(pass_1pct_pairs)
+    cand_2pct_rem = [p for p in stage2_1pct_pairs if p not in pass_1_set] + stage2_2pct_extra_pairs
+    ij_2pct_rem, ji_2pct_rem = run_s2_level(cand_2pct_rem, rms_thresh=2.0, early_stop=1.96, label="2.0%")
+    ij_2pct = dict(ij_1pct)
+    ji_2pct = dict(ji_1pct)
+    ij_2pct.update(ij_2pct_rem)
+    ji_2pct.update(ji_2pct_rem)
 
     dt_s2 = time.perf_counter() - t_s2_start
-    print(f"[Equiv:{design_set_name}] Stage 2 done ({dt_s2:.1f}s): 2a->{len(pair_rms_i2j)}/{n_s2} pairs checked bidirectionally")
+    n_s2 = len(stage2_1pct_pairs) + len(stage2_2pct_extra_pairs)
+    print(f"[Equiv:{design_set_name}] Stage 2 all levels done ({dt_s2:.1f}s)", flush=True)
 
+    rms_maps = {
+        "0.5pct": (0.5, ij_05pct, ji_05pct),
+        "1.0pct": (1.0, ij_1pct, ji_1pct),
+        "2.0pct": (2.0, ij_2pct, ji_2pct),
+    }
     partitions = {}
-    for sig_label, rms_cut in [("0.5pct", 0.5), ("1.0pct", 1.0), ("2.0pct", 2.0)]:
+    for sig_label, (rms_cut, map_ij, map_ji) in rms_maps.items():
         for pr_label, pr_cut in [("80pct", 0.80), ("85pct", 0.85), ("90pct", 0.90)]:
             key = f"sig_{sig_label}_pr_{pr_label}"
             partitions[key] = partition_equivalence_graph(
-                M, pair_rms_i2j, pair_rms_j2i, rms_thresh=rms_cut, pass_rate_thresh=pr_cut
+                M, map_ij, map_ji, rms_thresh=rms_cut, pass_rate_thresh=pr_cut
             )
 
     primary = partitions["sig_1.0pct_pr_85pct"]

@@ -5,6 +5,8 @@
 #include <cmath>
 #include <cstring>
 #include <cstdint>
+#include <cstdio>
+#include <atomic>
 #include <algorithm>
 #include <vector>
 #include <omp.h>
@@ -881,6 +883,9 @@ void fit_lm_pairs_dir(
 
     if (n_threads > 0) omp_set_num_threads(n_threads);
 
+    std::atomic<int> done_cnt{0};
+    const int report_step = std::max(1, n_pairs / 5);
+
     #pragma omp parallel for schedule(dynamic, 1)
     for (int p = 0; p < n_pairs; ++p) {
         const int mid = pair_target_mech_ids[p];
@@ -932,6 +937,11 @@ void fit_lm_pairs_dir(
                 ++n_fails;
                 if (n_fails > max_fails) pruned = true;
             }
+        }
+        int c = ++done_cnt;
+        if (n_pairs >= 200 && (c % report_step == 0 || c == n_pairs)) {
+            std::printf("    [LM-pairs] %d / %d pairs done\n", c, n_pairs);
+            std::fflush(stdout);
         }
     }
 }

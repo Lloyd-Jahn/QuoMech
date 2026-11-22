@@ -8,6 +8,7 @@ IS posteriors (zero neural networks).
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import time
@@ -20,6 +21,7 @@ from quomech.bayes_probe import (
     build_is_particle_bank,
     compute_exact_eig_candidates,
     compute_exact_is_posterior,
+    load_is_particle_bank_from_pool,
 )
 from quomech.equivalence import build_design_targets
 from quomech.grammar import build_default_grammar
@@ -256,6 +258,11 @@ def run_tier_probe(
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--from-pool", action="store_true", help="Reuse pre-simulated train pool (zero extra ODEs)")
+    ap.add_argument("--n-per-mech", type=int, default=2048)
+    args = ap.parse_args()
+
     root = Path(__file__).resolve().parents[1]
     g2_dir = root / "results" / "gate2"
     out_dir = root / "results" / "gate3a"
@@ -264,10 +271,17 @@ def main():
     grammar = build_default_grammar()
     sim = ODESimulator(grammar, rtol=1e-5, atol=1e-9, n_threads=64)
 
-    print("[Gate 3a] Building exact IS particle bank (151 mechs x 2048 particles x 10 designs)...")
     t0 = time.perf_counter()
-    bank = build_is_particle_bank(grammar, sim, n_per_mech=2048, n_t=20, sigma_ref=0.01, seed=31415)
-    print(f"[Gate 3a] IS bank built in {time.perf_counter() - t0:.1f}s.")
+    pool_train = root / "data" / "pool_v1" / "train"
+    if args.from_pool and pool_train.exists():
+        print(f"[Gate 3a] Loading exact IS particle bank from {pool_train} ({args.n_per_mech}/mech)...")
+        bank = load_is_particle_bank_from_pool(
+            grammar, pool_train, n_per_mech=args.n_per_mech, n_t=20, sigma_ref=0.01
+        )
+    else:
+        print(f"[Gate 3a] Building exact IS particle bank (151 mechs x {args.n_per_mech} particles x 10 designs)...")
+        bank = build_is_particle_bank(grammar, sim, n_per_mech=args.n_per_mech, n_t=20, sigma_ref=0.01, seed=31415)
+    print(f"[Gate 3a] IS bank ready in {time.perf_counter() - t0:.1f}s.")
 
     all_out = {}
     for tier in ["no_P", "basic", "full"]:

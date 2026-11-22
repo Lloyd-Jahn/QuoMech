@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import torch
-from quomech.boed import run_boed_benchmark
+from quomech.boed import run_boed_benchmark, run_continuous_lhs_boed
 from quomech.evaluate import evaluate_e1_suite, evaluate_enum_bic_comparison
 from quomech.grammar import build_default_grammar
 from quomech.simulator import ODESimulator
@@ -92,8 +92,17 @@ def main():
     with open(g3b_dir / "e3_boed_results.json", "w") as f:
         json.dump(boed_res, f, indent=2)
 
-    print("\n=== Spontaneous RPKA / VTNA Diagnostic Logic Emergence ===")
+    print("\n=== Spontaneous RPKA / VTNA Diagnostic Logic Emergence (Discrete Catalog) ===")
     print(json.dumps(boed_res["rpka_vtna_emergence"], indent=2))
+
+    print("\n=== E3: Continuous Design Space X LHS-64 BOED & Spatial Clustering ===")
+    cont_boed = run_continuous_lhs_boed(
+        model_q, grammar, sim, data_dir / "test", equiv_tiers["basic"], device,
+        n_cases=80, n_lhs=64, budget=4, n_mc=128, sigma_rel=0.01,
+    )
+    with open(g3b_dir / "e3_continuous_lhs.json", "w") as f:
+        json.dump(cont_boed, f, indent=2)
+    print(json.dumps(cont_boed["spatial_clustering"], indent=2))
 
 
 if __name__ == "__main__":

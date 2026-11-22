@@ -1,16 +1,12 @@
-"""E3 Closed-Loop Bayesian Experimental Design (Section 7.4 & Step 4.2).
-
-Compares 5 strategies across Ξ_no-P, Ξ_basic, Ξ_full on 150 test cases (from D0, budget T=4):
-  1. Random
-  2. Textbook fixed RPKA/VTNA (D2 -> D5 -> D6 -> D3; D4 fallback when D6 unavailable)
-  3. Static EIG (pre-selected prior-optimal sequence)
-  4. Fine-grained EIG (Barber-Agakov I(M; Y_xi | D)), reporting BOTH:
-       - unified class-level stopping (max_C q(C_Xi | D) >= 0.90)
-       - fine-grained stopping (max_m q(m | D) >= 0.90)
-  5. Quotient EIG (Barber-Agakov I(C_Xi; Y_xi | D))
-
-Also quantifies spontaneous emergence of RPKA & VTNA diagnostic logic (Section 8.2).
-Uses fast cached experiment embeddings + batched 64-core CPU ROS2 simulation + GPU BF16 scoring.
+"""E3 Closed-Loop Bayesian Experimental Design (Section 7.4 & 8.2):
+  1. Discrete 3-tier catalog BOED (Ξ_no-P, Ξ_basic, Ξ_full) comparing:
+     - Random, Textbook fixed RPKA/VTNA, Static EIG,
+     - Fine-grained EIG (reporting BOTH unified class stopping AND fine-grained stopping),
+     - Quotient EIG (QuoMech),
+     plus spontaneous RPKA/VTNA expert diagnostic mapping statistics.
+  2. Continuous design space X BOED (96-point Latin Hypercube candidate pool with load-adapted
+     variable windows t_end(xi) in [0.4, 4.0]), verifying spontaneous spatial clustering of
+     optimal continuous xi* into VTNA (variable cat loading) and RPKA (pre-added P / same-excess) zones.
 """
 
 from __future__ import annotations
@@ -19,42 +15,40 @@ import time
 from pathlib import Path
 from typing import Dict, List, Sequence, Tuple
 import numpy as np
+from scipy.stats import qmc
 import torch
 
-from quomech.data_gen import get_observable_channel_indices
-from quomech.evaluate import aggregate_class_probs
-from quomech.grammar import ReactionGrammar
+from quomech.data_gen import build_design_feature_vec, get_observable_channel_indices
+from quomech.evaluate import aggregate_class_probs, interp_traj_to_times
+from quomech.grammar import DesignSpec, ReactionGrammar
 from quomech.models import QuoMechNet
 from quomech.simulator import ODESimulator
 
 
 def _build_single_exp_tensors(
     grammar: ReactionGrammar,
-    design_idx: int,
+    des: DesignSpec,
+    t_end: float,
     y_noisy: np.ndarray,  # (B, n_t, n_ch) raw noisy concentrations
     t_grid: np.ndarray,   # (n_t,)
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Pack a batch of B observations of ONE catalog design into ExperimentEncoder tensors."""
+    """Pack B observations of ONE design (discrete or continuous) into ExperimentEncoder tensors."""
     B, n_t, n_ch = y_noisy.shape
     obs_ch = get_observable_channel_indices(grammar)
     ch_is_cat = np.array([grammar.species[s].is_catalyst for s in obs_ch], dtype=bool)
-    des = grammar.catalog[design_idx]
 
     ch_mask = np.zeros(n_ch, dtype=np.float32)
-    obs_full = np.zeros(grammar.n_species, dtype=np.float32)
     for c_i, sp in enumerate(obs_ch):
         if sp in des.obs_species:
             ch_mask[c_i] = 1.0
-            obs_full[sp] = 1.0
+
+    df1 = build_design_feature_vec(
+        grammar, des.A0, des.B0, des.P0, des.cat_mult, float(des.a_pre), t_end, obs_ch, ch_mask
+    )
+    df = np.broadcast_to(df1[None, :], (B, len(df1))).copy()
+    tm = np.broadcast_to(t_grid.astype(np.float32)[None, :], (B, n_t)).copy()
 
     cat0 = des.cat_mult * grammar.c0_base
-    df1 = np.concatenate([
-        np.array([des.A0, des.B0, des.P0, np.log10(max(cat0, 1e-6)), float(des.a_pre)], dtype=np.float32),
-        obs_full,
-    ])
-    df = np.broadcast_to(df1[None, :], (B, len(df1))).copy()
-    tm = np.broadcast_to(t_grid[None, :], (B, n_t)).copy()
-
     norm_scale = np.where(ch_is_cat, cat0, 1.0).astype(np.float32)
     ov = (y_noisy.astype(np.float32) / norm_scale[None, None, :]) * ch_mask[None, None, :]
     om = np.broadcast_to(ch_mask[None, None, :], (B, n_t, n_ch)).copy()
@@ -63,7 +57,7 @@ def _build_single_exp_tensors(
 
 
 @torch.no_grad()
-def _score_eig_batched(
+def _score_eig_designs_batched(
     model: QuoMechNet,
     grammar: ReactionGrammar,
     sim: ODESimulator,
@@ -72,31 +66,30 @@ def _score_eig_batched(
     G_mat: torch.Tensor,          # (M, d_g) on GPU
     probs_m_curr: np.ndarray,     # (B_act, M)
     probs_c_curr: np.ndarray,     # (B_act, n_classes)
-    cand_lists: List[List[int]],  # len B_act: available candidate design indices for each active case
-    mech_to_class: np.ndarray,    # (M,)
+    design_pool: Sequence[Tuple[DesignSpec, float]],  # pool of (DesignSpec, t_end)
+    cand_lists: List[List[int]],  # len B_act: indices into design_pool
+    mech_to_class: np.ndarray,
     n_classes: int,
-    t_eval: np.ndarray,
+    n_t: int,
     sigma_rel: float,
     n_mc: int,
     device: torch.device,
     rng: np.random.Generator,
     gpu_batch: int = 2048,
 ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
-    """Compute Barber-Agakov Quotient EIG and Fine-grained EIG simultaneously for B_act active cases."""
+    """Compute Barber-Agakov Quotient EIG and Fine-grained EIG simultaneously for B_act cases."""
     B_act = len(cand_lists)
     M = grammar.n_mechs
     obs_ch = get_observable_channel_indices(grammar)
     ch_is_cat = np.array([grammar.species[s].is_catalyst for s in obs_ch], dtype=bool)
     use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
 
-    # 1. Sample (m_i, theta_i) ~ q(. | D) for each active case: shape (B_act, n_mc)
     sampled_m = np.empty((B_act, n_mc), dtype=np.int32)
     for b in range(B_act):
         p = probs_m_curr[b]
         p = p / np.sum(p)
         sampled_m[b] = rng.choice(M, size=n_mc, replace=True, p=p)
 
-    # Batched flow sampling on GPU
     f_rep = f_curr.unsqueeze(1).expand(B_act, n_mc, -1).reshape(B_act * n_mc, -1)
     m_flat_t = torch.from_numpy(sampled_m.ravel()).long().to(device)
     th_chunks = []
@@ -104,16 +97,12 @@ def _score_eig_batched(
         ed = min(B_act * n_mc, st + 4096)
         th_chunks.append(model.sample_theta(f_rep[st:ed], G_mat, m_flat_t[st:ed], num_samples=1).cpu().numpy())
     sampled_th = np.concatenate(th_chunks, axis=0).astype(np.float64).reshape(B_act, n_mc, grammar.n_params)
-    # Clamp extreme sampled log10_k safely to +/- 5 std around prior mean so ODE stays bounded
     lb = grammar.mech_prior_mean - 4.5 * grammar.mech_prior_std
     ub = grammar.mech_prior_mean + 4.5 * grammar.mech_prior_std
     m_flat = sampled_m.ravel()
-    th_flat = sampled_th.reshape(B_act * n_mc, grammar.n_params)
-    th_flat = np.clip(th_flat, lb[m_flat], ub[m_flat])
+    th_flat = np.clip(sampled_th.reshape(B_act * n_mc, grammar.n_params), lb[m_flat], ub[m_flat])
     sampled_th = th_flat.reshape(B_act, n_mc, grammar.n_params)
 
-    # Group candidate evaluations by design index so each catalog design is simulated & encoded in bulk
-    # Map design_idx -> list of active case indices b that include design_idx in cand_lists[b]
     cases_by_design: Dict[int, List[int]] = {}
     for b, cands in enumerate(cand_lists):
         for d in cands:
@@ -121,37 +110,31 @@ def _score_eig_batched(
 
     eig_q_map: Dict[Tuple[int, int], float] = {}
     eig_f_map: Dict[Tuple[int, int], float] = {}
-
     E_hist = hist_embs.shape[1]
-    t_eval_f32 = t_eval.astype(np.float32)
     m2c_t = torch.from_numpy(mech_to_class).long().to(device)
 
     for d_idx, b_list in cases_by_design.items():
-        des = grammar.catalog[d_idx]
+        des, t_end = design_pool[d_idx]
+        t_eval = np.linspace(0.0, t_end, n_t)
         n_b = len(b_list)
         b_arr = np.array(b_list, dtype=np.int64)
-        m_sub = sampled_m[b_arr].ravel()                       # (n_b * n_mc,)
-        th_sub = sampled_th[b_arr].reshape(n_b * n_mc, -1)     # (n_b * n_mc, P)
+        m_sub = sampled_m[b_arr].ravel()
+        th_sub = sampled_th[b_arr].reshape(n_b * n_mc, -1)
 
-        # Build y0 for design d_idx
         y0_table = np.array([grammar.initial_state(m, des) for m in range(M)], dtype=np.float64)
         y0_sub = y0_table[m_sub]
 
-        # 64-core CPU ROS2 simulation
         y_sim, st_sim, _, _ = sim.simulate_batch(
-            m_sub, th_sub, y0_sub, t_eval, compute_flux=False, rtol=2e-5, atol=2e-9, max_steps=10000
+            m_sub, th_sub, y0_sub, t_eval, compute_flux=False, rtol=3e-5, atol=3e-9, max_steps=10000
         )
-        y_obs = y_sim[:, :, obs_ch]  # (n_b * n_mc, n_t, n_ch)
+        y_obs = y_sim[:, :, obs_ch]
         cat0 = des.cat_mult * grammar.c0_base
         noise_scale = np.where(ch_is_cat, cat0, des.A0)
         y_noisy = y_obs + rng.normal(0.0, 1.0, size=y_obs.shape) * (sigma_rel * noise_scale[None, None, :])
 
-        # Pack into ExperimentEncoder input tensors
-        df_np, tm_np, ov_np, om_np, tp_np = _build_single_exp_tensors(grammar, d_idx, y_noisy, t_eval_f32)
+        df_np, tm_np, ov_np, om_np, tp_np = _build_single_exp_tensors(grammar, des, t_end, y_noisy, t_eval)
 
-        # GPU batched scoring: encode new exp -> concat with cached hist_embs -> SetEncoder + MechHead
         tot_n = n_b * n_mc
-        # Pre-gather prior log-probs for each (b, i)
         pm_prior = probs_m_curr[np.repeat(b_arr, n_mc), m_sub]
         c_sub = mech_to_class[m_sub]
         pc_prior = probs_c_curr[np.repeat(b_arr, n_mc), c_sub]
@@ -174,15 +157,14 @@ def _score_eig_batched(
                     torch.from_numpy(ov_np[st:ed]).to(device),
                     torch.from_numpy(om_np[st:ed]).to(device),
                     torch.from_numpy(tp_np[st:ed]).to(device),
-                )  # (bs, d_exp)
-                h_prev = hist_embs[b_idx_rep_t[st:ed]]  # (bs, E_hist, d_exp)
+                )
+                h_prev = hist_embs[b_idx_rep_t[st:ed]]
                 h_cat = torch.cat([h_prev, new_emb.unsqueeze(1).to(h_prev.dtype)], dim=1)
                 ep_zero = torch.zeros((bs, E_hist + 1), dtype=torch.bool, device=device)
-                probs_new = model.probs_from_exp_embs(h_cat, ep_zero)  # (bs, M) float32
+                probs_new = model.probs_from_exp_embs(h_cat, ep_zero)
 
             ar = torch.arange(bs, device=device)
             pm_new = probs_new[ar, m_sub_t[st:ed]].clamp(min=1e-12)
-            # Sum class probability cleanly on GPU via scatter_add
             pc_mat = torch.zeros((bs, n_classes), device=device, dtype=torch.float32)
             pc_mat.scatter_add_(1, m2c_t.unsqueeze(0).expand(bs, -1), probs_new)
             pc_new = pc_mat[ar, c_sub_t[st:ed]].clamp(min=1e-12)
@@ -218,42 +200,39 @@ def run_boed_benchmark(
     sigma_rel: float = 0.01,
     seed: int = 202604,
 ) -> Dict:
-    """Run full E3 closed-loop BOED benchmark across Ξ_no-P, Ξ_basic, Ξ_full."""
+    """Full E3 discrete 3-tier catalog BOED benchmark across Ξ_no-P, Ξ_basic, Ξ_full."""
     model.eval()
     rng = np.random.default_rng(seed)
     obs_ch = get_observable_channel_indices(grammar)
     ch_is_cat = np.array([grammar.species[s].is_catalyst for s in obs_ch], dtype=bool)
     use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
 
+    t_grid = np.load(test_dir / "t_grid.npy")
     all_mids = np.load(test_dir / "mech_ids.npy")
     all_trajs = np.load(test_dir / "trajs.npy")
-    # Pick 1 fresh test sample per mechanism (151 cases, completely covering all 151 mechanisms!)
-    # Use index 5 per mech so distinct from Enum+BIC index 0
     sel_idx = np.array([np.where(all_mids == m)[0][5] for m in range(grammar.n_mechs)], dtype=np.int64)
     if n_cases < len(sel_idx):
         sel_idx = sel_idx[:n_cases]
     N = len(sel_idx)
     true_mids = all_mids[sel_idx].astype(np.int64)
-    trajs_sel = all_trajs[sel_idx]  # (N, 14, 64, C)
+    trajs_sel = all_trajs[sel_idx]
 
     n_t = 20
-    t_idx = np.round(np.linspace(0, trajs_sel.shape[2] - 1, n_t)).astype(np.int64)
     t_eval = np.linspace(0.0, 1.0, n_t)
-    t_eval_f32 = t_eval.astype(np.float32)
+    catalog_pool = [(d, 1.0) for d in grammar.catalog]
 
-    # Pre-generate FIXED noisy observations for all N cases x 10 catalog designs (paired CRN comparison!)
-    noisy_obs = np.empty((N, 10, n_t, len(obs_ch)), dtype=np.float64)
     exp_embs_all = torch.empty((N, 10, model.exp_encoder.d_model), device=device, dtype=torch.float32)
-
     for d_idx in range(10):
         des = grammar.catalog[d_idx]
-        clean = trajs_sel[:, d_idx, :, :][:, t_idx, :].astype(np.float64)
+        clean = np.stack(
+            [interp_traj_to_times(t_grid, trajs_sel[i, d_idx].astype(np.float64), t_eval) for i in range(N)],
+            axis=0,
+        )
         cat0 = des.cat_mult * grammar.c0_base
         noise_scale = np.where(ch_is_cat, cat0, des.A0)
         y_n = clean + rng.normal(0.0, 1.0, size=clean.shape) * (sigma_rel * noise_scale[None, None, :])
-        noisy_obs[:, d_idx] = y_n
 
-        df_np, tm_np, ov_np, om_np, tp_np = _build_single_exp_tensors(grammar, d_idx, y_n, t_eval_f32)
+        df_np, tm_np, ov_np, om_np, tp_np = _build_single_exp_tensors(grammar, des, 1.0, y_n, t_eval)
         with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
             emb = model.exp_encoder(
                 torch.from_numpy(df_np).to(device),
@@ -264,16 +243,14 @@ def run_boed_benchmark(
             )
         exp_embs_all[:, d_idx] = emb.float()
 
-    # Precompute mechanism embeddings G once
     _, G_mat = model.mech_head(torch.zeros((1, 256), device=device))
     G_mat = G_mat.float()
 
     def eval_state(chosen_hist: List[List[int]]) -> Tuple[np.ndarray, torch.Tensor, torch.Tensor]:
-        """Given list of observed design index lists (all same length E), return (probs_m, f, hist_embs)."""
         E = len(chosen_hist[0])
-        idx_t = torch.tensor(chosen_hist, dtype=torch.long, device=device)  # (N, E)
+        idx_t = torch.tensor(chosen_hist, dtype=torch.long, device=device)
         ar = torch.arange(N, device=device).unsqueeze(1).expand(N, E)
-        h_seq = exp_embs_all[ar, idx_t]  # (N, E, d_exp)
+        h_seq = exp_embs_all[ar, idx_t]
         ep = torch.zeros((N, E), dtype=torch.bool, device=device)
         with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
             f = model.set_encoder(h_seq, exp_pad_mask=ep)
@@ -281,7 +258,6 @@ def run_boed_benchmark(
         probs = torch.softmax(logits.float(), dim=-1).cpu().numpy()
         return probs, f.float(), h_seq
 
-    # Compute initial D0 posterior once
     init_hist = [[0] for _ in range(N)]
     probs_m_d0, f_d0, h_d0 = eval_state(init_hist)
 
@@ -297,29 +273,19 @@ def run_boed_benchmark(
         n_cls = len(classes)
         true_c = m2c[true_mids]
         nontriv_mask = np.array([len(classes[c]) >= 2 for c in true_c], dtype=bool)
-
         probs_c_d0 = aggregate_class_probs(probs_m_d0, m2c, n_cls)
 
-        # Compute Static EIG sequence (greedy prior-average Quotient EIG across the N cases' D0 state -> fixed 4 designs!)
-        # Actually per Section 8.3: "静态 EIG: 仅按先验一次性选定 4 组实验" — select top-4 designs by average step-1 Quotient EIG!
         cand_d0 = [[d for d in tier_designs if d != 0] for _ in range(N)]
-        eig_q_d0, eig_f_d0 = _score_eig_batched(
+        eig_q_d0, eig_f_d0 = _score_eig_designs_batched(
             model, grammar, sim, h_d0, f_d0, G_mat, probs_m_d0, probs_c_d0,
-            cand_d0, m2c, n_cls, t_eval, sigma_rel, n_mc=n_mc, device=device, rng=rng,
+            catalog_pool, cand_d0, m2c, n_cls, n_t, sigma_rel, n_mc=n_mc, device=device, rng=rng,
         )
-        eig_q_d0_mat = np.stack(eig_q_d0, axis=0)  # (N, n_cands)
+        eig_q_d0_mat = np.stack(eig_q_d0, axis=0)
         eig_f_d0_mat = np.stack(eig_f_d0, axis=0)
-        mean_q_d0 = np.mean(eig_q_d0_mat, axis=0)
-        static_order_idx = np.argsort(mean_q_d0)[::-1][:budget]
+        static_order_idx = np.argsort(np.mean(eig_q_d0_mat, axis=0))[::-1][:budget]
         static_seq = [cand_d0[0][i] for i in static_order_idx]
+        textbook_seq = [2, 5, 3, 4] if tier == "no_P" else [2, 5, 6, 3]
 
-        # Textbook fixed RPKA/VTNA sequence (D2 -> D5 -> D6 -> D3; substitute D4 in no_P where D6 unavailable)
-        if tier == "no_P":
-            textbook_seq = [2, 5, 3, 4]  # D2, D5, D3, D4
-        else:
-            textbook_seq = [2, 5, 6, 3]  # D2, D5, D6, D3
-
-        # Spontaneous RPKA / VTNA emergence statistics from step-1 Quotient EIG choices on D0!
         step1_q_choices = [cand_d0[i][int(np.argmax(eig_q_d0_mat[i]))] for i in range(N)]
         step1_f_choices = [cand_d0[i][int(np.argmax(eig_f_d0_mat[i]))] for i in range(N)]
         step1_disagree = float(np.mean([a != b for a, b in zip(step1_q_choices, step1_f_choices)]))
@@ -327,43 +293,37 @@ def run_boed_benchmark(
             np.mean([step1_q_choices[i] != step1_f_choices[i] for i in range(N) if nontriv_mask[i]])
         ) if np.any(nontriv_mask) else 0.0
 
-        # Analyze spontaneous RPKA/VTNA diagnostic logic on cases where top-2 classes after D0 differ by key chemical motif
         rpka_hits, rpka_tot = 0, 0
         vtna_hits, vtna_tot = 0, 0
         subA_hits, subA_tot = 0, 0
         act_hits, act_tot = 0, 0
         for i in range(N):
             if probs_c_d0[i].max() >= 0.90:
-                continue  # already confident from D0
+                continue
             top2_c = np.argsort(probs_c_d0[i])[-2:][::-1]
-            # Representative top mechanism in each of top-2 classes
             m_a = max(classes[top2_c[0]], key=lambda m: probs_m_d0[i, m])
             m_b = max(classes[top2_c[1]], key=lambda m: probs_m_d0[i, m])
             opt_a, opt_b = grammar.mech_options[m_a], grammar.mech_options[m_b]
             ch = step1_q_choices[i]
-            # 1) M2 vs M4/M7 (deactivation vs product inhibition/rev release)
             m2_diff = (opt_a[1] > 0) != (opt_b[1] > 0)
             p_diff = ((opt_a[3] > 0) or (opt_a[6] > 0)) != ((opt_b[3] > 0) or (opt_b[6] > 0))
             if m2_diff and p_diff:
                 rpka_tot += 1
-                if ch in (5, 6, 7):  # D5/D6/D7
+                if ch in (5, 6, 7):
                     rpka_hits += 1
-            # 2) Catalyst order ambiguity (M5, M8, M2:free2, M6)
             cat_ord_a = (opt_a[4] > 0, opt_a[7] > 0, opt_a[1] == 2, opt_a[5] > 0)
             cat_ord_b = (opt_b[4] > 0, opt_b[7] > 0, opt_b[1] == 2, opt_b[5] > 0)
             if cat_ord_a != cat_ord_b:
                 vtna_tot += 1
-                if ch in (1, 2):  # D1/D2
+                if ch in (1, 2):
                     vtna_hits += 1
-            # 3) M3 substrate A inhibition
             if opt_a[2] != opt_b[2]:
                 subA_tot += 1
-                if ch in (3, 4):  # D3/D4
+                if ch in (3, 4):
                     subA_hits += 1
-            # 4) M1 activation
             if opt_a[0] != opt_b[0] and tier == "full":
                 act_tot += 1
-                if ch == 8:  # D8
+                if ch == 8:
                     act_hits += 1
 
         rpka_vtna_stats[tier] = {
@@ -404,13 +364,11 @@ def run_boed_benchmark(
                         cands = [d for d in tier_designs if d not in hist[i]]
                         hist[i].append(int(rng.choice(cands)))
                 elif strat_name == "Textbook_RPKA_VTNA":
-                    d_pick = textbook_seq[step]
                     for i in range(N):
-                        hist[i].append(d_pick)
+                        hist[i].append(textbook_seq[step])
                 elif strat_name == "Static_EIG":
-                    d_pick = static_seq[step]
                     for i in range(N):
-                        hist[i].append(d_pick)
+                        hist[i].append(static_seq[step])
                 elif strat_name in ("Quotient_EIG", "Fine_EIG"):
                     if step == 0:
                         choices = step1_q_choices if strat_name == "Quotient_EIG" else step1_f_choices
@@ -418,14 +376,13 @@ def run_boed_benchmark(
                             hist[i].append(choices[i])
                     else:
                         cands_all = [[d for d in tier_designs if d not in hist[i]] for i in range(N)]
-                        eq_list, ef_list = _score_eig_batched(
+                        eq_list, ef_list = _score_eig_designs_batched(
                             model, grammar, sim, h_curr, f_curr, G_mat, pm_curr, pc_curr,
-                            cands_all, m2c, n_cls, t_eval, sigma_rel, n_mc=n_mc, device=device, rng=rng,
+                            catalog_pool, cands_all, m2c, n_cls, n_t, sigma_rel, n_mc=n_mc, device=device, rng=rng,
                         )
                         scores_use = eq_list if strat_name == "Quotient_EIG" else ef_list
                         for i in range(N):
-                            best_d = cands_all[i][int(np.argmax(scores_use[i]))]
-                            hist[i].append(best_d)
+                            hist[i].append(cands_all[i][int(np.argmax(scores_use[i]))])
 
                 pm_curr, f_curr, h_curr = eval_state(hist)
                 pc_curr = aggregate_class_probs(pm_curr, m2c, n_cls)
@@ -443,8 +400,6 @@ def run_boed_benchmark(
                 n_s = len(sub_pc)
                 if n_s == 0:
                     return {}
-
-                # Stopping times (0..budget additional experiments)
                 t_stop_cls = np.full(n_s, budget, dtype=np.int64)
                 t_stop_fine = np.full(n_s, budget, dtype=np.int64)
                 t_true90 = np.full(n_s, budget + 1, dtype=np.int64)
@@ -465,7 +420,6 @@ def run_boed_benchmark(
                             break
                     acc_at_stop_cls[i] = sub_top1[i, t_stop_cls[i]]
                     acc_at_stop_fine[i] = sub_top1[i, t_stop_fine[i]]
-
                 return {
                     "n": int(n_s),
                     "auc_true_class_prob": float(np.mean(sub_pc)),
@@ -513,3 +467,251 @@ def run_boed_benchmark(
             )
 
     return {"tiers": all_tier_results, "rpka_vtna_emergence": rpka_vtna_stats}
+
+
+@torch.no_grad()
+def run_continuous_lhs_boed(
+    model: QuoMechNet,
+    grammar: ReactionGrammar,
+    sim: ODESimulator,
+    test_dir: Path,
+    equiv_basic: Dict,
+    device: torch.device,
+    n_cases: int = 80,
+    n_lhs: int = 64,
+    budget: int = 4,
+    n_mc: int = 128,
+    sigma_rel: float = 0.01,
+    seed: int = 202605,
+) -> Dict:
+    """Section 8.2 continuous design space X BOED on a 64-point Latin Hypercube candidate pool.
+
+    Tests:
+      1. Closed-loop Quotient EIG vs Random Continuous on 80 test cases (from D0, budget=4).
+      2. Spontaneous spatial clustering of optimal continuous xi* at step 1 (from D0):
+         - Catalyst-order ambiguity -> clusters into VTNA extreme catalyst loading (<=0.55x or >=1.8x)
+         - M2 vs M4/M7 ambiguity -> clusters into RPKA pre-added P (P0>=0.2) and/or reduced A0<=0.8
+         - M3 ambiguity -> clusters into high [A]_0 >= 1.4
+    """
+    t0 = time.perf_counter()
+    model.eval()
+    rng = np.random.default_rng(seed)
+    obs_ch = get_observable_channel_indices(grammar)
+    ch_is_cat = np.array([grammar.species[s].is_catalyst for s in obs_ch], dtype=bool)
+    sA, sP = grammar.species_idx["A"], grammar.species_idx["P"]
+    use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+
+    # Build 64-point Latin Hypercube over continuous X: (A0, B0, P0, log10_cat_mult) + load-adapted t_end
+    sampler = qmc.LatinHypercube(d=4, seed=seed)
+    u = sampler.random(n=n_lhs)
+    A0_arr = 0.25 + u[:, 0] * (2.0 - 0.25)
+    B0_arr = 0.25 + u[:, 1] * (3.0 - 0.25)
+    # Half at P0=0, half spanning [0.1, 1.0]
+    P0_arr = np.where(u[:, 2] < 0.5, 0.0, 0.1 + ((u[:, 2] - 0.5) / 0.5) * 0.9)
+    cat_arr = 10.0 ** (np.log10(0.25) + u[:, 3] * (np.log10(4.0) - np.log10(0.25)))
+    tend_arr = np.clip(1.0 / cat_arr, 0.4, 4.0)
+
+    lhs_pool: List[Tuple[DesignSpec, float]] = [
+        (
+            DesignSpec(
+                f"LHS_{k:02d}", float(A0_arr[k]), float(B0_arr[k]), float(P0_arr[k]),
+                float(cat_arr[k]), 0, (sA, sP), 1.0, (),
+            ),
+            float(tend_arr[k]),
+        )
+        for k in range(n_lhs)
+    ]
+
+    # Select n_cases diverse test mechanisms (from test split index 8)
+    t_grid = np.load(test_dir / "t_grid.npy")
+    all_mids = np.load(test_dir / "mech_ids.npy")
+    all_thetas = np.load(test_dir / "thetas.npy")
+    all_trajs = np.load(test_dir / "trajs.npy")
+    sel_mechs = np.linspace(0, grammar.n_mechs - 1, n_cases, dtype=int)
+    sel_idx = np.array([np.where(all_mids == m)[0][8] for m in sel_mechs], dtype=np.int64)
+    true_mids = all_mids[sel_idx].astype(np.int64)
+    true_thetas = all_thetas[sel_idx].astype(np.float64)
+
+    eq = equiv_basic["primary"]
+    m2c = np.array(eq["mech_to_class"], dtype=np.int64)
+    classes = eq["classes"]
+    n_cls = len(classes)
+    true_c = m2c[true_mids]
+    n_t = 20
+
+    # Initial D0 observation (t_end = 1.0)
+    t_eval_1 = np.linspace(0.0, 1.0, n_t)
+    d0 = grammar.catalog[0]
+    clean_d0 = np.stack(
+        [interp_traj_to_times(t_grid, all_trajs[sel_idx[i], 0].astype(np.float64), t_eval_1) for i in range(n_cases)],
+        axis=0,
+    )
+    noise_sc_d0 = np.where(ch_is_cat, d0.cat_mult * grammar.c0_base, d0.A0)
+    y_d0 = clean_d0 + rng.normal(0.0, 1.0, size=clean_d0.shape) * (sigma_rel * noise_sc_d0[None, None, :])
+    df0, tm0, ov0, om0, tp0 = _build_single_exp_tensors(grammar, d0, 1.0, y_d0, t_eval_1)
+
+    with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
+        h_d0 = model.exp_encoder(
+            torch.from_numpy(df0).to(device), torch.from_numpy(tm0).to(device),
+            torch.from_numpy(ov0).to(device), torch.from_numpy(om0).to(device),
+            torch.from_numpy(tp0).to(device),
+        ).float().unsqueeze(1)  # (N, 1, d_exp)
+        f_d0 = model.set_encoder(h_d0, exp_pad_mask=torch.zeros((n_cases, 1), dtype=torch.bool, device=device))
+        logits_d0, G_mat = model.mech_head(f_d0)
+    probs_m_d0 = torch.softmax(logits_d0.float(), dim=-1).cpu().numpy()
+    probs_c_d0 = aggregate_class_probs(probs_m_d0, m2c, n_cls)
+    f_d0 = f_d0.float()
+    G_mat = G_mat.float()
+
+    # Step 1 continuous Quotient EIG across all 64 LHS points
+    all_cands = [list(range(n_lhs)) for _ in range(n_cases)]
+    eig_q_step1, _ = _score_eig_designs_batched(
+        model, grammar, sim, h_d0, f_d0, G_mat, probs_m_d0, probs_c_d0,
+        lhs_pool, all_cands, m2c, n_cls, n_t, sigma_rel, n_mc=n_mc, device=device, rng=rng,
+    )
+    step1_best = [int(np.argmax(eig_q_step1[i])) for i in range(n_cases)]
+
+    # Spatial clustering diagnostics on step-1 optimal continuous xi*
+    base_vtna_frac = float(np.mean((cat_arr <= 0.55) | (cat_arr >= 1.8)))
+    base_prod_frac = float(np.mean(P0_arr >= 0.2))
+    base_rpka_frac = float(np.mean((P0_arr >= 0.2) | (A0_arr <= 0.8)))
+    base_highA_frac = float(np.mean(A0_arr >= 1.4))
+
+    vtna_sel, rpka_sel, highA_sel = [], [], []
+    for i in range(n_cases):
+        if probs_c_d0[i].max() >= 0.90:
+            continue
+        top2_c = np.argsort(probs_c_d0[i])[-2:][::-1]
+        m_a = max(classes[top2_c[0]], key=lambda m: probs_m_d0[i, m])
+        m_b = max(classes[top2_c[1]], key=lambda m: probs_m_d0[i, m])
+        oa, ob = grammar.mech_options[m_a], grammar.mech_options[m_b]
+        k = step1_best[i]
+
+        cat_ord_a = (oa[4] > 0, oa[7] > 0, oa[1] == 2, oa[5] > 0)
+        cat_ord_b = (ob[4] > 0, ob[7] > 0, ob[1] == 2, ob[5] > 0)
+        if cat_ord_a != cat_ord_b:
+            vtna_sel.append(k)
+        m2_diff = (oa[1] > 0) != (ob[1] > 0)
+        p_diff = ((oa[3] > 0) or (oa[6] > 0)) != ((ob[3] > 0) or (ob[6] > 0))
+        if m2_diff or p_diff:
+            rpka_sel.append(k)
+        if oa[2] != ob[2]:
+            highA_sel.append(k)
+
+    spatial_stats = {
+        "pool_size": n_lhs,
+        "overall_step1_mean_cat_extremity_frac": float(np.mean([(cat_arr[k] <= 0.55 or cat_arr[k] >= 1.8) for k in step1_best])),
+        "overall_step1_preadded_P_frac": float(np.mean([P0_arr[k] >= 0.2 for k in step1_best])),
+        "baseline_uniform_vtna_frac": base_vtna_frac,
+        "baseline_uniform_preadded_P_frac": base_prod_frac,
+        "baseline_uniform_rpka_frac": base_rpka_frac,
+        "baseline_uniform_highA_frac": base_highA_frac,
+        "VTNA_ambig_cases": {
+            "n": len(vtna_sel),
+            "extreme_cat_loading_frac": float(np.mean([(cat_arr[k] <= 0.55 or cat_arr[k] >= 1.8) for k in vtna_sel])) if vtna_sel else 0.0,
+            "mean_abs_log2_cat": float(np.mean([abs(np.log2(cat_arr[k])) for k in vtna_sel])) if vtna_sel else 0.0,
+        },
+        "RPKA_M2_M4M7_ambig_cases": {
+            "n": len(rpka_sel),
+            "preadded_P_frac": float(np.mean([P0_arr[k] >= 0.2 for k in rpka_sel])) if rpka_sel else 0.0,
+            "rpka_zone_frac": float(np.mean([(P0_arr[k] >= 0.2 or A0_arr[k] <= 0.8) for k in rpka_sel])) if rpka_sel else 0.0,
+            "mean_P0": float(np.mean([P0_arr[k] for k in rpka_sel])) if rpka_sel else 0.0,
+        },
+        "SubA_M3_ambig_cases": {
+            "n": len(highA_sel),
+            "high_A0_frac": float(np.mean([A0_arr[k] >= 1.4 for k in highA_sel])) if highA_sel else 0.0,
+            "mean_A0": float(np.mean([A0_arr[k] for k in highA_sel])) if highA_sel else 0.0,
+        },
+    }
+
+    # Closed-loop 4-step rollout comparing Continuous Quotient EIG vs Continuous Random
+    def rollout_cont(policy: str) -> Dict:
+        h_curr = h_d0.clone()
+        f_curr = f_d0.clone()
+        pm_curr = probs_m_d0.copy()
+        pc_curr = probs_c_d0.copy()
+        used = [set() for _ in range(n_cases)]
+
+        pc_traj = np.zeros((n_cases, budget + 1), dtype=np.float64)
+        top1_traj = np.zeros((n_cases, budget + 1), dtype=np.float64)
+        max_pc_traj = np.zeros((n_cases, budget + 1), dtype=np.float64)
+        pc_traj[:, 0] = pc_curr[np.arange(n_cases), true_c]
+        top1_traj[:, 0] = (np.argmax(pc_curr, axis=1) == true_c).astype(np.float64)
+        max_pc_traj[:, 0] = np.max(pc_curr, axis=1)
+
+        for step in range(budget):
+            if policy == "Continuous_Random":
+                picks = [int(rng.choice([k for k in range(n_lhs) if k not in used[i]])) for i in range(n_cases)]
+            elif step == 0:
+                picks = list(step1_best)
+            else:
+                cands = [[k for k in range(n_lhs) if k not in used[i]] for i in range(n_cases)]
+                eq_l, _ = _score_eig_designs_batched(
+                    model, grammar, sim, h_curr, f_curr, G_mat, pm_curr, pc_curr,
+                    lhs_pool, cands, m2c, n_cls, n_t, sigma_rel, n_mc=n_mc, device=device, rng=rng,
+                )
+                picks = [cands[i][int(np.argmax(eq_l[i]))] for i in range(n_cases)]
+
+            # Simulate real noisy observation for each case's chosen continuous design on 64-core CPU
+            new_embs = torch.empty((n_cases, model.exp_encoder.d_model), device=device, dtype=torch.float32)
+            for i, k in enumerate(picks):
+                used[i].add(k)
+                des, t_end = lhs_pool[k]
+                t_q = np.linspace(0.0, t_end, n_t)
+                y0 = grammar.initial_state(int(true_mids[i]), des)[None, :]
+                y_sim, _, _, _ = sim.simulate_batch(
+                    np.array([true_mids[i]], dtype=np.int32), true_thetas[i : i + 1], y0, t_q, n_threads=1
+                )
+                y_obs = y_sim[:, :, obs_ch]
+                n_sc = np.where(ch_is_cat, des.cat_mult * grammar.c0_base, des.A0)
+                y_n = y_obs + rng.normal(0.0, 1.0, size=y_obs.shape) * (sigma_rel * n_sc[None, None, :])
+                df_i, tm_i, ov_i, om_i, tp_i = _build_single_exp_tensors(grammar, des, t_end, y_n, t_q)
+                with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
+                    new_embs[i] = model.exp_encoder(
+                        torch.from_numpy(df_i).to(device), torch.from_numpy(tm_i).to(device),
+                        torch.from_numpy(ov_i).to(device), torch.from_numpy(om_i).to(device),
+                        torch.from_numpy(tp_i).to(device),
+                    )[0].float()
+
+            h_curr = torch.cat([h_curr, new_embs.unsqueeze(1)], dim=1)
+            ep = torch.zeros((n_cases, h_curr.shape[1]), dtype=torch.bool, device=device)
+            with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
+                f_curr = model.set_encoder(h_curr, exp_pad_mask=ep)
+                logits, _ = model.mech_head(f_curr)
+            f_curr = f_curr.float()
+            pm_curr = torch.softmax(logits.float(), dim=-1).cpu().numpy()
+            pc_curr = aggregate_class_probs(pm_curr, m2c, n_cls)
+            pc_traj[:, step + 1] = pc_curr[np.arange(n_cases), true_c]
+            top1_traj[:, step + 1] = (np.argmax(pc_curr, axis=1) == true_c).astype(np.float64)
+            max_pc_traj[:, step + 1] = np.max(pc_curr, axis=1)
+
+        t_stop = np.full(n_cases, budget, dtype=np.int64)
+        for i in range(n_cases):
+            for ti in range(budget + 1):
+                if max_pc_traj[i, ti] >= 0.90:
+                    t_stop[i] = ti
+                    break
+        return {
+            "n_cases": n_cases,
+            "auc_true_class_prob": float(np.mean(pc_traj)),
+            "mean_pc_by_step": [float(x) for x in np.mean(pc_traj, axis=0)],
+            "top1_by_step": [float(x) for x in np.mean(top1_traj, axis=0)],
+            "unified_class_stop_mean_exps": float(np.mean(t_stop)),
+        }
+
+    res_q = rollout_cont("Continuous_Quotient_EIG")
+    res_r = rollout_cont("Continuous_Random")
+    elapsed = time.perf_counter() - t0
+    print(
+        f"\n[BOED:Continuous LHS-{n_lhs}] Done in {elapsed:.1f}s | "
+        f"Cont_Quot AUC={res_q['auc_true_class_prob']:.3f} top1@4={res_q['top1_by_step'][-1]:.3f} vs "
+        f"Cont_Rand AUC={res_r['auc_true_class_prob']:.3f} top1@4={res_r['top1_by_step'][-1]:.3f}"
+    )
+    return {
+        "n_cases": n_cases,
+        "n_lhs": n_lhs,
+        "elapsed_s": elapsed,
+        "Continuous_Quotient_EIG": res_q,
+        "Continuous_Random": res_r,
+        "spatial_clustering": spatial_stats,
+    }

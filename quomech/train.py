@@ -1,15 +1,19 @@
-"""PyTorch BF16/FP32 training loop for QuoMech (factorized) and Flat Softmax NPE models."""
+"""PyTorch BF16/FP32 single-GPU and multi-GPU DDP training loop for QuoMech & Flat NPE."""
 
 from __future__ import annotations
 
 import json
 import math
+import os
 import time
 from pathlib import Path
 from typing import Dict, Optional
 import numpy as np
 import torch
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
+from torch.utils.data.distributed import DistributedSampler
 
 from quomech.data_gen import OnlineKineticsDataset, get_observable_channel_indices
 from quomech.grammar import ReactionGrammar
@@ -88,7 +92,7 @@ def evaluate_loader(
 def build_model(grammar: ReactionGrammar, head_type: str) -> QuoMechNet:
     obs_ch = get_observable_channel_indices(grammar)
     return QuoMechNet(
-        design_dim=5 + grammar.n_species,
+        design_dim=6 + grammar.n_species,  # [A0, B0, P0, log10(cat0), a_pre, log10(t_end), obs_mask...]
         n_obs_channels=len(obs_ch),
         n_params=grammar.n_params,
         mech_options=torch.tensor(grammar.mech_options, dtype=torch.long),
@@ -112,33 +116,55 @@ def train_model(
     out_dir: Path,
     head_type: str = "factorized",
     gpu_id: int = 0,
-    total_steps: int = 40000,
-    batch_size: int = 256,
-    grad_accum: int = 2,
-    lr: float = 5e-4,
+    total_steps: int = 35000,
+    batch_size: int = 128,
+    grad_accum: int = 1,
+    lr: float = 6e-4,
     weight_decay: float = 1e-4,
     warmup_steps: int = 1500,
     eval_every: int = 2500,
     num_workers: int = 6,
     seed: int = 42,
 ) -> Dict:
-    out_dir.mkdir(parents=True, exist_ok=True)
-    torch.manual_seed(seed)
-    np.random.seed(seed)
+    # Auto-detect torchrun DDP environment
+    world_size = int(os.environ.get("WORLD_SIZE", "1"))
+    rank = int(os.environ.get("RANK", "0"))
+    local_rank = int(os.environ.get("LOCAL_RANK", str(gpu_id)))
+    is_ddp = world_size > 1
+    is_main = (rank == 0)
+
+    if is_ddp:
+        dist.init_process_group(backend="nccl")
+        torch.cuda.set_device(local_rank)
+        device = torch.device(f"cuda:{local_rank}")
+    else:
+        device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
+
+    if is_main:
+        out_dir.mkdir(parents=True, exist_ok=True)
+    torch.manual_seed(seed + rank)
+    np.random.seed(seed + rank)
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
-
-    device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
     use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
 
-    print(f"[Train:{head_type}] Loading datasets into RAM on device={device}, bf16={use_bf16}...")
-    train_ds = OnlineKineticsDataset(grammar, data_dir / "train", max_exps=8, max_len=30, in_memory=True)
+    if is_main:
+        print(
+            f"[Train:{head_type}] DDP={is_ddp} world={world_size} dev={device} bf16={use_bf16} "
+            f"eff_bs={batch_size * grad_accum * world_size}",
+            flush=True,
+        )
+
+    # Use mmap in DDP so 4 ranks share OS page cache cleanly (zero 4x RAM duplication!)
+    train_ds = OnlineKineticsDataset(grammar, data_dir / "train", max_exps=8, max_len=30, in_memory=(not is_ddp))
     val_ds = OnlineKineticsDataset(grammar, data_dir / "val", max_exps=8, max_len=30, in_memory=True)
 
+    train_sampler = DistributedSampler(train_ds, num_replicas=world_size, rank=rank, shuffle=True, seed=seed) if is_ddp else None
     train_loader = DataLoader(
         train_ds,
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=(train_sampler is None),
+        sampler=train_sampler,
         num_workers=num_workers,
         pin_memory=True,
         drop_last=True,
@@ -147,18 +173,20 @@ def train_model(
     )
     val_loader = DataLoader(
         val_ds,
-        batch_size=batch_size,
+        batch_size=256,
         shuffle=False,
-        num_workers=min(4, num_workers),
+        num_workers=4,
         pin_memory=True,
-        persistent_workers=(num_workers > 0),
+        persistent_workers=True,
         worker_init_fn=worker_init_fn,
-    )
+    ) if is_main else None
 
-    model = build_model(grammar, head_type=head_type).to(device)
-    n_params_model = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"[Train:{head_type}] Model parameters: {n_params_model:,}")
+    raw_model = build_model(grammar, head_type=head_type).to(device)
+    n_params_model = sum(p.numel() for p in raw_model.parameters() if p.requires_grad)
+    if is_main:
+        print(f"[Train:{head_type}] Model parameters: {n_params_model:,}", flush=True)
 
+    model = DDP(raw_model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=False) if is_ddp else raw_model
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     def lr_lambda(step: int) -> float:
@@ -170,6 +198,7 @@ def train_model(
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
     step = 0
+    epoch = 0
     micro = 0
     best_val_loss = float("inf")
     history = []
@@ -182,15 +211,23 @@ def train_model(
     model.train()
     optimizer.zero_grad(set_to_none=True)
     while step < total_steps:
+        if train_sampler is not None:
+            train_sampler.set_epoch(epoch)
+        epoch += 1
         for batch in train_loader:
             if step >= total_steps:
                 break
             df, tm, ov, om, tp, ep, mids, ths = [x.to(device, non_blocking=True) for x in batch]
             with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
-                loss, lm, lth, _ = model.forward_loss(df, tm, ov, om, tp, ep, mids, ths)
+                # Call forward_loss via module or DDP forward wrapper
+                if is_ddp:
+                    loss, lm, lth, _ = model(df, tm, ov, om, tp, ep, mids, ths)
+                else:
+                    loss, lm, lth, _ = model.forward_loss(df, tm, ov, om, tp, ep, mids, ths)
 
             if not torch.isfinite(loss):
-                print(f"[Train:{head_type}] WARNING non-finite loss at step {step}, skipping microbatch")
+                if is_main:
+                    print(f"[Train:{head_type}] WARNING non-finite loss at step {step}", flush=True)
                 optimizer.zero_grad(set_to_none=True)
                 micro = 0
                 continue
@@ -211,7 +248,7 @@ def train_model(
             micro = 0
             step += 1
 
-            if step % 500 == 0 or step == 1:
+            if is_main and (step % 500 == 0 or step == 1):
                 dt = time.perf_counter() - t_log
                 sps = (500 / dt) if step >= 500 else (1 / max(dt, 1e-6))
                 print(
@@ -224,47 +261,55 @@ def train_model(
                 t_log = time.perf_counter()
 
             if step % eval_every == 0 or step == total_steps:
-                val_metrics = evaluate_loader(model, val_loader, device, use_bf16=use_bf16, max_batches=30)
-                val_metrics["step"] = step
-                val_metrics["elapsed_s"] = time.perf_counter() - t0
-                history.append(val_metrics)
-                print(
-                    f"  [Val:{head_type} @ {step}] loss={val_metrics['loss']:.4f} "
-                    f"(m={val_metrics['loss_m']:.4f}, th={val_metrics['loss_th']:.4f}) | "
-                    f"top1={val_metrics['mech_top1']:.3f} top3={val_metrics['mech_top3']:.3f} "
-                    f"ece={val_metrics['mech_ece']:.4f}",
-                    flush=True,
-                )
-                if val_metrics["loss"] < best_val_loss:
-                    best_val_loss = val_metrics["loss"]
-                    torch.save(
-                        {
-                            "step": step,
-                            "head_type": head_type,
-                            "model_state": model.state_dict(),
-                            "val_metrics": val_metrics,
-                        },
-                        out_dir / "best.pt",
+                if is_main:
+                    val_metrics = evaluate_loader(raw_model, val_loader, device, use_bf16=use_bf16, max_batches=30)
+                    val_metrics["step"] = step
+                    val_metrics["elapsed_s"] = time.perf_counter() - t0
+                    history.append(val_metrics)
+                    print(
+                        f"  [Val:{head_type} @ {step}] loss={val_metrics['loss']:.4f} "
+                        f"(m={val_metrics['loss_m']:.4f}, th={val_metrics['loss_th']:.4f}) | "
+                        f"top1={val_metrics['mech_top1']:.3f} top3={val_metrics['mech_top3']:.3f} "
+                        f"ece={val_metrics['mech_ece']:.4f}",
+                        flush=True,
                     )
-                model.train()
+                    if val_metrics["loss"] < best_val_loss:
+                        best_val_loss = val_metrics["loss"]
+                        torch.save(
+                            {
+                                "step": step,
+                                "head_type": head_type,
+                                "model_state": raw_model.state_dict(),
+                                "val_metrics": val_metrics,
+                            },
+                            out_dir / "best.pt",
+                        )
+                    model.train()
+                if is_ddp:
+                    dist.barrier()
 
-    # Always save final checkpoint too
-    torch.save(
-        {"step": step, "head_type": head_type, "model_state": model.state_dict()},
-        out_dir / "last.pt",
-    )
-    summary = {
-        "head_type": head_type,
-        "seed": seed,
-        "total_steps": total_steps,
-        "batch_size": batch_size,
-        "grad_accum": grad_accum,
-        "effective_batch_size": batch_size * grad_accum,
-        "n_params": n_params_model,
-        "best_val_loss": best_val_loss,
-        "elapsed_s": time.perf_counter() - t0,
-        "history": history,
-    }
-    with open(out_dir / "train_summary.json", "w") as f:
-        json.dump(summary, f, indent=2)
+    summary = {}
+    if is_main:
+        torch.save(
+            {"step": step, "head_type": head_type, "model_state": raw_model.state_dict()},
+            out_dir / "last.pt",
+        )
+        summary = {
+            "head_type": head_type,
+            "seed": seed,
+            "total_steps": total_steps,
+            "batch_size_per_gpu": batch_size,
+            "grad_accum": grad_accum,
+            "world_size": world_size,
+            "effective_batch_size": batch_size * grad_accum * world_size,
+            "n_params": n_params_model,
+            "best_val_loss": best_val_loss,
+            "elapsed_s": time.perf_counter() - t0,
+            "history": history,
+        }
+        with open(out_dir / "train_summary.json", "w") as f:
+            json.dump(summary, f, indent=2)
+
+    if is_ddp:
+        dist.destroy_process_group()
     return summary
