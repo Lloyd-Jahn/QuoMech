@@ -406,7 +406,8 @@ def evaluate_e1_suite(
             y_pred, st_pred, _, _ = sim.simulate_designs(
                 draw_mids_flat, th_draw, [heldout_des], t_eval_ppe, compute_flux=False
             )
-            y_pred_AP = y_pred[:, 0, :, [sA, sP]].reshape(n_ppe_cases, n_ppc_draws, 20, 2)
+            # Note: use np.take to keep axis order (B, n_t, 2) instead of NumPy fancy-index axis transpose!
+            y_pred_AP = np.take(y_pred[:, 0], [sA, sP], axis=-1).reshape(n_ppe_cases, n_ppc_draws, 20, 2)
             st_ok = (st_pred[:, 0] == 0).reshape(n_ppe_cases, n_ppc_draws)
 
             ppe_rmses = []

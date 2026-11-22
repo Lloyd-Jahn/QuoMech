@@ -1,0 +1,38 @@
+{
+  "n_cases": 50,
+  "designs": [
+    "D0",
+    "D2",
+    "D5",
+    "D6"
+  ],
+  "tier": "basic",
+  "QuoMech": {
+    "mech_top1": 0.62,
+    "mech_top3": 0.82,
+    "class_top1": 0.72,
+    "class_top3": 0.88,
+    "class_ece": 0.1572436276083419,
+    "total_time_s": 0.010036135092377663,
+    "ms_per_case": 0.20072270184755325
+  },
+  "Flat_NPE": {
+    "mech_top1": 0.54,
+    "mech_top3": 0.8,
+    "class_top1": 0.68,
+    "class_top3": 0.92,
+    "class_ece": 0.12643407057444164,
+    "total_time_s": 0.01091668102890253,
+    "ms_per_case": 0.2183336205780506
+  },
+  "Enum_BIC": {
+    "mech_top1": 0.46,
+    "mech_top3": 0.66,
+    "class_top1": 0.64,
+    "class_top3": 0.84,
+    "class_ece": 0.16529405538361072,
+    "total_time_s": 185.83023650292307,
+    "ms_per_case": 3716.6047300584614,
+    "speedup_quomech_vs_bic": 18516.115495900325
+  }
+}

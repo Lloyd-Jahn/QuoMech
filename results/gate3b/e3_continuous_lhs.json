@@ -1,0 +1,68 @@
+{
+  "n_cases": 80,
+  "n_lhs": 64,
+  "elapsed_s": 70.93005858408287,
+  "Continuous_Quotient_EIG": {
+    "n_cases": 80,
+    "auc_true_class_prob": 0.43615612966843104,
+    "mean_pc_by_step": [
+      0.0799852478216053,
+      0.3051472500510258,
+      0.48378065925943137,
+      0.6154032062615814,
+      0.6964642849485111
+    ],
+    "top1_by_step": [
+      0.2,
+      0.4625,
+      0.5375,
+      0.7125,
+      0.775
+    ],
+    "unified_class_stop_mean_exps": 3.55
+  },
+  "Continuous_Random": {
+    "n_cases": 80,
+    "auc_true_class_prob": 0.2626269853635765,
+    "mean_pc_by_step": [
+      0.0799852478216053,
+      0.15936078249333718,
+      0.2847245191898299,
+      0.3687849702045858,
+      0.4202794071085241
+    ],
+    "top1_by_step": [
+      0.2,
+      0.3,
+      0.45,
+      0.525,
+      0.575
+    ],
+    "unified_class_stop_mean_exps": 3.8875
+  },
+  "spatial_clustering": {
+    "pool_size": 64,
+    "overall_step1_mean_cat_extremity_frac": 1.0,
+    "overall_step1_preadded_P_frac": 0.1375,
+    "baseline_uniform_vtna_frac": 0.5625,
+    "baseline_uniform_preadded_P_frac": 0.453125,
+    "baseline_uniform_rpka_frac": 0.625,
+    "baseline_uniform_highA_frac": 0.34375,
+    "VTNA_ambig_cases": {
+      "n": 65,
+      "extreme_cat_loading_frac": 1.0,
+      "mean_abs_log2_cat": 1.6615159056165192
+    },
+    "RPKA_M2_M4M7_ambig_cases": {
+      "n": 24,
+      "preadded_P_frac": 0.08333333333333333,
+      "rpka_zone_frac": 0.625,
+      "mean_P0": 0.10592258337903653
+    },
+    "SubA_M3_ambig_cases": {
+      "n": 10,
+      "high_A0_frac": 0.1,
+      "mean_A0": 0.818476475159782
+    }
+  }
+}
