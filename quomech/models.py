@@ -352,22 +352,15 @@ class QuoMechNet(nn.Module):
         exp_pad_mask: torch.Tensor,   # (B, E) bool (True=padded)
     ) -> torch.Tensor:
         B, E, L, C = obs_vals.shape
-        # Only run ExperimentEncoder on valid (non-padded) experiments for speed & safety
-        valid_exp = ~exp_pad_mask  # (B, E)
-        flat_valid = valid_exp.reshape(-1)
-        d_out = self.exp_encoder.d_model
-        exp_embs_flat = torch.zeros(B * E, d_out, device=obs_vals.device, dtype=design_feats.dtype)
-
-        if torch.any(flat_valid):
-            df_v = design_feats.reshape(B * E, -1)[flat_valid]
-            t_v = times.reshape(B * E, L)[flat_valid]
-            ov_v = obs_vals.reshape(B * E, L, C)[flat_valid]
-            om_v = obs_masks.reshape(B * E, L, C)[flat_valid]
-            tp_v = time_pad_mask.reshape(B * E, L)[flat_valid]
-            enc_v = self.exp_encoder(df_v, t_v, ov_v, om_v, tp_v)
-            exp_embs_flat[flat_valid] = enc_v.to(exp_embs_flat.dtype)
-
-        exp_embs = exp_embs_flat.view(B, E, d_out)
+        # Branchless (zero CPU-GPU sync): design CLS token at pos 0 is always unpadded so attention is finite
+        enc = self.exp_encoder(
+            design_feats.reshape(B * E, -1),
+            times.reshape(B * E, L),
+            obs_vals.reshape(B * E, L, C),
+            obs_masks.reshape(B * E, L, C),
+            time_pad_mask.reshape(B * E, L),
+        ).view(B, E, -1)
+        exp_embs = enc * (~exp_pad_mask).to(enc.dtype).unsqueeze(-1)
         return self.set_encoder(exp_embs, exp_pad_mask=exp_pad_mask)
 
     def standardize_theta(self, theta: torch.Tensor, mech_ids: torch.Tensor) -> torch.Tensor:

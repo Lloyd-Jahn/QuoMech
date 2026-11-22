@@ -30,18 +30,12 @@ def unconstrained_rational_quadratic_spline(
     min_bin_height: float = DEFAULT_MIN_BIN_HEIGHT,
     min_derivative: float = DEFAULT_MIN_DERIVATIVE,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
-    """Piecewise rational-quadratic spline on [-tail_bound, tail_bound] with linear tails."""
+    """Branchless (zero CPU-GPU sync) piecewise rational-quadratic spline on [-tail_bound, tail_bound]."""
     inside = (inputs >= -tail_bound) & (inputs <= tail_bound)
-    outputs = inputs.clone()
-    logabsdet = torch.zeros_like(inputs)
-
-    if not torch.any(inside):
-        return outputs, logabsdet
-
-    x = inputs[inside]
-    uw = unnormalized_widths[inside]
-    uh = unnormalized_heights[inside]
-    ud = unnormalized_derivatives[inside]
+    x = inputs.clamp(-tail_bound + 1e-6, tail_bound - 1e-6)
+    uw = unnormalized_widths
+    uh = unnormalized_heights
+    ud = unnormalized_derivatives
 
     num_bins = uw.shape[-1]
     widths = F.softmax(uw, dim=-1)
@@ -62,15 +56,14 @@ def unconstrained_rational_quadratic_spline(
     cumheights[..., -1] = tail_bound
     heights = cumheights[..., 1:] - cumheights[..., :-1]
 
-    # Boundary derivatives pinned to 1.0 for C^1 continuity with linear tails
     inner_derivs = min_derivative + F.softplus(ud)
     ones = torch.ones_like(inner_derivs[..., :1])
     derivatives = torch.cat([ones, inner_derivs, ones], dim=-1)
 
     if inverse:
-        bin_idx = torch.searchsorted(cumheights, x[..., None], right=True) - 1
+        bin_idx = torch.searchsorted(cumheights.contiguous(), x[..., None].contiguous(), right=True) - 1
     else:
-        bin_idx = torch.searchsorted(cumwidths, x[..., None], right=True) - 1
+        bin_idx = torch.searchsorted(cumwidths.contiguous(), x[..., None].contiguous(), right=True) - 1
     bin_idx = bin_idx.clamp(0, num_bins - 1)
 
     input_cumwidths = cumwidths.gather(-1, bin_idx)[..., 0]
@@ -112,8 +105,8 @@ def unconstrained_rational_quadratic_spline(
         )
         lad = torch.log(deriv_num.clamp(min=1e-12)) - 2.0 * torch.log(denom.clamp(min=1e-12))
 
-    outputs[inside] = y
-    logabsdet[inside] = lad
+    outputs = torch.where(inside, y, inputs)
+    logabsdet = torch.where(inside, lad, torch.zeros_like(lad))
     return outputs, logabsdet
 
 

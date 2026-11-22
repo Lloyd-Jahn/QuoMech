@@ -326,6 +326,7 @@ def train_model(
     eval_every: int = 2500,
     num_workers: int = 0,
     seed: int = 42,
+    resume: Optional[str] = None,
 ) -> Dict:
     world_size = int(os.environ.get("WORLD_SIZE", "1"))
     rank = int(os.environ.get("RANK", "0"))
@@ -381,16 +382,56 @@ def train_model(
 
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
+    start_step = 0
     best_val_loss = float("inf")
     history = []
+    elapsed_prev = 0.0
+
+    # Optional atomic checkpoint resume (supports both single-GPU and multi-GPU DDP)
+    ckpt_resume_path: Optional[Path] = None
+    if resume:
+        if resume == "auto":
+            cand = out_dir / "latest_ckpt.pt"
+            if cand.exists():
+                ckpt_resume_path = cand
+        else:
+            ckpt_resume_path = Path(resume)
+            if not ckpt_resume_path.exists():
+                raise FileNotFoundError(f"Resume checkpoint not found: {ckpt_resume_path}")
+
+    if ckpt_resume_path is not None:
+        ckpt = torch.load(ckpt_resume_path, map_location=device)
+        raw_model.load_state_dict(ckpt["model_state"])
+        if "optimizer_state" in ckpt:
+            optimizer.load_state_dict(ckpt["optimizer_state"])
+        if "scheduler_state" in ckpt:
+            scheduler.load_state_dict(ckpt["scheduler_state"])
+        start_step = int(ckpt.get("step", 0))
+        best_val_loss = float(ckpt.get("best_val_loss", float("inf")))
+        history = list(ckpt.get("history", []))
+        elapsed_prev = float(ckpt.get("elapsed_s", 0.0))
+        if is_main:
+            print(
+                f"[Train:{head_type}] Resumed from {ckpt_resume_path} @ step {start_step}/{total_steps} "
+                f"(best_val_loss={best_val_loss:.4f})",
+                flush=True,
+            )
+        if is_ddp:
+            dist.barrier()
+
     t0 = time.perf_counter()
     t_log = t0
     run_lm = 0.0
     run_lth = 0.0
     run_cnt = 0
 
+    def _atomic_save(payload: dict, path: Path) -> None:
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        torch.save(payload, tmp)
+        os.replace(tmp, path)
+
     model.train()
-    for step in range(1, total_steps + 1):
+    for step in range(start_step + 1, total_steps + 1):
         optimizer.zero_grad(set_to_none=True)
         for _ in range(grad_accum):
             df, tm, ov, om, tp, ep, mids, ths = train_sampler.sample_batch(batch_size)
@@ -399,27 +440,28 @@ def train_model(
                     loss, lm, lth, _ = model(df, tm, ov, om, tp, ep, mids, ths)
                 else:
                     loss, lm, lth, _ = model.forward_loss(df, tm, ov, om, tp, ep, mids, ths)
-            if not torch.isfinite(loss):
+            if step % 100 == 0 and not torch.isfinite(loss):
                 if is_main:
                     print(f"[Train:{head_type}] WARNING non-finite loss at step {step}", flush=True)
                 optimizer.zero_grad(set_to_none=True)
                 break
             (loss / grad_accum).backward()
-            run_lm += float(lm.item())
-            run_lth += float(lth.item())
-            run_cnt += 1
+            if step % 100 == 0 or step == 1:
+                run_lm += float(lm.item())
+                run_lth += float(lth.item())
+                run_cnt += 1
 
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
         optimizer.step()
         scheduler.step()
 
-        if is_main and (step % 1000 == 0 or step == 1):
+        if is_main and (step % 1000 == 0 or step == start_step + 1):
             dt = time.perf_counter() - t_log
-            sps = (1000 / dt) if step >= 1000 else (1 / max(dt, 1e-6))
+            sps = (1000 / dt) if (step % 1000 == 0 and step > start_step + 1) else (1 / max(dt, 1e-6))
             print(
                 f"[Train:{head_type}] step {step:6d}/{total_steps} | "
                 f"loss_m={run_lm/max(run_cnt,1):.4f} loss_th={run_lth/max(run_cnt,1):.4f} | "
-                f"lr={scheduler.get_last_lr()[0]:.2e} | {sps:.1f} step/s | elapsed={time.perf_counter()-t0:.0f}s",
+                f"lr={scheduler.get_last_lr()[0]:.2e} | {sps:.1f} step/s | elapsed={elapsed_prev + time.perf_counter()-t0:.0f}s",
                 flush=True,
             )
             run_lm, run_lth, run_cnt = 0.0, 0.0, 0
@@ -429,7 +471,7 @@ def train_model(
             if is_main:
                 val_metrics = evaluate_gpu_sampler(raw_model, val_sampler, use_bf16=use_bf16, n_batches=30, batch_size=256)
                 val_metrics["step"] = step
-                val_metrics["elapsed_s"] = time.perf_counter() - t0
+                val_metrics["elapsed_s"] = elapsed_prev + (time.perf_counter() - t0)
                 history.append(val_metrics)
                 print(
                     f"  [Val:{head_type} @ {step}] loss={val_metrics['loss']:.4f} "
@@ -440,7 +482,7 @@ def train_model(
                 )
                 if val_metrics["loss"] < best_val_loss:
                     best_val_loss = val_metrics["loss"]
-                    torch.save(
+                    _atomic_save(
                         {
                             "step": step,
                             "head_type": head_type,
@@ -449,14 +491,37 @@ def train_model(
                         },
                         out_dir / "best.pt",
                     )
+                # Always write atomic resumable checkpoint (model + optimizer + scheduler + progress)
+                _atomic_save(
+                    {
+                        "step": step,
+                        "head_type": head_type,
+                        "model_state": raw_model.state_dict(),
+                        "optimizer_state": optimizer.state_dict(),
+                        "scheduler_state": scheduler.state_dict(),
+                        "best_val_loss": best_val_loss,
+                        "history": history,
+                        "elapsed_s": elapsed_prev + (time.perf_counter() - t0),
+                    },
+                    out_dir / "latest_ckpt.pt",
+                )
                 model.train()
             if is_ddp:
                 dist.barrier()
 
     summary = {}
     if is_main:
-        torch.save(
-            {"step": total_steps, "head_type": head_type, "model_state": raw_model.state_dict()},
+        _atomic_save(
+            {
+                "step": total_steps,
+                "head_type": head_type,
+                "model_state": raw_model.state_dict(),
+                "optimizer_state": optimizer.state_dict(),
+                "scheduler_state": scheduler.state_dict(),
+                "best_val_loss": best_val_loss,
+                "history": history,
+                "elapsed_s": elapsed_prev + (time.perf_counter() - t0),
+            },
             out_dir / "last.pt",
         )
         summary = {
@@ -469,7 +534,7 @@ def train_model(
             "effective_batch_size": batch_size * grad_accum * world_size,
             "n_params": n_params_model,
             "best_val_loss": best_val_loss,
-            "elapsed_s": time.perf_counter() - t0,
+            "elapsed_s": elapsed_prev + (time.perf_counter() - t0),
             "history": history,
         }
         with open(out_dir / "train_summary.json", "w") as f:

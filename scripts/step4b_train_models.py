@@ -25,6 +25,7 @@ def main():
     ap.add_argument("--eval-every", type=int, default=2500)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--resume", type=str, default=None, help="'auto' to resume from out_dir/latest_ckpt.pt, or explicit path")
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parents[1]
@@ -45,6 +46,7 @@ def main():
         eval_every=args.eval_every,
         num_workers=args.workers,
         seed=args.seed,
+        resume=args.resume,
     )
     if summary:
         print(f"\n[Train:{args.head}] COMPLETE! Best val loss={summary['best_val_loss']:.4f}, "
