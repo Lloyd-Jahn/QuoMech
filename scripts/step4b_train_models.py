@@ -26,11 +26,12 @@ def main():
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--resume", type=str, default=None, help="'auto' to resume from out_dir/latest_ckpt.pt, or explicit path")
+    ap.add_argument("--out-dir", type=str, default=None, help="Custom output directory for checkpoints")
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parents[1]
     data_dir = root / "data" / "pool_v1"
-    out_dir = root / "results" / "gate3b" / f"model_{args.head}_s{args.seed}"
+    out_dir = Path(args.out_dir) if args.out_dir else (root / "results" / "gate3b" / f"model_{args.head}_s{args.seed}")
 
     grammar = build_default_grammar()
     summary = train_model(

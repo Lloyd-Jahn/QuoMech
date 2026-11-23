@@ -272,6 +272,7 @@ def evaluate_gpu_sampler(
     use_bf16: bool = True,
     n_batches: int = 30,
     batch_size: int = 256,
+    eval_seed: Optional[int] = 12345,
 ) -> Dict[str, float]:
     model.eval()
     tot_loss = 0.0
@@ -281,17 +282,24 @@ def evaluate_gpu_sampler(
     all_probs = []
     all_mids = []
 
-    for _ in range(n_batches):
-        df, tm, ov, om, tp, ep, mids, ths = val_sampler.sample_batch(batch_size)
-        with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
-            loss, lm, lth, logits = model.forward_loss(df, tm, ov, om, tp, ep, mids, ths)
-        bs = mids.shape[0]
-        tot_loss += float(loss.item()) * bs
-        tot_lm += float(lm.item()) * bs
-        tot_lth += float(lth.item()) * bs
-        n_seen += bs
-        all_probs.append(torch.softmax(logits.float(), dim=-1).cpu().numpy())
-        all_mids.append(mids.cpu().numpy())
+    dev = val_sampler.device
+    ctx = torch.random.fork_rng(devices=[dev] if dev.type == "cuda" else [])
+    with ctx:
+        if eval_seed is not None:
+            torch.manual_seed(eval_seed)
+            if dev.type == "cuda":
+                torch.cuda.manual_seed(eval_seed)
+        for _ in range(n_batches):
+            df, tm, ov, om, tp, ep, mids, ths = val_sampler.sample_batch(batch_size)
+            with torch.cuda.amp.autocast(enabled=use_bf16, dtype=torch.bfloat16):
+                loss, lm, lth, logits = model.forward_loss(df, tm, ov, om, tp, ep, mids, ths)
+            bs = mids.shape[0]
+            tot_loss += float(loss.item()) * bs
+            tot_lm += float(lm.item()) * bs
+            tot_lth += float(lth.item()) * bs
+            n_seen += bs
+            all_probs.append(torch.softmax(logits.float(), dim=-1).cpu().numpy())
+            all_mids.append(mids.cpu().numpy())
 
     probs = np.concatenate(all_probs, axis=0)
     mids = np.concatenate(all_mids, axis=0)
@@ -322,7 +330,7 @@ def train_model(
     grad_accum: int = 1,
     lr: float = 8e-4,
     weight_decay: float = 1e-4,
-    warmup_steps: int = 1500,
+    warmup_steps: int = 2000,
     eval_every: int = 2500,
     num_workers: int = 0,
     seed: int = 42,
@@ -386,6 +394,7 @@ def train_model(
     best_val_loss = float("inf")
     history = []
     elapsed_prev = 0.0
+    milestones = {16000, 30000, 45000, 60000}
 
     # Optional atomic checkpoint resume (supports both single-GPU and multi-GPU DDP)
     ckpt_resume_path: Optional[Path] = None
@@ -423,7 +432,9 @@ def train_model(
     t_log = t0
     run_lm = 0.0
     run_lth = 0.0
+    run_gnorm = 0.0
     run_cnt = 0
+    skipped_steps = 0
 
     def _atomic_save(payload: dict, path: Path) -> None:
         tmp = path.with_suffix(path.suffix + ".tmp")
@@ -440,46 +451,75 @@ def train_model(
                     loss, lm, lth, _ = model(df, tm, ov, om, tp, ep, mids, ths)
                 else:
                     loss, lm, lth, _ = model.forward_loss(df, tm, ov, om, tp, ep, mids, ths)
-            if step % 100 == 0 and not torch.isfinite(loss):
-                if is_main:
-                    print(f"[Train:{head_type}] WARNING non-finite loss at step {step}", flush=True)
-                optimizer.zero_grad(set_to_none=True)
-                break
             (loss / grad_accum).backward()
             if step % 100 == 0 or step == 1:
                 run_lm += float(lm.item())
                 run_lth += float(lth.item())
                 run_cnt += 1
 
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=2.0)
-        optimizer.step()
+        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        # Synchronized across all DDP ranks (gradients are all-reduced identically)
+        if torch.isfinite(grad_norm):
+            optimizer.step()
+            if step % 100 == 0 or step == 1:
+                run_gnorm += float(grad_norm.item())
+        else:
+            skipped_steps += 1
+            if is_main:
+                print(f"[Train:{head_type}] WARNING non-finite grad_norm at step {step}; skipping optimizer.step()", flush=True)
         scheduler.step()
 
         if is_main and (step % 1000 == 0 or step == start_step + 1):
             dt = time.perf_counter() - t_log
             sps = (1000 / dt) if (step % 1000 == 0 and step > start_step + 1) else (1 / max(dt, 1e-6))
+            last_train_lm = run_lm / max(run_cnt, 1)
+            last_train_lth = run_lth / max(run_cnt, 1)
+            last_train_gnorm = run_gnorm / max(run_cnt, 1)
             print(
                 f"[Train:{head_type}] step {step:6d}/{total_steps} | "
-                f"loss_m={run_lm/max(run_cnt,1):.4f} loss_th={run_lth/max(run_cnt,1):.4f} | "
+                f"loss_m={last_train_lm:.4f} loss_th={last_train_lth:.4f} gnorm={last_train_gnorm:.2f} | "
                 f"lr={scheduler.get_last_lr()[0]:.2e} | {sps:.1f} step/s | elapsed={elapsed_prev + time.perf_counter()-t0:.0f}s",
                 flush=True,
             )
-            run_lm, run_lth, run_cnt = 0.0, 0.0, 0
+            run_lm, run_lth, run_gnorm, run_cnt = 0.0, 0.0, 0.0, 0
             t_log = time.perf_counter()
 
-        if step % eval_every == 0 or step == total_steps:
+        if step % eval_every == 0 or step in milestones or step == total_steps:
             if is_main:
-                val_metrics = evaluate_gpu_sampler(raw_model, val_sampler, use_bf16=use_bf16, n_batches=30, batch_size=256)
+                # Exact apples-to-apples train vs val evaluation at the SAME checkpoint weights & fixed eval seed
+                train_eval = evaluate_gpu_sampler(
+                    raw_model, train_sampler, use_bf16=use_bf16, n_batches=30, batch_size=256, eval_seed=12345
+                )
+                val_metrics = evaluate_gpu_sampler(
+                    raw_model, val_sampler, use_bf16=use_bf16, n_batches=30, batch_size=256, eval_seed=54321
+                )
                 val_metrics["step"] = step
+                val_metrics["train_loss"] = float(train_eval["loss"])
+                val_metrics["train_loss_m"] = float(train_eval["loss_m"])
+                val_metrics["train_loss_th"] = float(train_eval["loss_th"])
+                val_metrics["train_mech_top1"] = float(train_eval["mech_top1"])
+                val_metrics["train_mech_top3"] = float(train_eval["mech_top3"])
+                val_metrics["train_mech_ece"] = float(train_eval["mech_ece"])
+                val_metrics["gen_gap"] = float(val_metrics["loss"] - train_eval["loss"])
                 val_metrics["elapsed_s"] = elapsed_prev + (time.perf_counter() - t0)
                 history.append(val_metrics)
                 print(
-                    f"  [Val:{head_type} @ {step}] loss={val_metrics['loss']:.4f} "
-                    f"(m={val_metrics['loss_m']:.4f}, th={val_metrics['loss_th']:.4f}) | "
-                    f"top1={val_metrics['mech_top1']:.3f} top3={val_metrics['mech_top3']:.3f} "
-                    f"ece={val_metrics['mech_ece']:.4f}",
+                    f"  [Val:{head_type} @ {step}] train_loss={val_metrics['train_loss']:.4f} "
+                    f"(m={val_metrics['train_loss_m']:.4f}, th={val_metrics['train_loss_th']:.4f}, top1={val_metrics['train_mech_top1']:.3f}) | "
+                    f"val_loss={val_metrics['loss']:.4f} (m={val_metrics['loss_m']:.4f}, th={val_metrics['loss_th']:.4f}, top1={val_metrics['mech_top1']:.3f}) | "
+                    f"gap={val_metrics['gen_gap']:+.4f} top3={val_metrics['mech_top3']:.3f} ece={val_metrics['mech_ece']:.4f}",
                     flush=True,
                 )
+                if step in milestones:
+                    _atomic_save(
+                        {
+                            "step": step,
+                            "head_type": head_type,
+                            "model_state": raw_model.state_dict(),
+                            "val_metrics": val_metrics,
+                        },
+                        out_dir / f"ckpt_{step}.pt",
+                    )
                 if val_metrics["loss"] < best_val_loss:
                     best_val_loss = val_metrics["loss"]
                     _atomic_save(

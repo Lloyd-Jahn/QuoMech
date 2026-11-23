@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 import numpy as np
 from scipy.stats import qmc
 import torch
@@ -75,27 +75,45 @@ def _score_eig_designs_batched(
     n_mc: int,
     device: torch.device,
     rng: np.random.Generator,
-    gpu_batch: int = 2048,
+    gpu_batch: int = 4096,
+    crn_seed: Optional[int] = None,
+    case_ids: Optional[Sequence[int]] = None,
 ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
-    """Compute Barber-Agakov Quotient EIG and Fine-grained EIG simultaneously for B_act cases."""
+    """Compute Barber-Agakov Quotient EIG and Fine-grained EIG simultaneously for B_act cases.
+
+    When `crn_seed` is provided, enforces strict Common Random Numbers across policies for:
+      1. Mechanism draws m ~ q(m | D) (seeded per case_id),
+      2. NSF parameter draws theta ~ q(theta | m, D) (seeded via forked torch RNG),
+      3. Candidate observation noise eps ~ N(0, 1) (seeded deterministically per design & case_id).
+    """
     B_act = len(cand_lists)
     M = grammar.n_mechs
     obs_ch = get_observable_channel_indices(grammar)
+    n_ch = len(obs_ch)
     ch_is_cat = np.array([grammar.species[s].is_catalyst for s in obs_ch], dtype=bool)
     use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+    cids = list(range(B_act)) if case_ids is None else list(case_ids)
+    max_cid = max(cids) if cids else 0
 
     sampled_m = np.empty((B_act, n_mc), dtype=np.int32)
     for b in range(B_act):
         p = probs_m_curr[b]
         p = p / np.sum(p)
-        sampled_m[b] = rng.choice(M, size=n_mc, replace=True, p=p)
+        r_b = np.random.default_rng(crn_seed + cids[b] * 1009) if crn_seed is not None else rng
+        sampled_m[b] = r_b.choice(M, size=n_mc, replace=True, p=p)
 
     f_rep = f_curr.unsqueeze(1).expand(B_act, n_mc, -1).reshape(B_act * n_mc, -1)
     m_flat_t = torch.from_numpy(sampled_m.ravel()).long().to(device)
     th_chunks = []
-    for st in range(0, B_act * n_mc, 4096):
-        ed = min(B_act * n_mc, st + 4096)
-        th_chunks.append(model.sample_theta(f_rep[st:ed], G_mat, m_flat_t[st:ed], num_samples=1).cpu().numpy())
+    fork_ctx = torch.random.fork_rng(devices=[device] if device.type == "cuda" else [])
+    with fork_ctx:
+        if crn_seed is not None:
+            torch.manual_seed(crn_seed + 99991)
+            if device.type == "cuda":
+                torch.cuda.manual_seed(crn_seed + 99991)
+        for st in range(0, B_act * n_mc, 4096):
+            ed = min(B_act * n_mc, st + 4096)
+            th_chunks.append(model.sample_theta(f_rep[st:ed], G_mat, m_flat_t[st:ed], num_samples=1).cpu().numpy())
     sampled_th = np.concatenate(th_chunks, axis=0).astype(np.float64).reshape(B_act, n_mc, grammar.n_params)
     lb = grammar.mech_prior_mean - 4.5 * grammar.mech_prior_std
     ub = grammar.mech_prior_mean + 4.5 * grammar.mech_prior_std
@@ -113,7 +131,8 @@ def _score_eig_designs_batched(
     E_hist = hist_embs.shape[1]
     m2c_t = torch.from_numpy(mech_to_class).long().to(device)
 
-    for d_idx, b_list in cases_by_design.items():
+    for d_idx in sorted(cases_by_design.keys()):
+        b_list = cases_by_design[d_idx]
         des, t_end = design_pool[d_idx]
         t_eval = np.linspace(0.0, t_end, n_t)
         n_b = len(b_list)
@@ -130,7 +149,14 @@ def _score_eig_designs_batched(
         y_obs = y_sim[:, :, obs_ch]
         cat0 = des.cat_mult * grammar.c0_base
         noise_scale = np.where(ch_is_cat, cat0, des.A0)
-        y_noisy = y_obs + rng.normal(0.0, 1.0, size=y_obs.shape) * (sigma_rel * noise_scale[None, None, :])
+        if crn_seed is not None:
+            rng_d = np.random.default_rng(crn_seed + d_idx * 100003 + 7)
+            eps_all = rng_d.standard_normal((max_cid + 1, n_mc, n_t, n_ch), dtype=np.float32)
+            cid_arr = np.array([cids[b] for b in b_list], dtype=np.int64)
+            eps = eps_all[cid_arr].reshape(n_b * n_mc, n_t, n_ch)
+            y_noisy = y_obs + eps * (sigma_rel * noise_scale[None, None, :])
+        else:
+            y_noisy = y_obs + rng.normal(0.0, 1.0, size=y_obs.shape) * (sigma_rel * noise_scale[None, None, :])
 
         df_np, tm_np, ov_np, om_np, tp_np = _build_single_exp_tensors(grammar, des, t_end, y_noisy, t_eval)
 

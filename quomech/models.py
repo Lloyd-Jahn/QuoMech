@@ -42,6 +42,38 @@ class TimeEncoding(nn.Module):
         return self.proj(feats)
 
 
+class FastTransformerBlock(nn.Module):
+    """Fused SDPA Pre-LN Transformer block with QK-Norm for long-horizon BF16 stability."""
+
+    def __init__(self, d_model: int = 192, n_heads: int = 6, dropout: float = 0.0) -> None:
+        super().__init__()
+        self.n_heads = n_heads
+        self.d_head = d_model // n_heads
+        self.ln1 = nn.LayerNorm(d_model)
+        self.qkv = nn.Linear(d_model, 3 * d_model)
+        self.q_norm = nn.LayerNorm(self.d_head)
+        self.k_norm = nn.LayerNorm(self.d_head)
+        self.proj = nn.Linear(d_model, d_model)
+        self.ln2 = nn.LayerNorm(d_model)
+        self.ff = nn.Sequential(
+            nn.Linear(d_model, d_model * 4),
+            nn.GELU(),
+            nn.Linear(d_model * 4, d_model),
+        )
+
+    def forward(self, x: torch.Tensor, attn_bias: torch.Tensor) -> torch.Tensor:
+        N, S, D = x.shape
+        qkv = self.qkv(self.ln1(x)).view(N, S, 3, self.n_heads, self.d_head).permute(2, 0, 3, 1, 4)
+        q = self.q_norm(qkv[0]).to(qkv.dtype)
+        k = self.k_norm(qkv[1]).to(qkv.dtype)
+        v = qkv[2]
+        bias = attn_bias.to(qkv.dtype) if attn_bias.dtype != qkv.dtype else attn_bias
+        out = F.scaled_dot_product_attention(q, k, v, attn_mask=bias)
+        x = x + self.proj(out.transpose(1, 2).reshape(N, S, D))
+        x = x + self.ff(self.ln2(x))
+        return x
+
+
 class ExperimentEncoder(nn.Module):
     """4-layer Pre-LN Transformer encoding a single experiment (design token + L irregular obs tokens)."""
 
@@ -62,7 +94,6 @@ class ExperimentEncoder(nn.Module):
             nn.Linear(d_model, d_model),
         )
         self.time_enc = TimeEncoding(d_model // 2)
-        # Per-timestamp observation features: (y_norm[C], mask[C])
         self.obs_proj = nn.Sequential(
             nn.Linear(2 * n_obs_channels, d_model // 2),
             nn.SiLU(),
@@ -70,17 +101,7 @@ class ExperimentEncoder(nn.Module):
         )
         self.tok_fuse = nn.Linear(d_model, d_model)
         self.type_emb = nn.Embedding(2, d_model)  # 0 = design token, 1 = obs token
-
-        enc_layer = nn.TransformerEncoderLayer(
-            d_model=d_model,
-            nhead=n_heads,
-            dim_feedforward=d_model * 4,
-            dropout=dropout,
-            activation="gelu",
-            batch_first=True,
-            norm_first=True,
-        )
-        self.transformer = nn.TransformerEncoder(enc_layer, num_layers=n_layers, enable_nested_tensor=False)
+        self.layers = nn.ModuleList([FastTransformerBlock(d_model, n_heads, dropout) for _ in range(n_layers)])
         self.out_norm = nn.LayerNorm(d_model)
 
     def forward(
@@ -107,22 +128,33 @@ class ExperimentEncoder(nn.Module):
         pad_full = torch.cat(
             [torch.zeros((N, 1), dtype=torch.bool, device=device), time_pad_mask], dim=1
         )
-        h = self.transformer(seq, src_key_padding_mask=pad_full)
+        attn_bias = torch.zeros((N, 1, 1, 1 + L), device=device, dtype=seq.dtype).masked_fill(
+            pad_full.view(N, 1, 1, 1 + L), -1e4
+        )
+        h = seq
+        for layer in self.layers:
+            h = layer(h, attn_bias)
         h = self.out_norm(h)
-        # Pool design CLS token + mean of valid observation tokens
         des_out = h[:, 0]
-        valid = (~time_pad_mask).float().unsqueeze(-1)  # (N, L, 1)
+        valid = (~time_pad_mask).to(h.dtype).unsqueeze(-1)
         obs_mean = (h[:, 1:] * valid).sum(dim=1) / valid.sum(dim=1).clamp(min=1.0)
         return 0.5 * (des_out + obs_mean)
 
 
 class MAB(nn.Module):
-    """Multihead Attention Block (Lee et al., Set Transformer)."""
+    """Fused SDPA Pre-LN Cross/Self Multihead Attention Block with KV-LayerNorm & QK-Norm."""
 
     def __init__(self, d_model: int, n_heads: int = 8) -> None:
         super().__init__()
-        self.attn = nn.MultiheadAttention(d_model, n_heads, batch_first=True)
+        self.n_heads = n_heads
+        self.d_head = d_model // n_heads
+        self.q_proj = nn.Linear(d_model, d_model)
+        self.kv_proj = nn.Linear(d_model, 2 * d_model)
+        self.out_proj = nn.Linear(d_model, d_model)
         self.ln1 = nn.LayerNorm(d_model)
+        self.ln_kv = nn.LayerNorm(d_model)
+        self.q_norm = nn.LayerNorm(self.d_head)
+        self.k_norm = nn.LayerNorm(self.d_head)
         self.ln2 = nn.LayerNorm(d_model)
         self.ff = nn.Sequential(
             nn.Linear(d_model, d_model * 2),
@@ -136,11 +168,22 @@ class MAB(nn.Module):
         Y: torch.Tensor,
         key_padding_mask: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        q = self.ln1(X)
-        k = self.ln1(Y) if X is Y else Y
-        v = k
-        out, _ = self.attn(q, k, v, key_padding_mask=key_padding_mask, need_weights=False)
-        H = X + out
+        B, Sq, D = X.shape
+        Sk = Y.shape[1]
+        q_in = self.ln1(X)
+        kv_in = self.ln1(Y) if X is Y else self.ln_kv(Y)
+        q = self.q_proj(q_in).view(B, Sq, self.n_heads, self.d_head).transpose(1, 2)
+        kv = self.kv_proj(kv_in).view(B, Sk, 2, self.n_heads, self.d_head).permute(2, 0, 3, 1, 4)
+        q = self.q_norm(q).to(kv.dtype)
+        k = self.k_norm(kv[0]).to(kv.dtype)
+        v = kv[1]
+        attn_bias = None
+        if key_padding_mask is not None:
+            attn_bias = torch.zeros((B, 1, 1, Sk), device=X.device, dtype=q.dtype).masked_fill(
+                key_padding_mask.view(B, 1, 1, Sk), -1e4
+            )
+        out = F.scaled_dot_product_attention(q, k, v, attn_mask=attn_bias)
+        H = X + self.out_proj(out.transpose(1, 2).reshape(B, Sq, D))
         H = H + self.ff(self.ln2(H))
         return H
 
