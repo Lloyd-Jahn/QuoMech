@@ -11,6 +11,7 @@ quomech/csrc/*.so
 
 # Large datasets, model checkpoints, and cached binary pools
 data/
+papers/
 *.npy
 *.npz
 *.pt

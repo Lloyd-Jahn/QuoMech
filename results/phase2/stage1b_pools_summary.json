@@ -1,0 +1,198 @@
+{
+  "c3_branch_min": 0.1,
+  "n_mechs": 527,
+  "n_train_per_mech": 6000,
+  "n_val_per_mech": 100,
+  "n_test_per_mech": 100,
+  "pools": {
+    "filtered": {
+      "train": {
+        "split": "train",
+        "unfiltered": false,
+        "c3_branch_min": 0.1,
+        "n_mechs": 527,
+        "n_per_mech": 6000,
+        "n_samples": 3162000,
+        "n_cat": 10,
+        "n_rand_designs": 4,
+        "t_max": 4.0,
+        "n_t": 80,
+        "obs_channels": [
+          0,
+          1,
+          2,
+          6
+        ],
+        "obs_channel_names": [
+          "A",
+          "B",
+          "P",
+          "catAB"
+        ],
+        "elapsed_rej_s": 2710.883635275997,
+        "elapsed_sim_s": 3871.110284517985,
+        "elapsed_total_s": 6598.488987320103,
+        "sim_traj_per_sec": 11435.478905637035,
+        "median_acc_rate": 0.1220703125,
+        "min_acc_rate": 0.017438616071428572,
+        "mean_acc_rate": 0.11233595114231665,
+        "total_rej_solver_fails": 0,
+        "total_sim_solver_fails": 0,
+        "rej_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "sim_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "size_gb": 26.385784149169922
+      },
+      "val": {
+        "split": "val",
+        "unfiltered": false,
+        "c3_branch_min": 0.1,
+        "n_mechs": 527,
+        "n_per_mech": 100,
+        "n_samples": 52700,
+        "n_cat": 10,
+        "n_rand_designs": 4,
+        "t_max": 4.0,
+        "n_t": 80,
+        "obs_channels": [
+          0,
+          1,
+          2,
+          6
+        ],
+        "obs_channel_names": [
+          "A",
+          "B",
+          "P",
+          "catAB"
+        ],
+        "elapsed_rej_s": 240.44686896307394,
+        "elapsed_sim_s": 64.71710739796981,
+        "elapsed_total_s": 305.4645713730715,
+        "sim_traj_per_sec": 11400.385920572602,
+        "median_acc_rate": 0.0244140625,
+        "min_acc_rate": 0.01220703125,
+        "mean_acc_rate": 0.024275869693396228,
+        "total_rej_solver_fails": 0,
+        "total_sim_solver_fails": 0,
+        "rej_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "sim_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "size_gb": 0.43976306915283203
+      },
+      "test": {
+        "split": "test",
+        "unfiltered": false,
+        "c3_branch_min": 0.1,
+        "n_mechs": 527,
+        "n_per_mech": 100,
+        "n_samples": 52700,
+        "n_cat": 10,
+        "n_rand_designs": 4,
+        "t_max": 4.0,
+        "n_t": 80,
+        "obs_channels": [
+          0,
+          1,
+          2,
+          6
+        ],
+        "obs_channel_names": [
+          "A",
+          "B",
+          "P",
+          "catAB"
+        ],
+        "elapsed_rej_s": 239.516812433023,
+        "elapsed_sim_s": 64.6382544413209,
+        "elapsed_total_s": 304.4475380363874,
+        "sim_traj_per_sec": 11414.293383646065,
+        "median_acc_rate": 0.0244140625,
+        "min_acc_rate": 0.01220703125,
+        "mean_acc_rate": 0.024321759806238186,
+        "total_rej_solver_fails": 0,
+        "total_sim_solver_fails": 0,
+        "rej_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "sim_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "size_gb": 0.43976306915283203
+      }
+    },
+    "unfiltered": {
+      "train": {
+        "split": "train",
+        "unfiltered": true,
+        "c3_branch_min": 0.1,
+        "n_mechs": 527,
+        "n_per_mech": 6000,
+        "n_samples": 3162000,
+        "n_cat": 10,
+        "n_rand_designs": 4,
+        "t_max": 4.0,
+        "n_t": 80,
+        "obs_channels": [
+          0,
+          1,
+          2,
+          6
+        ],
+        "obs_channel_names": [
+          "A",
+          "B",
+          "P",
+          "catAB"
+        ],
+        "elapsed_rej_s": 642.0654246830381,
+        "elapsed_sim_s": 4574.409785705153,
+        "elapsed_total_s": 5235.582123558968,
+        "sim_traj_per_sec": 9677.314030399228,
+        "median_acc_rate": 0.3662109375,
+        "min_acc_rate": 0.18310546875,
+        "mean_acc_rate": 0.36141041959269665,
+        "total_rej_solver_fails": 0,
+        "total_sim_solver_fails": 0,
+        "rej_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "sim_fails_by_core": {
+          "C1": 0,
+          "C2": 0,
+          "C3": 0,
+          "C4": 0
+        },
+        "size_gb": 26.385784149169922
+      }
+    }
+  },
+  "elapsed_total_s": 5235.655083957128
+}
