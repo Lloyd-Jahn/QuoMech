@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 from quomech.grammar import build_default_grammar, ReactionSpec
 from quomech.simulator import ODESimulator
-from scripts.step1_gate1_probe import run_prior_probe
+from scripts.pre_phase2_scripts.step1_gate1_probe import run_prior_probe
 
 
 def build_grammar_with_catcat(prior_means: dict, use_catcat_type: bool = False):

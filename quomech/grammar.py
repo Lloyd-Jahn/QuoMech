@@ -23,6 +23,14 @@ class SpeciesSpec:
 
 
 @dataclass(frozen=True)
+class CoreSpec:
+    id: int
+    code: str
+    name: str
+    allowed_modules: Tuple[int, ...]
+
+
+@dataclass(frozen=True)
 class ReactionSpec:
     name: str
     reactants: Tuple[int, ...]         # 1 or 2 species indices
@@ -31,6 +39,8 @@ class ReactionSpec:
     module_id: int                     # -1 for core cycle, 0..n_modules-1 for optional
     module_option: int                 # 0 for core; >=1 for active module option
     rxn_type: str                      # reaction-type key for shared Gaussian prior
+    allowed_cores: Optional[Tuple[int, ...]] = None  # None -> all cores
+    role: str = ""                     # semantic role for data-driven observability checks
 
 
 @dataclass(frozen=True)
@@ -78,19 +88,24 @@ class ReactionGrammar:
     c0_base: float = 0.05
     max_active_modules: int = 3
     catalog: List[DesignSpec] = field(default_factory=list)
+    cores: Optional[List[CoreSpec]] = None
     # Populated in __post_init__
     species_idx: Dict[str, int] = field(init=False)
+    rxn_idx_by_role: Dict[str, int] = field(init=False)
     n_species: int = field(init=False)
     n_reactions: int = field(init=False)
     n_params: int = field(init=False)
     n_modules: int = field(init=False)
+    n_cores: int = field(init=False)
     stoich_matrix: np.ndarray = field(init=False)       # (n_species, n_reactions) float64
     atom_matrix: np.ndarray = field(init=False)         # (3, n_species) float64
     reactant1: np.ndarray = field(init=False)           # (n_reactions,) int32
     reactant2: np.ndarray = field(init=False)           # (n_reactions,) int32 (-1 if unimol)
     rxn_param_slot: np.ndarray = field(init=False)      # (n_reactions,) int32
     # Sparse mechanism library
+    mech_core_id: np.ndarray = field(init=False)        # (n_mechs,) int32
     mech_options: np.ndarray = field(init=False)        # (n_mechs, n_modules) int32
+    mech_tokens: np.ndarray = field(init=False)         # (n_mechs, n_tokens) int32
     mech_rxn_mask: np.ndarray = field(init=False)       # (n_mechs, n_reactions) int32
     mech_param_mask: np.ndarray = field(init=False)     # (n_mechs, n_params) int32
     mech_prior_mean: np.ndarray = field(init=False)     # (n_mechs, n_params) float64
@@ -106,12 +121,16 @@ class ReactionGrammar:
         self.n_reactions = len(self.reactions)
         self.n_params = len(self.param_names)
         self.n_modules = len(self.modules)
+        if self.cores is None or len(self.cores) == 0:
+            self.cores = [CoreSpec(0, "C1", "OrderedA", tuple(range(self.n_modules)))]
+        self.n_cores = len(self.cores)
 
-        # Build stoichiometry and reactant arrays
+        # Build stoichiometry, reactant arrays, and semantic role lookup
         self.stoich_matrix = np.zeros((self.n_species, self.n_reactions), dtype=np.float64)
         self.reactant1 = np.full(self.n_reactions, -1, dtype=np.int32)
         self.reactant2 = np.full(self.n_reactions, -1, dtype=np.int32)
         self.rxn_param_slot = np.zeros(self.n_reactions, dtype=np.int32)
+        self.rxn_idx_by_role = {}
 
         for r_idx, rxn in enumerate(self.reactions):
             assert 1 <= len(rxn.reactants) <= 2, f"Only 1st/2nd order supported: {rxn.name}"
@@ -121,6 +140,8 @@ class ReactionGrammar:
             for s_idx, delta in rxn.stoich:
                 self.stoich_matrix[s_idx, r_idx] += delta
             self.rxn_param_slot[r_idx] = rxn.param_slot
+            if rxn.role:
+                self.rxn_idx_by_role[rxn.role] = r_idx
 
         # Verify strict atomic conservation for every reaction
         self.atom_matrix = np.array([s.atoms for s in self.species], dtype=np.float64).T
@@ -129,38 +150,58 @@ class ReactionGrammar:
             bad = np.where(atom_err.max(axis=0) > 1e-12)[0]
             raise ValueError(f"Atom conservation violated in reactions: {[self.reactions[i].name for i in bad]}")
 
-        # Enumerate sparse mechanisms with <= max_active_modules active modules
-        mech_opt_list: List[Tuple[int, ...]] = []
-        for k in range(self.max_active_modules + 1):
-            for mod_subset in combinations(range(self.n_modules), k):
-                opt_ranges = [range(1, len(self.modules[m].options)) for m in mod_subset]
-                for chosen_opts in product(*opt_ranges):
-                    vec = [0] * self.n_modules
-                    for m, opt in zip(mod_subset, chosen_opts):
-                        vec[m] = opt
-                    mech_opt_list.append(tuple(vec))
+        # Enumerate sparse mechanisms across cores with <= max_active_modules active modules
+        mech_list: List[Tuple[int, Tuple[int, ...]]] = []
+        for core in self.cores:
+            allowed_mods = core.allowed_modules
+            for k in range(self.max_active_modules + 1):
+                for mod_subset in combinations(allowed_mods, k):
+                    opt_ranges = [range(1, len(self.modules[m].options)) for m in mod_subset]
+                    for chosen_opts in product(*opt_ranges):
+                        vec = [0] * self.n_modules
+                        for m, opt in zip(mod_subset, chosen_opts):
+                            vec[m] = opt
+                        mech_list.append((core.id, tuple(vec)))
 
-        self.n_mechs = len(mech_opt_list)
-        self.mech_options = np.array(mech_opt_list, dtype=np.int32)
+        self.n_mechs = len(mech_list)
+        self.mech_core_id = np.array([c for c, _ in mech_list], dtype=np.int32)
+        self.mech_options = np.array([v for _, v in mech_list], dtype=np.int32)
+        if self.n_cores > 1:
+            self.mech_tokens = np.concatenate([self.mech_core_id[:, None], self.mech_options], axis=1).astype(np.int32)
+        else:
+            self.mech_tokens = self.mech_options.copy()
+
         self.mech_rxn_mask = np.zeros((self.n_mechs, self.n_reactions), dtype=np.int32)
         self.mech_param_mask = np.zeros((self.n_mechs, self.n_params), dtype=np.int32)
         self.mech_prior_mean = np.zeros((self.n_mechs, self.n_params), dtype=np.float64)
         self.mech_prior_std = np.full((self.n_mechs, self.n_params), self.prior_std, dtype=np.float64)
         self.mech_names = []
 
-        for m_idx, opt_vec in enumerate(mech_opt_list):
+        core_code_by_id = {c.id: c.code for c in self.cores}
+        for m_idx, (c_id, opt_vec) in enumerate(mech_list):
             parts = []
             for mod_id, opt in enumerate(opt_vec):
                 if opt > 0:
                     mod = self.modules[mod_id]
                     parts.append(f"{mod.code}:{mod.options[opt]}" if len(mod.options) > 2 else mod.code)
-            self.mech_names.append("Core" if not parts else "+".join(parts))
+            if self.n_cores == 1:
+                self.mech_names.append("Core" if not parts else "+".join(parts))
+            else:
+                ccode = core_code_by_id[c_id]
+                self.mech_names.append(ccode if not parts else f"{ccode}+" + "+".join(parts))
 
             for r_idx, rxn in enumerate(self.reactions):
-                active = (rxn.module_id < 0) or (opt_vec[rxn.module_id] == rxn.module_option)
-                if active:
+                core_ok = (rxn.allowed_cores is None) or (c_id in rxn.allowed_cores)
+                mod_ok = (rxn.module_id < 0) or (opt_vec[rxn.module_id] == rxn.module_option)
+                if core_ok and mod_ok:
                     self.mech_rxn_mask[m_idx, r_idx] = 1
                     p_slot = rxn.param_slot
+                    if self.mech_param_mask[m_idx, p_slot] == 1:
+                        expected_mean = self.prior_means_by_type[rxn.rxn_type]
+                        if abs(self.mech_prior_mean[m_idx, p_slot] - expected_mean) > 1e-12:
+                            raise ValueError(
+                                f"Conflicting prior on param slot {p_slot} for mech {self.mech_names[-1]}"
+                            )
                     self.mech_param_mask[m_idx, p_slot] = 1
                     self.mech_prior_mean[m_idx, p_slot] = self.prior_means_by_type[rxn.rxn_type]
 
@@ -298,8 +339,8 @@ def build_default_grammar(
         # Core cycle (4 reactions)
         ReactionSpec("R0_bindA", (si["cat"], si["A"]), ((si["cat"], -1), (si["A"], -1), (si["catA"], 1)), 0, -1, 0, "bimol"),
         ReactionSpec("R1_dissA", (si["catA"],), ((si["catA"], -1), (si["cat"], 1), (si["A"], 1)), 1, -1, 0, "unimol"),
-        ReactionSpec("R2_bindB", (si["catA"], si["B"]), ((si["catA"], -1), (si["B"], -1), (si["catAB"], 1)), 2, -1, 0, "bimol"),
-        ReactionSpec("R3_relP",  (si["catAB"],), ((si["catAB"], -1), (si["cat"], 1), (si["P"], 1)), 3, -1, 0, "unimol"),
+        ReactionSpec("R2_bindB", (si["catA"], si["B"]), ((si["catA"], -1), (si["B"], -1), (si["catAB"], 1)), 2, -1, 0, "bimol", role="bindB_fromA"),
+        ReactionSpec("R3_relP",  (si["catAB"],), ((si["catAB"], -1), (si["cat"], 1), (si["P"], 1)), 3, -1, 0, "unimol", role="relP"),
         # M1: Activation
         ReactionSpec("R4_act",   (si["precat"],), ((si["precat"], -1), (si["cat"], 1)), 4, 0, 1, "act"),
         # M2: Deactivation (3 mutually exclusive options sharing param slot 5)
@@ -316,11 +357,11 @@ def build_default_grammar(
         ReactionSpec("R12_dimer", (si["cat"], si["cat"]), ((si["cat"], -2), (si["cat2"], 1)), 10, 4, 1, "bimol_cat"),
         ReactionSpec("R13_monom", (si["cat2"],), ((si["cat2"], -1), (si["cat"], 2)), 11, 4, 1, "unimol"),
         # M6: Background non-catalytic
-        ReactionSpec("R14_bg",    (si["A"], si["B"]), ((si["A"], -1), (si["B"], -1), (si["P"], 1)), 12, 5, 1, "bg"),
+        ReactionSpec("R14_bg",    (si["A"], si["B"]), ((si["A"], -1), (si["B"], -1), (si["P"], 1)), 12, 5, 1, "bg", role="bg"),
         # M7: Reversible product release
-        ReactionSpec("R15_revP",  (si["cat"], si["P"]), ((si["cat"], -1), (si["P"], -1), (si["catAB"], 1)), 13, 6, 1, "bimol"),
+        ReactionSpec("R15_revP",  (si["cat"], si["P"]), ((si["cat"], -1), (si["P"], -1), (si["catAB"], 1)), 13, 6, 1, "bimol", role="revP"),
         # M8: Bimetallic product release (catAB + cat -> bimol_cat, scaled by -log10(c0) = +1.3)
-        ReactionSpec("R16_bimet", (si["catAB"], si["cat"]), ((si["catAB"], -1), (si["cat"], 1), (si["P"], 1)), 14, 7, 1, "bimol_cat"),
+        ReactionSpec("R16_bimet", (si["catAB"], si["cat"]), ((si["catAB"], -1), (si["cat"], 1), (si["P"], 1)), 14, 7, 1, "bimol_cat", role="bimet"),
     ]
 
     # Global shared reaction-type prior means (strictly no per-mechanism tuning).
@@ -364,4 +405,146 @@ def build_default_grammar(
         c0_base=0.05,
         max_active_modules=3,
         catalog=catalog,
+    )
+
+
+def build_multicore_grammar(
+    prior_means_override: Optional[Dict[str, float]] = None,
+    prior_std: float = 0.7,
+) -> ReactionGrammar:
+    """Build the 4-core, 13-species, 24-reaction, 19-param, 527-mechanism grammar (Section 6.1).
+
+    Cores (k <= 3 active modules):
+      - C1 Ordered A-first (151): M1-M8
+      - C2 Ordered B-first (151): M1-M8 (M2:complex binds catB -> catI + B; M3 binds catB + B <-> catB2)
+      - C3 Random-order    (151): M1-M8 (dual binding branches converging to catAB -> cat + P)
+      - C4 Eley-Rideal      (74): M1-M6 (no catAB intermediate; disables M7/M8)
+    Total: 151 + 151 + 151 + 74 = 527 mechanisms.
+    """
+    species = [
+        SpeciesSpec("A", (1, 0, 0)),
+        SpeciesSpec("B", (0, 1, 0)),
+        SpeciesSpec("P", (1, 1, 0)),
+        SpeciesSpec("cat", (0, 0, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("catA", (1, 0, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("catB", (0, 1, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("catAB", (1, 1, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("precat", (0, 0, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("catI", (0, 0, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("catA2", (2, 0, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("catB2", (0, 2, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("catP", (1, 1, 1), is_catalyst=True, cat_stoich=1),
+        SpeciesSpec("cat2", (0, 0, 2), is_catalyst=True, cat_stoich=2),
+    ]
+    si = {s.name: i for i, s in enumerate(species)}
+
+    cores = [
+        CoreSpec(0, "C1", "OrderedA", (0, 1, 2, 3, 4, 5, 6, 7)),
+        CoreSpec(1, "C2", "OrderedB", (0, 1, 2, 3, 4, 5, 6, 7)),
+        CoreSpec(2, "C3", "Random", (0, 1, 2, 3, 4, 5, 6, 7)),
+        CoreSpec(3, "C4", "EleyRideal", (0, 1, 2, 3, 4, 5)),
+    ]
+
+    modules = [
+        ModuleSpec(0, "M1", "Activation", ("off", "on")),
+        ModuleSpec(1, "M2", "Deactivation", ("off", "free1", "free2", "complex")),
+        ModuleSpec(2, "M3", "Sub_Inhib", ("off", "on")),
+        ModuleSpec(3, "M4", "Prod_Inhib", ("off", "on")),
+        ModuleSpec(4, "M5", "Dimer_Rest", ("off", "on")),
+        ModuleSpec(5, "M6", "Background", ("off", "on")),
+        ModuleSpec(6, "M7", "Rev_Release", ("off", "on")),
+        ModuleSpec(7, "M8", "Bimetallic", ("off", "on")),
+    ]
+
+    param_names = [
+        "k_1a", "k_-1a", "k_2a",        # 0..2: A-first binding branch (C1, C3; k_1a/k_-1a also C4)
+        "k_1b", "k_-1b", "k_2b",        # 3..5: B-first binding branch (C2, C3)
+        "k_3",                          # 6: catAB -> cat + P (C1, C2, C3)
+        "k_er",                         # 7: catA + B -> cat + P (C4)
+        "k_a",                          # 8: M1
+        "k_d",                          # 9: M2 (shared across 3 mutually exclusive opts / core variants)
+        "k_si", "k_-si",                # 10..11: M3 (shared between catA2 for C1/C3/C4 and catB2 for C2)
+        "k_4", "k_-4",                  # 12..13: M4
+        "k_5", "k_-5",                  # 14..15: M5
+        "k_bg",                         # 16: M6
+        "k_-3",                         # 17: M7 (C1-C3)
+        "k_bi",                         # 18: M8 (C1-C3)
+    ]
+
+    reactions = [
+        # 8 Core reactions
+        ReactionSpec("R0_bindA",       (si["cat"], si["A"]),      ((si["cat"], -1), (si["A"], -1), (si["catA"], 1)),              0, -1, 0, "bimol",     allowed_cores=(0, 2, 3)),
+        ReactionSpec("R1_dissA",       (si["catA"],),             ((si["catA"], -1), (si["cat"], 1), (si["A"], 1)),               1, -1, 0, "unimol",    allowed_cores=(0, 2, 3)),
+        ReactionSpec("R2_bindB_fromA", (si["catA"], si["B"]),     ((si["catA"], -1), (si["B"], -1), (si["catAB"], 1)),            2, -1, 0, "bimol",     allowed_cores=(0, 2), role="bindB_fromA"),
+        ReactionSpec("R3_bindB",       (si["cat"], si["B"]),      ((si["cat"], -1), (si["B"], -1), (si["catB"], 1)),              3, -1, 0, "bimol",     allowed_cores=(1, 2)),
+        ReactionSpec("R4_dissB",       (si["catB"],),             ((si["catB"], -1), (si["cat"], 1), (si["B"], 1)),               4, -1, 0, "unimol",    allowed_cores=(1, 2)),
+        ReactionSpec("R5_bindA_fromB", (si["catB"], si["A"]),     ((si["catB"], -1), (si["A"], -1), (si["catAB"], 1)),            5, -1, 0, "bimol",     allowed_cores=(1, 2), role="bindA_fromB"),
+        ReactionSpec("R6_relP",        (si["catAB"],),            ((si["catAB"], -1), (si["cat"], 1), (si["P"], 1)),              6, -1, 0, "unimol",    allowed_cores=(0, 1, 2), role="relP"),
+        ReactionSpec("R7_er",          (si["catA"], si["B"]),     ((si["catA"], -1), (si["B"], -1), (si["cat"], 1), (si["P"], 1)),7, -1, 0, "bimol",     allowed_cores=(3,)),
+        # 16 Optional module reactions
+        # M1: Activation
+        ReactionSpec("R8_act",         (si["precat"],),           ((si["precat"], -1), (si["cat"], 1)),                           8,  0, 1, "act",       allowed_cores=(0, 1, 2, 3)),
+        # M2: Deactivation (free1, free2, complex-A for C1/C3/C4, complex-B for C2)
+        ReactionSpec("R9_deact1",      (si["cat"],),              ((si["cat"], -1), (si["catI"], 1)),                             9,  1, 1, "deact1",    allowed_cores=(0, 1, 2, 3)),
+        ReactionSpec("R10_deact2",     (si["cat"], si["cat"]),    ((si["cat"], -2), (si["catI"], 2)),                             9,  1, 2, "deact2",    allowed_cores=(0, 1, 2, 3)),
+        ReactionSpec("R11_deactCA",    (si["catA"],),             ((si["catA"], -1), (si["catI"], 1), (si["A"], 1)),              9,  1, 3, "deact1",    allowed_cores=(0, 2, 3)),
+        ReactionSpec("R12_deactCB",    (si["catB"],),             ((si["catB"], -1), (si["catI"], 1), (si["B"], 1)),              9,  1, 3, "deact1",    allowed_cores=(1,)),
+        # M3: Excess substrate inhibition (catA2 for C1/C3/C4, catB2 for C2)
+        ReactionSpec("R13_bindA2",     (si["catA"], si["A"]),     ((si["catA"], -1), (si["A"], -1), (si["catA2"], 1)),           10,  2, 1, "bimol",     allowed_cores=(0, 2, 3)),
+        ReactionSpec("R14_dissA2",     (si["catA2"],),            ((si["catA2"], -1), (si["catA"], 1), (si["A"], 1)),            11,  2, 1, "unimol",    allowed_cores=(0, 2, 3)),
+        ReactionSpec("R15_bindB2",     (si["catB"], si["B"]),     ((si["catB"], -1), (si["B"], -1), (si["catB2"], 1)),           10,  2, 1, "bimol",     allowed_cores=(1,)),
+        ReactionSpec("R16_dissB2",     (si["catB2"],),            ((si["catB2"], -1), (si["catB"], 1), (si["B"], 1)),            11,  2, 1, "unimol",    allowed_cores=(1,)),
+        # M4: Product inhibition
+        ReactionSpec("R17_bindP",      (si["cat"], si["P"]),      ((si["cat"], -1), (si["P"], -1), (si["catP"], 1)),             12,  3, 1, "bimol",     allowed_cores=(0, 1, 2, 3)),
+        ReactionSpec("R18_dissP",      (si["catP"],),             ((si["catP"], -1), (si["cat"], 1), (si["P"], 1)),              13,  3, 1, "unimol",    allowed_cores=(0, 1, 2, 3)),
+        # M5: Dimeric resting state
+        ReactionSpec("R19_dimer",      (si["cat"], si["cat"]),    ((si["cat"], -2), (si["cat2"], 1)),                            14,  4, 1, "bimol_cat", allowed_cores=(0, 1, 2, 3)),
+        ReactionSpec("R20_monom",      (si["cat2"],),             ((si["cat2"], -1), (si["cat"], 2)),                            15,  4, 1, "unimol",    allowed_cores=(0, 1, 2, 3)),
+        # M6: Background non-catalytic reaction
+        ReactionSpec("R21_bg",         (si["A"], si["B"]),        ((si["A"], -1), (si["B"], -1), (si["P"], 1)),                  16,  5, 1, "bg",        allowed_cores=(0, 1, 2, 3), role="bg"),
+        # M7: Reversible product release (C1-C3 only)
+        ReactionSpec("R22_revP",       (si["cat"], si["P"]),      ((si["cat"], -1), (si["P"], -1), (si["catAB"], 1)),            17,  6, 1, "bimol",     allowed_cores=(0, 1, 2), role="revP"),
+        # M8: Bimetallic product release (C1-C3 only)
+        ReactionSpec("R23_bimet",      (si["catAB"], si["cat"]),  ((si["catAB"], -1), (si["cat"], 1), (si["P"], 1)),             18,  7, 1, "bimol_cat", allowed_cores=(0, 1, 2), role="bimet"),
+    ]
+
+    prior_means = {
+        "bimol": 2.2,
+        "bimol_cat": 3.5,   # bimol + 1.3 (-log10(c0))
+        "unimol": 1.6,
+        "act": 0.6,
+        "deact1": 0.4,
+        "deact2": 1.7,      # deact1 + 1.3 (-log10(c0))
+        "bg": -1.2,
+    }
+    if prior_means_override:
+        prior_means.update(prior_means_override)
+
+    obs_AP = (si["A"], si["P"])
+    obs_full = (si["A"], si["B"], si["P"], si["catAB"])
+
+    catalog = [
+        DesignSpec("D0", 1.0, 1.5, 0.0, 1.0, 0, obs_AP,   1.0, ("no_P", "basic", "full")),
+        DesignSpec("D1", 1.0, 1.5, 0.0, 0.5, 0, obs_AP,   1.0, ("no_P", "basic", "full")),
+        DesignSpec("D2", 1.0, 1.5, 0.0, 2.0, 0, obs_AP,   1.0, ("no_P", "basic", "full")),
+        DesignSpec("D3", 1.0, 2.5, 0.0, 1.0, 0, obs_AP,   1.0, ("no_P", "basic", "full")),
+        DesignSpec("D4", 2.0, 2.5, 0.0, 1.0, 0, obs_AP,   1.0, ("no_P", "basic", "full")),
+        DesignSpec("D5", 0.5, 1.0, 0.0, 1.0, 0, obs_AP,   1.0, ("no_P", "basic", "full")),
+        DesignSpec("D6", 0.5, 1.0, 0.5, 1.0, 0, obs_AP,   1.0, ("basic", "full")),
+        DesignSpec("D7", 1.0, 1.5, 0.5, 1.0, 0, obs_AP,   1.0, ("full",)),
+        DesignSpec("D8", 1.0, 1.5, 0.0, 1.0, 1, obs_AP,   1.0, ("full",)),
+        DesignSpec("D9", 1.0, 1.5, 0.0, 1.0, 0, obs_full, 3.0, ("full",)),
+    ]
+
+    return ReactionGrammar(
+        species=species,
+        reactions=reactions,
+        modules=modules,
+        param_names=param_names,
+        prior_means_by_type=prior_means,
+        prior_std=prior_std,
+        c0_base=0.05,
+        max_active_modules=3,
+        catalog=catalog,
+        cores=cores,
     )

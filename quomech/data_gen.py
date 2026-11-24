@@ -77,6 +77,8 @@ def generate_split(
     n_per_mech: int,
     n_rand_designs: int = 4,
     seed: int = 42,
+    unfiltered: bool = False,
+    c3_branch_min: float = 0.15,
 ) -> Dict:
     """Generate accepted (m, theta) samples simulated to t_max=4.0 on 80-pt early-log-dense grid.
 
@@ -115,17 +117,37 @@ def generate_split(
     t_rej = time.perf_counter()
     for m in range(M):
         th, tot_d, sfail = sample_accepted_thetas(
-            grammar, sim, m, n_per_mech, rng, batch_size=max(2048, min(8192, n_per_mech * 4))
+            grammar,
+            sim,
+            m,
+            n_per_mech,
+            rng,
+            batch_size=max(4096, min(16384, n_per_mech * 4)),
+            max_draws=max(500000, n_per_mech * 150),
+            unfiltered=unfiltered,
+            c3_branch_min=c3_branch_min,
         )
         if len(th) < n_per_mech:
-            raise RuntimeError(f"[{split_name}] Mech {m} got {len(th)}/{n_per_mech}")
+            raise RuntimeError(
+                f"[{split_name}] Mech {m} ({grammar.mech_names[m]}) got {len(th)}/{n_per_mech} "
+                f"(draws={tot_d}, acc={len(th)/max(tot_d,1):.4f})"
+            )
         thetas[m * n_per_mech : (m + 1) * n_per_mech] = th.astype(np.float32)
         total_draws_per_mech[m] = tot_d
         rej_solver_fails_per_mech[m] = sfail
+        if (m + 1) % 100 == 0 or (m + 1) == M:
+            acc_so_far = ((m + 1) * n_per_mech) / max(1, int(np.sum(total_draws_per_mech[: m + 1])))
+            print(
+                f"  [DataGen:{split_name}] Rejection {m + 1}/{M} mechs ({time.perf_counter() - t_rej:.1f}s, "
+                f"cum_acc={acc_so_far:.3f}, rej_fails={int(np.sum(rej_solver_fails_per_mech[: m + 1]))})",
+                flush=True,
+            )
     dt_rej = time.perf_counter() - t_rej
+    acc_rates = n_per_mech / np.maximum(total_draws_per_mech, 1)
     print(
         f"[DataGen:{split_name}] Rejection sampled {N:,} (m, theta) in {dt_rej:.1f}s "
-        f"(mean acc={N / np.sum(total_draws_per_mech):.3f}, rej_fails={int(np.sum(rej_solver_fails_per_mech))})",
+        f"(median_acc={float(np.median(acc_rates)):.3f}, min_acc={float(np.min(acc_rates)):.4f}, "
+        f"mean_acc={N / np.sum(total_draws_per_mech):.3f}, rej_fails={int(np.sum(rej_solver_fails_per_mech))})",
         flush=True,
     )
 
@@ -210,6 +232,8 @@ def generate_split(
 
     meta = {
         "split": split_name,
+        "unfiltered": unfiltered,
+        "c3_branch_min": c3_branch_min,
         "n_mechs": M,
         "n_per_mech": n_per_mech,
         "n_samples": N,
@@ -223,8 +247,19 @@ def generate_split(
         "elapsed_sim_s": dt_sim,
         "elapsed_total_s": time.perf_counter() - t0,
         "sim_traj_per_sec": n_tot_traj / dt_sim,
+        "median_acc_rate": float(np.median(acc_rates)),
+        "min_acc_rate": float(np.min(acc_rates)),
+        "mean_acc_rate": float(N / np.sum(total_draws_per_mech)),
         "total_rej_solver_fails": int(np.sum(rej_solver_fails_per_mech)),
         "total_sim_solver_fails": int(np.sum(sim_solver_fails_per_mech)),
+        "rej_fails_by_core": {
+            c.code: int(np.sum(rej_solver_fails_per_mech[grammar.mech_core_id == c.id]))
+            for c in grammar.cores
+        },
+        "sim_fails_by_core": {
+            c.code: int(np.sum(sim_solver_fails_per_mech[grammar.mech_core_id == c.id]))
+            for c in grammar.cores
+        },
         "size_gb": float(trajs.nbytes / (1024 ** 3)),
     }
     with open(split_dir / "meta.json", "w") as f:

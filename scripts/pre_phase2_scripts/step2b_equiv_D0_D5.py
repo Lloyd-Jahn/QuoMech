@@ -19,7 +19,7 @@ import numpy as np
 from quomech.equivalence import run_two_stage_equivalence
 from quomech.grammar import build_default_grammar
 from quomech.simulator import ODESimulator
-from scripts.step2_gate2_equiv import inspect_chem_pairs
+from scripts.pre_phase2_scripts.step2_gate2_equiv import inspect_chem_pairs
 
 
 def main():

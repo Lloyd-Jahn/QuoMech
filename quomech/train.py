@@ -41,24 +41,43 @@ def compute_ece(probs: np.ndarray, targets: np.ndarray, n_bins: int = 15) -> flo
     return float(ece)
 
 
-def build_model(grammar: ReactionGrammar, head_type: str) -> QuoMechNet:
+def build_model(
+    grammar: ReactionGrammar,
+    head_type: str,
+    arch: str = "p2_256",
+    train_class_mask: Optional[np.ndarray] = None,
+) -> QuoMechNet:
     obs_ch = get_observable_channel_indices(grammar)
+    if grammar.n_cores > 1:
+        mech_toks = torch.tensor(grammar.mech_tokens, dtype=torch.long)
+        tok_num_opts = (grammar.n_cores,) + tuple(len(m.options) for m in grammar.modules)
+    else:
+        mech_toks = torch.tensor(grammar.mech_options, dtype=torch.long)
+        tok_num_opts = tuple(len(m.options) for m in grammar.modules)
+
+    tcm = torch.tensor(train_class_mask, dtype=torch.bool) if train_class_mask is not None else None
+
+    if arch == "p1_192":
+        cfg = dict(d_exp=192, n_heads_exp=6, d_set=256, set_ff_mult=2, d_g=128, nsf_layers=6, nsf_hidden=192, nsf_bins=8)
+    elif arch == "p2_256":
+        # Phase 2 publication model (~15.8M params): 4L ExpEnc(d=256) + 2L SetTF(d=256, ff=4x, Pre-LN KV-Norm+QK-Norm)
+        # + Factorized Core+Module Head(d_g=160) + 19D branchless RQS-NSF(10L, h=576, 8 bins)
+        cfg = dict(d_exp=256, n_heads_exp=8, d_set=256, set_ff_mult=4, d_g=160, nsf_layers=10, nsf_hidden=576, nsf_bins=8)
+    else:
+        raise ValueError(f"Unknown arch: {arch}")
+
     return QuoMechNet(
         design_dim=6 + grammar.n_species,  # [A0, B0, P0, log10(cat0), a_pre, log10(t_end), obs_mask...]
         n_obs_channels=len(obs_ch),
         n_params=grammar.n_params,
-        mech_options=torch.tensor(grammar.mech_options, dtype=torch.long),
-        module_num_options=tuple(len(m.options) for m in grammar.modules),
+        mech_options=mech_toks,
+        module_num_options=tok_num_opts,
         mech_prior_mean=torch.tensor(grammar.mech_prior_mean, dtype=torch.float32),
         mech_prior_std=torch.tensor(grammar.mech_prior_std, dtype=torch.float32),
         mech_param_mask=torch.tensor(grammar.mech_param_mask, dtype=torch.float32),
         head_type=head_type,
-        d_exp=192,
-        d_set=256,
-        d_g=128,
-        nsf_layers=6,
-        nsf_hidden=192,
-        nsf_bins=8,
+        train_class_mask=tcm,
+        **cfg,
     )
 
 
@@ -74,11 +93,14 @@ class GPUKineticBatchSampler:
         max_len: int = 30,
         shard_rank: int = 0,
         shard_world: int = 1,
+        discrete_fixed_window: bool = False,
+        allowed_mech_ids: Optional[np.ndarray] = None,
     ) -> None:
         self.grammar = grammar
         self.device = device
         self.max_exps = max_exps
         self.max_len = max_len
+        self.discrete_fixed_window = discrete_fixed_window
         self.obs_ch = get_observable_channel_indices(grammar)
         self.n_ch = len(self.obs_ch)
         self.n_cat = len(grammar.catalog)
@@ -86,30 +108,46 @@ class GPUKineticBatchSampler:
         self.c0_base = float(grammar.c0_base)
 
         t_grid_np = np.load(split_dir / "t_grid.npy").astype(np.float32)
-        mids_np = np.load(split_dir / "mech_ids.npy")
-        ths_np = np.load(split_dir / "thetas.npy")
-        rdes_np = np.load(split_dir / "rand_des.npy")
-        trajs_np = np.load(split_dir / "trajs.npy")
+        mids_mm = np.load(split_dir / "mech_ids.npy", mmap_mode="r")
+        ths_mm = np.load(split_dir / "thetas.npy", mmap_mode="r")
+        rdes_mm = np.load(split_dir / "rand_des.npy", mmap_mode="r")
+        trajs_mm = np.load(split_dir / "trajs.npy", mmap_mode="r")
 
-        # Shard deterministically across DDP ranks (interleaved so every rank gets exact class balance!)
-        if shard_world > 1:
+        # Filter to allowed mechanisms (e.g. OOD 34 held-out 3-mod ablation) & shard across DDP ranks
+        # Using mmap_mode='r' avoids 8x CPU RAM duplication across DDP processes!
+        if allowed_mech_ids is not None:
+            allow_mask = np.isin(np.asarray(mids_mm), allowed_mech_ids)
+            keep_idx = np.where(allow_mask)[0]
+            if shard_world > 1:
+                keep_idx = keep_idx[shard_rank::shard_world]
+            mids_np = np.array(mids_mm[keep_idx], copy=True)
+            ths_np = np.array(ths_mm[keep_idx], copy=True)
+            rdes_np = np.array(rdes_mm[keep_idx], copy=True)
+            trajs_np = np.array(trajs_mm[keep_idx], copy=True)
+        elif shard_world > 1:
             sl = slice(shard_rank, None, shard_world)
-            mids_np = mids_np[sl]
-            ths_np = ths_np[sl]
-            rdes_np = rdes_np[sl]
-            trajs_np = trajs_np[sl]
+            mids_np = np.array(mids_mm[sl], copy=True)
+            ths_np = np.array(ths_mm[sl], copy=True)
+            rdes_np = np.array(rdes_mm[sl], copy=True)
+            trajs_np = np.array(trajs_mm[sl], copy=True)
+        else:
+            mids_np = np.array(mids_mm, copy=True)
+            ths_np = np.array(ths_mm, copy=True)
+            rdes_np = np.array(rdes_mm, copy=True)
+            trajs_np = np.array(trajs_mm, copy=True)
 
         self.n_samples = len(mids_np)
         self.n_t = len(t_grid_np)
         self.n_des_tot = trajs_np.shape[1]
         self.n_rand = rdes_np.shape[1]
 
-        # Pin directly in GPU VRAM (~1.9 GB/rank in 4-GPU DDP!)
+        # Pin directly in GPU VRAM (~3.54 GB/rank in 8-GPU or ~7.08 GB/rank in 4-GPU DDP)
         self.t_grid = torch.from_numpy(t_grid_np).to(device)                          # (80,)
         self.mech_ids = torch.from_numpy(mids_np.astype(np.int64)).to(device)         # (N,)
-        self.thetas = torch.from_numpy(ths_np.astype(np.float32)).to(device)          # (N, 15)
+        self.thetas = torch.from_numpy(ths_np.astype(np.float32)).to(device)          # (N, P)
         self.rand_des = torch.from_numpy(rdes_np.astype(np.float32)).to(device)       # (N, 4, 5)
         self.trajs = torch.from_numpy(np.ascontiguousarray(trajs_np)).to(device)      # (N, 14, 80, 4) fp16
+        del mids_np, ths_np, rdes_np, trajs_np
 
         # Static catalog metadata on GPU
         cat_p = np.array(
@@ -130,7 +168,21 @@ class GPUKineticBatchSampler:
         )
         self.obs_ch_t = torch.tensor(self.obs_ch, dtype=torch.long, device=device)
         self.ch_pos_A = self.obs_ch.index(grammar.species_idx["A"])
+        self.ch_pos_B = self.obs_ch.index(grammar.species_idx["B"])
         self.ch_pos_P = self.obs_ch.index(grammar.species_idx["P"])
+
+        # Precompute channel-mask templates for general macroscopic kinetics coverage ({A,P}, {P}, {A}, {A,B}, {A,B,P}, full)
+        def _mk(positions):
+            v = torch.zeros(self.n_ch, device=device, dtype=torch.float32)
+            for p in positions:
+                v[p] = 1.0
+            return v
+        self.mask_AP = _mk([self.ch_pos_A, self.ch_pos_P])
+        self.mask_P = _mk([self.ch_pos_P])
+        self.mask_A = _mk([self.ch_pos_A])
+        self.mask_AB = _mk([self.ch_pos_A, self.ch_pos_B])
+        self.mask_ABP = _mk([self.ch_pos_A, self.ch_pos_B, self.ch_pos_P])
+        self.mask_full = torch.ones(self.n_ch, device=device, dtype=torch.float32)
 
         # Precompute normalized log-index ramp for fast vectorized log-spaced sampling
         self.u_lin = torch.linspace(0.0, 1.0, max_len, device=device)  # (max_len,)
@@ -152,8 +204,11 @@ class GPUKineticBatchSampler:
         exp_pos = torch.arange(E, device=dev).unsqueeze(0)  # (1, E)
         exp_pad = exp_pos >= E_cnt.unsqueeze(1)             # (B, E)
 
-        # 50% catalog-only containing D0; 50% mixed across all 14 designs (without replacement per row)
-        is_cat_only = torch.rand((B,), device=dev) < 0.50
+        # 50% catalog-only containing D0; 50% mixed across all 14 designs (or 100% catalog in discrete_fixed_window)
+        if self.discrete_fixed_window:
+            is_cat_only = torch.ones((B,), dtype=torch.bool, device=dev)
+        else:
+            is_cat_only = torch.rand((B,), device=dev) < 0.50
 
         # Generate random permutation of 1..9 for cat-only (slot 0 forced to D0, then shuffled)
         rand_cat = torch.rand((B, self.n_cat - 1), device=dev).argsort(dim=1) + 1  # (B, 9) in 1..9
@@ -172,30 +227,52 @@ class GPUKineticBatchSampler:
         is_cat_slot = chosen < self.n_cat
         safe_cat = chosen.clamp(max=self.n_cat - 1)
         ch_cat = self.cat_obs_mask[safe_cat]  # (B, E, C)
-        # Random continuous designs: 15% full (all 4 channels), 85% AP
-        rand_full = (torch.rand((B, E, 1), device=dev) < 0.15).float()
-        ch_ap = torch.zeros((1, 1, C), device=dev)
-        ch_ap[0, 0, self.ch_pos_A] = 1.0
-        ch_ap[0, 0, self.ch_pos_P] = 1.0
-        ch_rand = rand_full + (1.0 - rand_full) * ch_ap
-        ch_mask = torch.where(is_cat_slot.unsqueeze(-1), ch_cat, ch_rand)  # (B, E, C)
 
-        # 15% P-only datasets (excluding D9)
-        p_only = (torch.rand((B, 1), device=dev) < 0.15) & (chosen != 9)  # (B, E)
-        ch_p = torch.zeros((1, 1, C), device=dev)
-        ch_p[0, 0, self.ch_pos_P] = 1.0
-        ch_mask = torch.where(p_only.unsqueeze(-1), ch_p.expand(B, E, C), ch_mask)
+        if self.discrete_fixed_window:
+            ch_mask = ch_cat
+            # Still include 15% P-only on non-D9 slots for apples-to-apples channel comparison
+            p_only = (torch.rand((B, 1), device=dev) < 0.15) & (chosen != 9)
+            ch_mask = torch.where(p_only.unsqueeze(-1), self.mask_P.view(1, 1, C).expand(B, E, C), ch_mask)
+        else:
+            # Random continuous designs cover natural macroscopic observation subsets + 15% full
+            u_r = torch.rand((B, E, 1), device=dev)
+            ch_rand = torch.where(
+                u_r < 0.50, self.mask_AP.view(1, 1, C),
+                torch.where(
+                    u_r < 0.65, self.mask_full.view(1, 1, C),
+                    torch.where(
+                        u_r < 0.80, self.mask_ABP.view(1, 1, C),
+                        torch.where(u_r < 0.90, self.mask_AB.view(1, 1, C), self.mask_A.view(1, 1, C)),
+                    ),
+                ),
+            )
+            ch_mask = torch.where(is_cat_slot.unsqueeze(-1), ch_cat, ch_rand)  # (B, E, C)
 
-        # Variable observation duration t_end(xi) in [0.4, 4.0]
+            # Dataset-level macroscopic observability subsets (excluding D9 so in-situ catAB remains intact):
+            #   65% keep default (A+P / rand), 15% P-only, 10% A-only, 5% A+B, 5% A+B+P
+            u_ds = torch.rand((B, 1), device=dev)
+            not_d9 = (chosen != 9)
+            m_p = (u_ds < 0.15) & not_d9
+            m_a = (u_ds >= 0.15) & (u_ds < 0.25) & not_d9
+            m_ab = (u_ds >= 0.25) & (u_ds < 0.30) & not_d9
+            m_abp = (u_ds >= 0.30) & (u_ds < 0.35) & not_d9
+            ch_mask = torch.where(m_p.unsqueeze(-1), self.mask_P.view(1, 1, C).expand(B, E, C), ch_mask)
+            ch_mask = torch.where(m_a.unsqueeze(-1), self.mask_A.view(1, 1, C).expand(B, E, C), ch_mask)
+            ch_mask = torch.where(m_ab.unsqueeze(-1), self.mask_AB.view(1, 1, C).expand(B, E, C), ch_mask)
+            ch_mask = torch.where(m_abp.unsqueeze(-1), self.mask_ABP.view(1, 1, C).expand(B, E, C), ch_mask)
+
+        # Variable observation duration t_end(xi) in [0.4, 4.0] (or fixed 1.0 for discrete_fixed_window ablation)
         cat_mult = p5[:, :, 3].clamp(min=0.25)  # (B, E)
-        # Load-adapted inverse scaling + 15% broad LogU + 50% exact 1.0 in catalog-only mode
-        log_t_adapt = -torch.log10(cat_mult) + 0.25 * torch.randn((B, E), device=dev)
-        log_t_broad = math.log10(0.4) + torch.rand((B, E), device=dev) * (math.log10(4.0) - math.log10(0.4))
-        use_broad = torch.rand((B, E), device=dev) < 0.15
-        log_t = torch.where(use_broad, log_t_broad, log_t_adapt).clamp(math.log10(0.4), math.log10(4.0))
-        t_end_cand = torch.pow(10.0, log_t)
-        use_std_1 = (is_cat_only.unsqueeze(1) & is_cat_slot) & (torch.rand((B, E), device=dev) < 0.50)
-        t_end_target = torch.where(use_std_1, torch.ones_like(t_end_cand), t_end_cand)
+        if self.discrete_fixed_window:
+            t_end_target = torch.ones((B, E), device=dev)
+        else:
+            log_t_adapt = -torch.log10(cat_mult) + 0.25 * torch.randn((B, E), device=dev)
+            log_t_broad = math.log10(0.4) + torch.rand((B, E), device=dev) * (math.log10(4.0) - math.log10(0.4))
+            use_broad = torch.rand((B, E), device=dev) < 0.15
+            log_t = torch.where(use_broad, log_t_broad, log_t_adapt).clamp(math.log10(0.4), math.log10(4.0))
+            t_end_cand = torch.pow(10.0, log_t)
+            use_std_1 = (is_cat_only.unsqueeze(1) & is_cat_slot) & (torch.rand((B, E), device=dev) < 0.50)
+            t_end_target = torch.where(use_std_1, torch.ones_like(t_end_cand), t_end_cand)
 
         # Map t_end_target -> max grid index in [12, n_t - 1]
         max_idx = (torch.searchsorted(self.t_grid, t_end_target, right=True) - 1).clamp(12, self.n_t - 1)  # (B, E)
@@ -324,8 +401,9 @@ def train_model(
     data_dir: Path,
     out_dir: Path,
     head_type: str = "factorized",
+    arch: str = "p2_256",
     gpu_id: int = 0,
-    total_steps: int = 40000,
+    total_steps: int = 60000,
     batch_size: int = 256,
     grad_accum: int = 1,
     lr: float = 8e-4,
@@ -335,6 +413,9 @@ def train_model(
     num_workers: int = 0,
     seed: int = 42,
     resume: Optional[str] = None,
+    val_data_dir: Optional[Path] = None,
+    discrete_fixed_window: bool = False,
+    allowed_mech_ids: Optional[np.ndarray] = None,
 ) -> Dict:
     world_size = int(os.environ.get("WORLD_SIZE", "1"))
     rank = int(os.environ.get("RANK", "0"))
@@ -359,25 +440,36 @@ def train_model(
 
     if is_main:
         print(
-            f"[Train:{head_type}] GPU-Resident DDP={is_ddp} world={world_size} dev={device} bf16={use_bf16} "
-            f"bs/gpu={batch_size} eff_bs={batch_size * grad_accum * world_size}",
+            f"[Train:{head_type}/{arch}] GPU-Resident DDP={is_ddp} world={world_size} dev={device} bf16={use_bf16} "
+            f"bs/gpu={batch_size} eff_bs={batch_size * grad_accum * world_size} steps={total_steps} seed={seed} "
+            f"disc_fixed={discrete_fixed_window} allowed_mechs={'all' if allowed_mech_ids is None else len(allowed_mech_ids)}",
             flush=True,
         )
 
+    val_root = val_data_dir if val_data_dir is not None else data_dir
     train_sampler = GPUKineticBatchSampler(
         grammar, data_dir / "train", device=device, max_exps=8, max_len=30,
         shard_rank=rank, shard_world=world_size,
+        discrete_fixed_window=discrete_fixed_window,
+        allowed_mech_ids=allowed_mech_ids,
     )
     val_sampler = GPUKineticBatchSampler(
-        grammar, data_dir / "val", device=device, max_exps=8, max_len=30,
+        grammar, val_root / "val", device=device, max_exps=8, max_len=30,
         shard_rank=0, shard_world=1,
+        discrete_fixed_window=discrete_fixed_window,
+        allowed_mech_ids=allowed_mech_ids,
     ) if is_main else None
 
-    raw_model = build_model(grammar, head_type=head_type).to(device)
+    train_class_mask = None
+    if allowed_mech_ids is not None:
+        train_class_mask = np.zeros(grammar.n_mechs, dtype=bool)
+        train_class_mask[allowed_mech_ids] = True
+
+    raw_model = build_model(grammar, head_type=head_type, arch=arch, train_class_mask=train_class_mask).to(device)
     n_params_model = sum(p.numel() for p in raw_model.parameters() if p.requires_grad)
     if is_main:
         vram_gb = torch.cuda.memory_allocated(device) / 1e9
-        print(f"[Train:{head_type}] Params={n_params_model:,}, Resident VRAM={vram_gb:.2f} GB/GPU", flush=True)
+        print(f"[Train:{head_type}/{arch}] Params={n_params_model:,}, Resident VRAM={vram_gb:.2f} GB/GPU", flush=True)
 
     model = DDP(raw_model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=False) if is_ddp else raw_model
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -394,7 +486,7 @@ def train_model(
     best_val_loss = float("inf")
     history = []
     elapsed_prev = 0.0
-    milestones = {16000, 30000, 45000, 60000}
+    milestones = {20000, 40000, 60000, 80000}
 
     # Optional atomic checkpoint resume (supports both single-GPU and multi-GPU DDP)
     ckpt_resume_path: Optional[Path] = None
@@ -515,6 +607,7 @@ def train_model(
                         {
                             "step": step,
                             "head_type": head_type,
+                            "arch": arch,
                             "model_state": raw_model.state_dict(),
                             "val_metrics": val_metrics,
                         },
@@ -526,6 +619,7 @@ def train_model(
                         {
                             "step": step,
                             "head_type": head_type,
+                            "arch": arch,
                             "model_state": raw_model.state_dict(),
                             "val_metrics": val_metrics,
                         },
@@ -536,6 +630,7 @@ def train_model(
                     {
                         "step": step,
                         "head_type": head_type,
+                        "arch": arch,
                         "model_state": raw_model.state_dict(),
                         "optimizer_state": optimizer.state_dict(),
                         "scheduler_state": scheduler.state_dict(),
@@ -555,6 +650,7 @@ def train_model(
             {
                 "step": total_steps,
                 "head_type": head_type,
+                "arch": arch,
                 "model_state": raw_model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "scheduler_state": scheduler.state_dict(),
@@ -566,6 +662,7 @@ def train_model(
         )
         summary = {
             "head_type": head_type,
+            "arch": arch,
             "seed": seed,
             "total_steps": total_steps,
             "batch_size_per_gpu": batch_size,

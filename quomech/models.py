@@ -144,7 +144,7 @@ class ExperimentEncoder(nn.Module):
 class MAB(nn.Module):
     """Fused SDPA Pre-LN Cross/Self Multihead Attention Block with KV-LayerNorm & QK-Norm."""
 
-    def __init__(self, d_model: int, n_heads: int = 8) -> None:
+    def __init__(self, d_model: int, n_heads: int = 8, ff_mult: int = 2) -> None:
         super().__init__()
         self.n_heads = n_heads
         self.d_head = d_model // n_heads
@@ -157,9 +157,9 @@ class MAB(nn.Module):
         self.k_norm = nn.LayerNorm(self.d_head)
         self.ln2 = nn.LayerNorm(d_model)
         self.ff = nn.Sequential(
-            nn.Linear(d_model, d_model * 2),
+            nn.Linear(d_model, d_model * ff_mult),
             nn.GELU(),
-            nn.Linear(d_model * 2, d_model),
+            nn.Linear(d_model * ff_mult, d_model),
         )
 
     def forward(
@@ -191,11 +191,11 @@ class MAB(nn.Module):
 class ISAB(nn.Module):
     """Induced Set Attention Block (strictly permutation-equivariant)."""
 
-    def __init__(self, d_model: int, n_heads: int = 8, num_inducing: int = 16) -> None:
+    def __init__(self, d_model: int, n_heads: int = 8, num_inducing: int = 16, ff_mult: int = 2) -> None:
         super().__init__()
         self.I = nn.Parameter(torch.randn(1, num_inducing, d_model) * (d_model ** -0.5))
-        self.mab1 = MAB(d_model, n_heads)
-        self.mab2 = MAB(d_model, n_heads)
+        self.mab1 = MAB(d_model, n_heads, ff_mult=ff_mult)
+        self.mab2 = MAB(d_model, n_heads, ff_mult=ff_mult)
 
     def forward(self, X: torch.Tensor, exp_pad_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         B = X.shape[0]
@@ -207,10 +207,10 @@ class ISAB(nn.Module):
 class PMA(nn.Module):
     """Pooling by Multihead Attention (strictly permutation-invariant)."""
 
-    def __init__(self, d_model: int, n_heads: int = 8, num_seeds: int = 4) -> None:
+    def __init__(self, d_model: int, n_heads: int = 8, num_seeds: int = 4, ff_mult: int = 2) -> None:
         super().__init__()
         self.S = nn.Parameter(torch.randn(1, num_seeds, d_model) * (d_model ** -0.5))
-        self.mab = MAB(d_model, n_heads)
+        self.mab = MAB(d_model, n_heads, ff_mult=ff_mult)
 
     def forward(self, X: torch.Tensor, exp_pad_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         B = X.shape[0]
@@ -221,12 +221,19 @@ class PMA(nn.Module):
 class SetEncoder(nn.Module):
     """2-layer Set Transformer (2x ISAB + PMA) outputting permutation-invariant f(D) in R^d_out."""
 
-    def __init__(self, d_in: int = 192, d_set: int = 256, n_heads: int = 8, num_inducing: int = 16) -> None:
+    def __init__(
+        self,
+        d_in: int = 192,
+        d_set: int = 256,
+        n_heads: int = 8,
+        num_inducing: int = 16,
+        ff_mult: int = 2,
+    ) -> None:
         super().__init__()
         self.in_proj = nn.Linear(d_in, d_set)
-        self.isab1 = ISAB(d_set, n_heads=n_heads, num_inducing=num_inducing)
-        self.isab2 = ISAB(d_set, n_heads=n_heads, num_inducing=num_inducing)
-        self.pma = PMA(d_set, n_heads=n_heads, num_seeds=4)
+        self.isab1 = ISAB(d_set, n_heads=n_heads, num_inducing=num_inducing, ff_mult=ff_mult)
+        self.isab2 = ISAB(d_set, n_heads=n_heads, num_inducing=num_inducing, ff_mult=ff_mult)
+        self.pma = PMA(d_set, n_heads=n_heads, num_seeds=4, ff_mult=ff_mult)
         self.out_proj = nn.Sequential(
             nn.LayerNorm(d_set * 4),
             nn.Linear(d_set * 4, d_set),
@@ -342,11 +349,14 @@ class QuoMechNet(nn.Module):
         mech_param_mask: torch.Tensor,  # (M, n_params)
         head_type: str = "factorized",  # "factorized" (QuoMech) or "flat" (baseline)
         d_exp: int = 192,
+        n_heads_exp: int = 6,
         d_set: int = 256,
+        set_ff_mult: int = 2,
         d_g: int = 128,
         nsf_layers: int = 6,
         nsf_hidden: int = 192,
         nsf_bins: int = 8,
+        train_class_mask: Optional[torch.Tensor] = None,  # (M,) bool for OOD held-out training
     ) -> None:
         super().__init__()
         self.head_type = head_type
@@ -355,15 +365,21 @@ class QuoMechNet(nn.Module):
         self.register_buffer("prior_mean", mech_prior_mean.float())
         self.register_buffer("prior_std", mech_prior_std.float())
         self.register_buffer("param_mask", mech_param_mask.float())
+        if train_class_mask is not None:
+            self.register_buffer("train_class_mask", train_class_mask.bool())
+        else:
+            self.train_class_mask = None
 
         self.exp_encoder = ExperimentEncoder(
             design_dim=design_dim,
             n_obs_channels=n_obs_channels,
             d_model=d_exp,
-            n_heads=6,
+            n_heads=n_heads_exp,
             n_layers=4,
         )
-        self.set_encoder = SetEncoder(d_in=d_exp, d_set=d_set, n_heads=8, num_inducing=16)
+        self.set_encoder = SetEncoder(
+            d_in=d_exp, d_set=d_set, n_heads=8, num_inducing=16, ff_mult=set_ff_mult
+        )
         if head_type == "factorized":
             self.mech_head = FactorizedMechanismHead(
                 mech_options=mech_options,
@@ -449,7 +465,10 @@ class QuoMechNet(nn.Module):
         """Joint NLL loss = -log q(m | D) - log q(z_theta | m, D)."""
         f = self.encode_dataset(design_feats, times, obs_vals, obs_masks, time_pad_mask, exp_pad_mask)
         logits, G = self.mech_head(f)
-        loss_m = F.cross_entropy(logits.float(), mech_ids)
+        logits_ce = logits.float()
+        if self.training and self.train_class_mask is not None:
+            logits_ce = logits_ce.masked_fill(~self.train_class_mask.unsqueeze(0), -1e9)
+        loss_m = F.cross_entropy(logits_ce, mech_ids)
 
         g_m = G[mech_ids]  # (B, d_g)
         cond = torch.cat([f.float(), g_m.float()], dim=-1)

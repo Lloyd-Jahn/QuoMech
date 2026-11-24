@@ -472,6 +472,7 @@ int eval_multi_design_residuals(
     const int* obs_offsets,
     const double* t_eval,
     int n_t,
+    int per_design_t_eval,
     const double* target_flat,
     const double* inv_sigma_flat,
     double rtol,
@@ -489,9 +490,10 @@ int eval_multi_design_residuals(
     const int ns = net.n_species;
     int rpos = 0;
     for (int d = 0; d < n_designs; ++d) {
+        const double* te_d = per_design_t_eval ? (t_eval + static_cast<size_t>(d) * n_t) : t_eval;
         int st = integrate_ros2_single(
             net, rxn_mask, log10_k,
-            y0_all + d * ns, t_eval, n_t,
+            y0_all + d * ns, te_d, n_t,
             rtol, atol, max_steps, y_buf, nullptr, nullptr
         );
         if (st != 0) return st;
@@ -524,6 +526,7 @@ double fit_lm_single(
     const int* obs_offsets,
     const double* t_eval,
     int n_t,
+    int per_design_t_eval,
     const double* target_flat,
     const double* inv_sigma_flat,
     int n_res,
@@ -546,7 +549,7 @@ double fit_lm_single(
 
     int st = eval_multi_design_residuals(
         net, rxn_mask, theta, active_slots, n_active,
-        n_designs, y0_all, obs_flat, obs_offsets, t_eval, n_t,
+        n_designs, y0_all, obs_flat, obs_offsets, t_eval, n_t, per_design_t_eval,
         target_flat, inv_sigma_flat, rtol, atol, max_ode_steps,
         res.data(), y_buf.data()
     );
@@ -582,7 +585,7 @@ double fit_lm_single(
             theta[p] = orig + eps;
             int stp = eval_multi_design_residuals(
                 net, rxn_mask, theta, active_slots, n_active,
-                n_designs, y0_all, obs_flat, obs_offsets, t_eval, n_t,
+                n_designs, y0_all, obs_flat, obs_offsets, t_eval, n_t, per_design_t_eval,
                 target_flat, inv_sigma_flat, rtol, atol, max_ode_steps,
                 res_pert.data(), y_buf.data()
             );
@@ -650,7 +653,7 @@ double fit_lm_single(
 
             int stt = eval_multi_design_residuals(
                 net, rxn_mask, theta_trial, active_slots, n_active,
-                n_designs, y0_all, obs_flat, obs_offsets, t_eval, n_t,
+                n_designs, y0_all, obs_flat, obs_offsets, t_eval, n_t, per_design_t_eval,
                 target_flat, inv_sigma_flat, rtol, atol, max_ode_steps,
                 res_trial.data(), y_buf.data()
             );
@@ -739,7 +742,61 @@ void simulate_batch_ros2(
     }
 }
 
-void fit_lm_batch(
+void simulate_batch_ros2_var_t(
+    int batch,
+    int n_species,
+    int n_reactions,
+    int n_params,
+    const int* reactant1,
+    const int* reactant2,
+    const int* rxn_param_slot,
+    const double* stoich_matrix,
+    const int* rxn_masks,
+    const double* log10_ks,
+    const double* y0s,
+    const double* t_eval_sets,   // [n_t_sets * n_t]
+    const int* t_set_ids,        // [batch] -> index into t_eval_sets
+    int n_t,
+    double rtol,
+    double atol,
+    int max_steps,
+    int n_threads,
+    double* y_out,
+    double* flux1_out,
+    double* flux2_out,
+    int* status_out
+) {
+    NetworkDesc net;
+    build_network_desc(
+        n_species, n_reactions, n_params,
+        reactant1, reactant2, rxn_param_slot, stoich_matrix, net
+    );
+
+    if (n_threads > 0) omp_set_num_threads(n_threads);
+
+    #pragma omp parallel for schedule(dynamic, 32)
+    for (int i = 0; i < batch; ++i) {
+        double* f1 = flux1_out ? (flux1_out + static_cast<size_t>(i) * n_reactions) : nullptr;
+        double* f2 = flux2_out ? (flux2_out + static_cast<size_t>(i) * n_reactions) : nullptr;
+        const double* te_i = t_eval_sets + static_cast<size_t>(t_set_ids[i]) * n_t;
+        status_out[i] = integrate_ros2_single(
+            net,
+            rxn_masks + static_cast<size_t>(i) * n_reactions,
+            log10_ks + static_cast<size_t>(i) * n_params,
+            y0s + static_cast<size_t>(i) * n_species,
+            te_i,
+            n_t,
+            rtol,
+            atol,
+            max_steps,
+            y_out + static_cast<size_t>(i) * n_t * n_species,
+            f1,
+            f2
+        );
+    }
+}
+
+void fit_lm_batch_ex(
     int n_tasks,
     int n_starts,
     int n_species,
@@ -758,6 +815,7 @@ void fit_lm_batch(
     const int* obs_offsets,
     const double* t_eval,
     int n_t,
+    int per_design_t_eval,
     int n_res,
     const double* targets_flat,
     const double* inv_sigmas_flat,
@@ -816,7 +874,7 @@ void fit_lm_batch(
             double rms = fit_lm_single(
                 net, rmask, active_slots, n_active,
                 init_a, lb_a, ub_a,
-                n_designs, y0_m, obs_flat, obs_offsets, t_eval, n_t,
+                n_designs, y0_m, obs_flat, obs_offsets, t_eval, n_t, per_design_t_eval,
                 target_t, invs_t, n_res,
                 rtol, atol, max_ode_steps, max_lm_iters, early_stop_rms, out_a
             );
@@ -834,12 +892,57 @@ void fit_lm_batch(
     }
 }
 
-// Pair-grouped directional multi-start LM with EXACT binomial early exit:
-// For each pair p in [0, n_pairs), evaluates K samples sequentially in a thread;
-// if more than max_fails samples exceed fail_rms_thresh (making it mathematically
-// impossible to meet the pass-rate threshold), prunes remaining samples of pair p
-// (setting rms = 999.0) with ZERO approximation to the equivalence test.
-void fit_lm_pairs_dir(
+void fit_lm_batch(
+    int n_tasks,
+    int n_starts,
+    int n_species,
+    int n_reactions,
+    int n_params,
+    const int* reactant1,
+    const int* reactant2,
+    const int* rxn_param_slot,
+    const double* stoich_matrix,
+    const int* mech_rxn_masks,
+    const int* mech_param_masks,
+    const int* task_mech_ids,
+    int n_designs,
+    const double* mech_y0_all,
+    const int* obs_flat,
+    const int* obs_offsets,
+    const double* t_eval,
+    int n_t,
+    int n_res,
+    const double* targets_flat,
+    const double* inv_sigmas_flat,
+    const double* init_thetas,
+    const double* lb_all,
+    const double* ub_all,
+    double rtol,
+    double atol,
+    int max_ode_steps,
+    int max_lm_iters,
+    double early_stop_rms,
+    int n_threads,
+    double* best_rms_out,
+    double* best_theta_out
+) {
+    fit_lm_batch_ex(
+        n_tasks, n_starts, n_species, n_reactions, n_params,
+        reactant1, reactant2, rxn_param_slot, stoich_matrix,
+        mech_rxn_masks, mech_param_masks, task_mech_ids,
+        n_designs, mech_y0_all, obs_flat, obs_offsets,
+        t_eval, n_t, 0, n_res,
+        targets_flat, inv_sigmas_flat, init_thetas, lb_all, ub_all,
+        rtol, atol, max_ode_steps, max_lm_iters, early_stop_rms,
+        n_threads, best_rms_out, best_theta_out
+    );
+}
+
+// Extended pair-grouped directional multi-start LM:
+//   - supports per-design t_eval (for heterogeneous windows like X_basic^ref)
+//   - optionally writes best_theta_out [n_pairs * K * n_params] for 0-iter nested inheritance
+//   - exact binomial early exit (n_fails > max_fails -> remaining samples set to 999.0)
+void fit_lm_pairs_dir_ex(
     int n_pairs,
     int K,
     int n_starts,
@@ -859,6 +962,7 @@ void fit_lm_pairs_dir(
     const int* obs_offsets,
     const double* t_eval,
     int n_t,
+    int per_design_t_eval,
     int n_res,
     const double* targets_flat,       // [n_pairs * K * n_res]
     const double* inv_sigma_1d,       // [n_res] shared across all tasks
@@ -873,7 +977,8 @@ void fit_lm_pairs_dir(
     double fail_rms_thresh,
     int max_fails,                    // break pair early when n_fails > max_fails (<0 disables)
     int n_threads,
-    double* best_rms_out              // [n_pairs * K]
+    double* best_rms_out,             // [n_pairs * K]
+    double* best_theta_out            // [n_pairs * K * n_params] or nullptr
 ) {
     NetworkDesc net;
     build_network_desc(
@@ -911,6 +1016,9 @@ void fit_lm_pairs_dir(
         bool pruned = false;
         for (int k = 0; k < K; ++k) {
             const size_t task_idx = static_cast<size_t>(p) * K + k;
+            double* theta_out_k = best_theta_out ? (best_theta_out + task_idx * n_params) : nullptr;
+            if (theta_out_k) std::memset(theta_out_k, 0, sizeof(double) * n_params);
+
             if (pruned) {
                 best_rms_out[task_idx] = 999.0;
                 continue;
@@ -925,11 +1033,18 @@ void fit_lm_pairs_dir(
                 double rms = fit_lm_single(
                     net, rmask, active_slots, n_active,
                     init_a, lb_a, ub_a,
-                    n_designs, y0_m, obs_flat, obs_offsets, t_eval, n_t,
+                    n_designs, y0_m, obs_flat, obs_offsets, t_eval, n_t, per_design_t_eval,
                     target_t, inv_sigma_1d, n_res,
                     rtol, atol, max_ode_steps, max_lm_iters, early_stop_rms, out_a
                 );
-                if (rms < best_rms) best_rms = rms;
+                if (rms < best_rms) {
+                    best_rms = rms;
+                    if (theta_out_k) {
+                        for (int j = 0; j < n_active; ++j) {
+                            theta_out_k[active_slots[j]] = out_a[j];
+                        }
+                    }
+                }
                 if (early_stop_rms > 0.0 && best_rms <= early_stop_rms) break;
             }
             best_rms_out[task_idx] = best_rms;
@@ -942,6 +1057,131 @@ void fit_lm_pairs_dir(
         if (n_pairs >= 200 && (c % report_step == 0 || c == n_pairs)) {
             std::printf("    [LM-pairs] %d / %d pairs done\n", c, n_pairs);
             std::fflush(stdout);
+        }
+    }
+}
+
+void fit_lm_pairs_dir(
+    int n_pairs,
+    int K,
+    int n_starts,
+    int n_species,
+    int n_reactions,
+    int n_params,
+    const int* reactant1,
+    const int* reactant2,
+    const int* rxn_param_slot,
+    const double* stoich_matrix,
+    const int* mech_rxn_masks,
+    const int* mech_param_masks,
+    const int* pair_target_mech_ids,
+    int n_designs,
+    const double* mech_y0_all,
+    const int* obs_flat,
+    const int* obs_offsets,
+    const double* t_eval,
+    int n_t,
+    int n_res,
+    const double* targets_flat,
+    const double* inv_sigma_1d,
+    const double* init_thetas,
+    const double* lb_all,
+    const double* ub_all,
+    double rtol,
+    double atol,
+    int max_ode_steps,
+    int max_lm_iters,
+    double early_stop_rms,
+    double fail_rms_thresh,
+    int max_fails,
+    int n_threads,
+    double* best_rms_out
+) {
+    fit_lm_pairs_dir_ex(
+        n_pairs, K, n_starts, n_species, n_reactions, n_params,
+        reactant1, reactant2, rxn_param_slot, stoich_matrix,
+        mech_rxn_masks, mech_param_masks, pair_target_mech_ids,
+        n_designs, mech_y0_all, obs_flat, obs_offsets,
+        t_eval, n_t, 0, n_res,
+        targets_flat, inv_sigma_1d, init_thetas, lb_all, ub_all,
+        rtol, atol, max_ode_steps, max_lm_iters, early_stop_rms,
+        fail_rms_thresh, max_fails, n_threads, best_rms_out, nullptr
+    );
+}
+
+// 0-iteration forward verification of inherited fitted parameters on subset design sets D \subset D'.
+void eval_pairs_forward_ex(
+    int n_pairs,
+    int K,
+    int n_species,
+    int n_reactions,
+    int n_params,
+    const int* reactant1,
+    const int* reactant2,
+    const int* rxn_param_slot,
+    const double* stoich_matrix,
+    const int* mech_rxn_masks,
+    const int* mech_param_masks,
+    const int* pair_target_mech_ids,  // [n_pairs]
+    int n_designs,
+    const double* mech_y0_all,
+    const int* obs_flat,
+    const int* obs_offsets,
+    const double* t_eval,
+    int n_t,
+    int per_design_t_eval,
+    int n_res,
+    const double* targets_flat,       // [n_pairs * K * n_res]
+    const double* inv_sigma_1d,       // [n_res]
+    const double* fitted_thetas,      // [n_pairs * K * n_params]
+    double rtol,
+    double atol,
+    int max_ode_steps,
+    int n_threads,
+    double* rms_out                   // [n_pairs * K]
+) {
+    NetworkDesc net;
+    build_network_desc(
+        n_species, n_reactions, n_params,
+        reactant1, reactant2, rxn_param_slot, stoich_matrix, net
+    );
+
+    if (n_threads > 0) omp_set_num_threads(n_threads);
+
+    #pragma omp parallel for schedule(dynamic, 4)
+    for (int p = 0; p < n_pairs; ++p) {
+        const int mid = pair_target_mech_ids[p];
+        const int* rmask = mech_rxn_masks + static_cast<size_t>(mid) * n_reactions;
+        const int* pmask = mech_param_masks + static_cast<size_t>(mid) * n_params;
+        const double* y0_m = mech_y0_all + static_cast<size_t>(mid) * n_designs * n_species;
+
+        int active_slots[MAX_P];
+        double active_th[MAX_P];
+        int n_active = 0;
+        for (int q = 0; q < n_params; ++q) {
+            if (pmask[q]) active_slots[n_active++] = q;
+        }
+
+        std::vector<double> y_buf(n_t * n_species);
+        std::vector<double> res(n_res);
+
+        for (int k = 0; k < K; ++k) {
+            const size_t task_idx = static_cast<size_t>(p) * K + k;
+            const double* th_full = fitted_thetas + task_idx * n_params;
+            for (int j = 0; j < n_active; ++j) active_th[j] = th_full[active_slots[j]];
+            int st = eval_multi_design_residuals(
+                net, rmask, active_th, active_slots, n_active,
+                n_designs, y0_m, obs_flat, obs_offsets, t_eval, n_t, per_design_t_eval,
+                targets_flat + task_idx * n_res, inv_sigma_1d,
+                rtol, atol, max_ode_steps, res.data(), y_buf.data()
+            );
+            if (st != 0) {
+                rms_out[task_idx] = 1e9;
+            } else {
+                double cost = 0.0;
+                for (int i = 0; i < n_res; ++i) cost += res[i] * res[i];
+                rms_out[task_idx] = std::sqrt(cost / n_res);
+            }
         }
     }
 }
