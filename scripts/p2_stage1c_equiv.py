@@ -138,6 +138,7 @@ def main():
     ap.add_argument("--k2", type=int, default=32)
     ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--out-dir", type=str, default="results/phase2")
+    ap.add_argument("--no-resume", action="store_true", help="Recompute even if equiv_<tier>.json exists")
     args = ap.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -159,6 +160,25 @@ def main():
     print(f"Sampled pools in {time.perf_counter() - t0:.1f}s", flush=True)
 
     t_eval_1d = np.linspace(0.0, 1.0, 20)
+    all_results = {}
+
+    # Independent continuous reference set X_basic^ref FIRST (fast, unblocks E3 BOED!)
+    x_json = equiv_dir / "equiv_X_basic_ref.json"
+    if (not args.no_resume) and x_json.exists():
+        print(f"\n=== Resuming Independent Continuous Set: X_basic_ref (loaded {x_json}) ===", flush=True)
+        all_results["X_basic_ref"] = json.loads(x_json.read_text())
+    else:
+        print("\n=== Running Independent Continuous Set: X_basic_ref ===", flush=True)
+        x_designs, x_t_eval_2d = build_x_basic_ref_designs(g, n_t=20)
+        res_x, _ = run_two_stage_equivalence_multicore(
+            g, sim, "X_basic_ref", x_designs, x_t_eval_2d, pools,
+            inherited_fits=None, seed=args.seed + 999,
+        )
+        all_results["X_basic_ref"] = res_x
+        with open(x_json, "w") as f:
+            json.dump(res_x, f, indent=2)
+        print(f"  Saved {x_json}", flush=True)
+
     # Reverse-nested discrete chain: Xi_full -> Xi_basic -> Xi_noP -> D0_D5 -> D0
     nested_chain = [
         ("Xi_full",  g.tiers["full"]),
@@ -168,10 +188,14 @@ def main():
         ("D0",       [0]),
     ]
 
-    all_results = {}
     inherited_fits = None
 
     for idx_tier, (tier_name, design_indices) in enumerate(nested_chain):
+        out_json = equiv_dir / f"equiv_{tier_name}.json"
+        if (not args.no_resume) and out_json.exists():
+            print(f"\n=== Resuming Nested Tier [{idx_tier + 1}/5]: {tier_name} (loaded {out_json}) ===", flush=True)
+            all_results[tier_name] = json.loads(out_json.read_text())
+            continue
         designs = [g.catalog[i] for i in design_indices]
         print(f"\n=== Running Nested Tier [{idx_tier + 1}/5]: {tier_name} ({[d.name for d in designs]}) ===", flush=True)
         res, inherited_fits = run_two_stage_equivalence_multicore(
@@ -179,21 +203,9 @@ def main():
             inherited_fits=inherited_fits, seed=args.seed + 100 * (idx_tier + 1),
         )
         all_results[tier_name] = res
-        out_json = equiv_dir / f"equiv_{tier_name}.json"
         with open(out_json, "w") as f:
             json.dump(res, f, indent=2)
         print(f"  Saved {out_json}", flush=True)
-
-    # Independent continuous reference set X_basic^ref (NOT a subset of Xi_full!)
-    print("\n=== Running Independent Continuous Set [6/6]: X_basic_ref ===", flush=True)
-    x_designs, x_t_eval_2d = build_x_basic_ref_designs(g, n_t=20)
-    res_x, _ = run_two_stage_equivalence_multicore(
-        g, sim, "X_basic_ref", x_designs, x_t_eval_2d, pools,
-        inherited_fits=None, seed=args.seed + 999,
-    )
-    all_results["X_basic_ref"] = res_x
-    with open(equiv_dir / "equiv_X_basic_ref.json", "w") as f:
-        json.dump(res_x, f, indent=2)
 
     # Save compact index + write markdown summary
     compact = {

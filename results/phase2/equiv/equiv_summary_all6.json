@@ -1,0 +1,775 @@
+{
+  "X_basic_ref": {
+    "n_designs": 9,
+    "design_names": [
+      "X_D0",
+      "X_lowCat",
+      "X_highCat",
+      "X_highB",
+      "X_highA_lowB",
+      "X_highA_highB",
+      "X_lowSub_SE",
+      "X_lowSub_hiP",
+      "X_loCat_hiP"
+    ],
+    "n_classes": 417,
+    "n_singleton": 323,
+    "n_nontrivial_classes": 94,
+    "n_mechs_in_nontrivial": 204,
+    "max_class_size": 4,
+    "core_merge_stats": {
+      "core_codes": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "edge_matrix": [
+        [
+          44,
+          1,
+          2,
+          0
+        ],
+        [
+          1,
+          51,
+          5,
+          0
+        ],
+        [
+          2,
+          5,
+          49,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          4
+        ]
+      ],
+      "n_within_core_edges": 148,
+      "n_cross_core_edges": 8,
+      "n_cross_core_classes": 4,
+      "n_mechs_in_cross_core_classes": 9
+    },
+    "sensitivity": {
+      "sig_0.5pct_pr_80pct": {
+        "n_classes": 461,
+        "n_nontrivial_classes": 62,
+        "n_mechs_in_nontrivial": 128,
+        "max_class_size": 3,
+        "n_passing_edges": 79,
+        "n_non_transitive": 9
+      },
+      "sig_0.5pct_pr_85pct": {
+        "n_classes": 484,
+        "n_nontrivial_classes": 41,
+        "n_mechs_in_nontrivial": 84,
+        "max_class_size": 3,
+        "n_passing_edges": 51,
+        "n_non_transitive": 6
+      },
+      "sig_0.5pct_pr_90pct": {
+        "n_classes": 494,
+        "n_nontrivial_classes": 32,
+        "n_mechs_in_nontrivial": 65,
+        "max_class_size": 3,
+        "n_passing_edges": 38,
+        "n_non_transitive": 4
+      },
+      "sig_1.0pct_pr_80pct": {
+        "n_classes": 378,
+        "n_nontrivial_classes": 119,
+        "n_mechs_in_nontrivial": 268,
+        "max_class_size": 4,
+        "n_passing_edges": 234,
+        "n_non_transitive": 24
+      },
+      "sig_1.0pct_pr_85pct": {
+        "n_classes": 417,
+        "n_nontrivial_classes": 94,
+        "n_mechs_in_nontrivial": 204,
+        "max_class_size": 4,
+        "n_passing_edges": 156,
+        "n_non_transitive": 18
+      },
+      "sig_1.0pct_pr_90pct": {
+        "n_classes": 435,
+        "n_nontrivial_classes": 83,
+        "n_mechs_in_nontrivial": 175,
+        "max_class_size": 3,
+        "n_passing_edges": 127,
+        "n_non_transitive": 14
+      },
+      "sig_2.0pct_pr_80pct": {
+        "n_classes": 248,
+        "n_nontrivial_classes": 155,
+        "n_mechs_in_nontrivial": 434,
+        "max_class_size": 8,
+        "n_passing_edges": 1180,
+        "n_non_transitive": 8
+      },
+      "sig_2.0pct_pr_85pct": {
+        "n_classes": 298,
+        "n_nontrivial_classes": 157,
+        "n_mechs_in_nontrivial": 386,
+        "max_class_size": 6,
+        "n_passing_edges": 711,
+        "n_non_transitive": 23
+      },
+      "sig_2.0pct_pr_90pct": {
+        "n_classes": 314,
+        "n_nontrivial_classes": 152,
+        "n_mechs_in_nontrivial": 365,
+        "max_class_size": 5,
+        "n_passing_edges": 539,
+        "n_non_transitive": 30
+      }
+    },
+    "elapsed_total_s": 4327.314218509011
+  },
+  "Xi_full": {
+    "n_designs": 10,
+    "design_names": [
+      "D0",
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8",
+      "D9"
+    ],
+    "n_classes": 392,
+    "n_singleton": 289,
+    "n_nontrivial_classes": 103,
+    "n_mechs_in_nontrivial": 238,
+    "max_class_size": 5,
+    "core_merge_stats": {
+      "core_codes": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "edge_matrix": [
+        [
+          27,
+          5,
+          40,
+          0
+        ],
+        [
+          5,
+          47,
+          71,
+          0
+        ],
+        [
+          40,
+          71,
+          77,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          11
+        ]
+      ],
+      "n_within_core_edges": 162,
+      "n_cross_core_edges": 116,
+      "n_cross_core_classes": 51,
+      "n_mechs_in_cross_core_classes": 113
+    },
+    "sensitivity": {
+      "sig_0.5pct_pr_80pct": {
+        "n_classes": 483,
+        "n_nontrivial_classes": 38,
+        "n_mechs_in_nontrivial": 82,
+        "max_class_size": 4,
+        "n_passing_edges": 57,
+        "n_non_transitive": 5
+      },
+      "sig_0.5pct_pr_85pct": {
+        "n_classes": 506,
+        "n_nontrivial_classes": 20,
+        "n_mechs_in_nontrivial": 41,
+        "max_class_size": 3,
+        "n_passing_edges": 25,
+        "n_non_transitive": 2
+      },
+      "sig_0.5pct_pr_90pct": {
+        "n_classes": 514,
+        "n_nontrivial_classes": 13,
+        "n_mechs_in_nontrivial": 26,
+        "max_class_size": 2,
+        "n_passing_edges": 14,
+        "n_non_transitive": 1
+      },
+      "sig_1.0pct_pr_80pct": {
+        "n_classes": 334,
+        "n_nontrivial_classes": 127,
+        "n_mechs_in_nontrivial": 320,
+        "max_class_size": 6,
+        "n_passing_edges": 522,
+        "n_non_transitive": 39
+      },
+      "sig_1.0pct_pr_85pct": {
+        "n_classes": 392,
+        "n_nontrivial_classes": 103,
+        "n_mechs_in_nontrivial": 238,
+        "max_class_size": 5,
+        "n_passing_edges": 278,
+        "n_non_transitive": 33
+      },
+      "sig_1.0pct_pr_90pct": {
+        "n_classes": 426,
+        "n_nontrivial_classes": 82,
+        "n_mechs_in_nontrivial": 183,
+        "max_class_size": 5,
+        "n_passing_edges": 176,
+        "n_non_transitive": 20
+      },
+      "sig_2.0pct_pr_80pct": {
+        "n_classes": 182,
+        "n_nontrivial_classes": 119,
+        "n_mechs_in_nontrivial": 464,
+        "max_class_size": 11,
+        "n_passing_edges": 2539,
+        "n_non_transitive": 7
+      },
+      "sig_2.0pct_pr_85pct": {
+        "n_classes": 214,
+        "n_nontrivial_classes": 140,
+        "n_mechs_in_nontrivial": 453,
+        "max_class_size": 8,
+        "n_passing_edges": 1727,
+        "n_non_transitive": 13
+      },
+      "sig_2.0pct_pr_90pct": {
+        "n_classes": 247,
+        "n_nontrivial_classes": 147,
+        "n_mechs_in_nontrivial": 427,
+        "max_class_size": 8,
+        "n_passing_edges": 1347,
+        "n_non_transitive": 18
+      }
+    },
+    "elapsed_total_s": 6835.310740225017
+  },
+  "Xi_basic": {
+    "n_designs": 7,
+    "design_names": [
+      "D0",
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6"
+    ],
+    "n_classes": 306,
+    "n_singleton": 160,
+    "n_nontrivial_classes": 146,
+    "n_mechs_in_nontrivial": 367,
+    "max_class_size": 6,
+    "core_merge_stats": {
+      "core_codes": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "edge_matrix": [
+        [
+          109,
+          15,
+          69,
+          11
+        ],
+        [
+          15,
+          113,
+          134,
+          0
+        ],
+        [
+          69,
+          134,
+          183,
+          0
+        ],
+        [
+          11,
+          0,
+          0,
+          12
+        ]
+      ],
+      "n_within_core_edges": 417,
+      "n_cross_core_edges": 229,
+      "n_cross_core_classes": 50,
+      "n_mechs_in_cross_core_classes": 128
+    },
+    "sensitivity": {
+      "sig_0.5pct_pr_80pct": {
+        "n_classes": 380,
+        "n_nontrivial_classes": 112,
+        "n_mechs_in_nontrivial": 259,
+        "max_class_size": 5,
+        "n_passing_edges": 251,
+        "n_non_transitive": 28
+      },
+      "sig_0.5pct_pr_85pct": {
+        "n_classes": 428,
+        "n_nontrivial_classes": 90,
+        "n_mechs_in_nontrivial": 189,
+        "max_class_size": 4,
+        "n_passing_edges": 140,
+        "n_non_transitive": 21
+      },
+      "sig_0.5pct_pr_90pct": {
+        "n_classes": 451,
+        "n_nontrivial_classes": 70,
+        "n_mechs_in_nontrivial": 146,
+        "max_class_size": 4,
+        "n_passing_edges": 108,
+        "n_non_transitive": 17
+      },
+      "sig_1.0pct_pr_80pct": {
+        "n_classes": 261,
+        "n_nontrivial_classes": 151,
+        "n_mechs_in_nontrivial": 417,
+        "max_class_size": 8,
+        "n_passing_edges": 1014,
+        "n_non_transitive": 22
+      },
+      "sig_1.0pct_pr_85pct": {
+        "n_classes": 306,
+        "n_nontrivial_classes": 146,
+        "n_mechs_in_nontrivial": 367,
+        "max_class_size": 6,
+        "n_passing_edges": 646,
+        "n_non_transitive": 27
+      },
+      "sig_1.0pct_pr_90pct": {
+        "n_classes": 335,
+        "n_nontrivial_classes": 140,
+        "n_mechs_in_nontrivial": 332,
+        "max_class_size": 6,
+        "n_passing_edges": 460,
+        "n_non_transitive": 31
+      },
+      "sig_2.0pct_pr_80pct": {
+        "n_classes": 160,
+        "n_nontrivial_classes": 118,
+        "n_mechs_in_nontrivial": 485,
+        "max_class_size": 11,
+        "n_passing_edges": 3445,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_85pct": {
+        "n_classes": 195,
+        "n_nontrivial_classes": 132,
+        "n_mechs_in_nontrivial": 464,
+        "max_class_size": 10,
+        "n_passing_edges": 2353,
+        "n_non_transitive": 2
+      },
+      "sig_2.0pct_pr_90pct": {
+        "n_classes": 214,
+        "n_nontrivial_classes": 140,
+        "n_mechs_in_nontrivial": 453,
+        "max_class_size": 9,
+        "n_passing_edges": 1880,
+        "n_non_transitive": 3
+      }
+    },
+    "elapsed_total_s": 5950.300693969708
+  },
+  "Xi_noP": {
+    "n_designs": 6,
+    "design_names": [
+      "D0",
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5"
+    ],
+    "n_classes": 290,
+    "n_singleton": 147,
+    "n_nontrivial_classes": 143,
+    "n_mechs_in_nontrivial": 380,
+    "max_class_size": 7,
+    "core_merge_stats": {
+      "core_codes": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "edge_matrix": [
+        [
+          140,
+          18,
+          77,
+          13
+        ],
+        [
+          18,
+          154,
+          178,
+          0
+        ],
+        [
+          77,
+          178,
+          241,
+          0
+        ],
+        [
+          13,
+          0,
+          0,
+          13
+        ]
+      ],
+      "n_within_core_edges": 548,
+      "n_cross_core_edges": 286,
+      "n_cross_core_classes": 54,
+      "n_mechs_in_cross_core_classes": 146
+    },
+    "sensitivity": {
+      "sig_0.5pct_pr_80pct": {
+        "n_classes": 368,
+        "n_nontrivial_classes": 114,
+        "n_mechs_in_nontrivial": 273,
+        "max_class_size": 6,
+        "n_passing_edges": 305,
+        "n_non_transitive": 30
+      },
+      "sig_0.5pct_pr_85pct": {
+        "n_classes": 403,
+        "n_nontrivial_classes": 100,
+        "n_mechs_in_nontrivial": 224,
+        "max_class_size": 4,
+        "n_passing_edges": 197,
+        "n_non_transitive": 25
+      },
+      "sig_0.5pct_pr_90pct": {
+        "n_classes": 422,
+        "n_nontrivial_classes": 87,
+        "n_mechs_in_nontrivial": 192,
+        "max_class_size": 4,
+        "n_passing_edges": 160,
+        "n_non_transitive": 20
+      },
+      "sig_1.0pct_pr_80pct": {
+        "n_classes": 247,
+        "n_nontrivial_classes": 144,
+        "n_mechs_in_nontrivial": 424,
+        "max_class_size": 9,
+        "n_passing_edges": 1327,
+        "n_non_transitive": 12
+      },
+      "sig_1.0pct_pr_85pct": {
+        "n_classes": 290,
+        "n_nontrivial_classes": 143,
+        "n_mechs_in_nontrivial": 380,
+        "max_class_size": 7,
+        "n_passing_edges": 834,
+        "n_non_transitive": 21
+      },
+      "sig_1.0pct_pr_90pct": {
+        "n_classes": 318,
+        "n_nontrivial_classes": 144,
+        "n_mechs_in_nontrivial": 353,
+        "max_class_size": 7,
+        "n_passing_edges": 591,
+        "n_non_transitive": 27
+      },
+      "sig_2.0pct_pr_80pct": {
+        "n_classes": 139,
+        "n_nontrivial_classes": 103,
+        "n_mechs_in_nontrivial": 491,
+        "max_class_size": 15,
+        "n_passing_edges": 5200,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_85pct": {
+        "n_classes": 172,
+        "n_nontrivial_classes": 120,
+        "n_mechs_in_nontrivial": 475,
+        "max_class_size": 13,
+        "n_passing_edges": 3615,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_90pct": {
+        "n_classes": 201,
+        "n_nontrivial_classes": 126,
+        "n_mechs_in_nontrivial": 452,
+        "max_class_size": 12,
+        "n_passing_edges": 2853,
+        "n_non_transitive": 2
+      }
+    },
+    "elapsed_total_s": 6682.118674680125
+  },
+  "D0_D5": {
+    "n_designs": 2,
+    "design_names": [
+      "D0",
+      "D5"
+    ],
+    "n_classes": 99,
+    "n_singleton": 23,
+    "n_nontrivial_classes": 76,
+    "n_mechs_in_nontrivial": 504,
+    "max_class_size": 30,
+    "core_merge_stats": {
+      "core_codes": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "edge_matrix": [
+        [
+          1204,
+          958,
+          1792,
+          494
+        ],
+        [
+          958,
+          2363,
+          3242,
+          34
+        ],
+        [
+          1792,
+          3242,
+          1714,
+          169
+        ],
+        [
+          494,
+          34,
+          169,
+          199
+        ]
+      ],
+      "n_within_core_edges": 5480,
+      "n_cross_core_edges": 6689,
+      "n_cross_core_classes": 56,
+      "n_mechs_in_cross_core_classes": 417
+    },
+    "sensitivity": {
+      "sig_0.5pct_pr_80pct": {
+        "n_classes": 154,
+        "n_nontrivial_classes": 114,
+        "n_mechs_in_nontrivial": 487,
+        "max_class_size": 16,
+        "n_passing_edges": 4537,
+        "n_non_transitive": 3
+      },
+      "sig_0.5pct_pr_85pct": {
+        "n_classes": 210,
+        "n_nontrivial_classes": 128,
+        "n_mechs_in_nontrivial": 445,
+        "max_class_size": 13,
+        "n_passing_edges": 2441,
+        "n_non_transitive": 8
+      },
+      "sig_0.5pct_pr_90pct": {
+        "n_classes": 246,
+        "n_nontrivial_classes": 149,
+        "n_mechs_in_nontrivial": 430,
+        "max_class_size": 9,
+        "n_passing_edges": 1651,
+        "n_non_transitive": 12
+      },
+      "sig_1.0pct_pr_80pct": {
+        "n_classes": 79,
+        "n_nontrivial_classes": 64,
+        "n_mechs_in_nontrivial": 512,
+        "max_class_size": 36,
+        "n_passing_edges": 18502,
+        "n_non_transitive": 1
+      },
+      "sig_1.0pct_pr_85pct": {
+        "n_classes": 99,
+        "n_nontrivial_classes": 76,
+        "n_mechs_in_nontrivial": 504,
+        "max_class_size": 30,
+        "n_passing_edges": 12169,
+        "n_non_transitive": 2
+      },
+      "sig_1.0pct_pr_90pct": {
+        "n_classes": 124,
+        "n_nontrivial_classes": 92,
+        "n_mechs_in_nontrivial": 495,
+        "max_class_size": 25,
+        "n_passing_edges": 9055,
+        "n_non_transitive": 2
+      },
+      "sig_2.0pct_pr_80pct": {
+        "n_classes": 46,
+        "n_nontrivial_classes": 42,
+        "n_mechs_in_nontrivial": 523,
+        "max_class_size": 85,
+        "n_passing_edges": 40444,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_85pct": {
+        "n_classes": 52,
+        "n_nontrivial_classes": 45,
+        "n_mechs_in_nontrivial": 520,
+        "max_class_size": 70,
+        "n_passing_edges": 35235,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_90pct": {
+        "n_classes": 56,
+        "n_nontrivial_classes": 50,
+        "n_mechs_in_nontrivial": 521,
+        "max_class_size": 60,
+        "n_passing_edges": 31505,
+        "n_non_transitive": 1
+      }
+    },
+    "elapsed_total_s": 12606.893670795951
+  },
+  "D0": {
+    "n_designs": 1,
+    "design_names": [
+      "D0"
+    ],
+    "n_classes": 26,
+    "n_singleton": 0,
+    "n_nontrivial_classes": 26,
+    "n_mechs_in_nontrivial": 527,
+    "max_class_size": 95,
+    "core_merge_stats": {
+      "core_codes": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "edge_matrix": [
+        [
+          3491,
+          7062,
+          7331,
+          2404
+        ],
+        [
+          7062,
+          4625,
+          7807,
+          2272
+        ],
+        [
+          7331,
+          7807,
+          3884,
+          2359
+        ],
+        [
+          2404,
+          2272,
+          2359,
+          534
+        ]
+      ],
+      "n_within_core_edges": 12534,
+      "n_cross_core_edges": 29235,
+      "n_cross_core_classes": 24,
+      "n_mechs_in_cross_core_classes": 521
+    },
+    "sensitivity": {
+      "sig_0.5pct_pr_80pct": {
+        "n_classes": 46,
+        "n_nontrivial_classes": 41,
+        "n_mechs_in_nontrivial": 522,
+        "max_class_size": 63,
+        "n_passing_edges": 26003,
+        "n_non_transitive": 2
+      },
+      "sig_0.5pct_pr_85pct": {
+        "n_classes": 63,
+        "n_nontrivial_classes": 56,
+        "n_mechs_in_nontrivial": 520,
+        "max_class_size": 47,
+        "n_passing_edges": 18299,
+        "n_non_transitive": 2
+      },
+      "sig_0.5pct_pr_90pct": {
+        "n_classes": 79,
+        "n_nontrivial_classes": 60,
+        "n_mechs_in_nontrivial": 508,
+        "max_class_size": 40,
+        "n_passing_edges": 14624,
+        "n_non_transitive": 2
+      },
+      "sig_1.0pct_pr_80pct": {
+        "n_classes": 23,
+        "n_nontrivial_classes": 19,
+        "n_mechs_in_nontrivial": 523,
+        "max_class_size": 122,
+        "n_passing_edges": 52009,
+        "n_non_transitive": 1
+      },
+      "sig_1.0pct_pr_85pct": {
+        "n_classes": 26,
+        "n_nontrivial_classes": 26,
+        "n_mechs_in_nontrivial": 527,
+        "max_class_size": 95,
+        "n_passing_edges": 41769,
+        "n_non_transitive": 1
+      },
+      "sig_1.0pct_pr_90pct": {
+        "n_classes": 38,
+        "n_nontrivial_classes": 33,
+        "n_mechs_in_nontrivial": 522,
+        "max_class_size": 80,
+        "n_passing_edges": 35422,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_80pct": {
+        "n_classes": 11,
+        "n_nontrivial_classes": 10,
+        "n_mechs_in_nontrivial": 526,
+        "max_class_size": 254,
+        "n_passing_edges": 79543,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_85pct": {
+        "n_classes": 13,
+        "n_nontrivial_classes": 13,
+        "n_mechs_in_nontrivial": 527,
+        "max_class_size": 222,
+        "n_passing_edges": 72593,
+        "n_non_transitive": 1
+      },
+      "sig_2.0pct_pr_90pct": {
+        "n_classes": 15,
+        "n_nontrivial_classes": 13,
+        "n_mechs_in_nontrivial": 525,
+        "max_class_size": 206,
+        "n_passing_edges": 68355,
+        "n_non_transitive": 1
+      }
+    },
+    "elapsed_total_s": 9945.242827739567
+  }
+}

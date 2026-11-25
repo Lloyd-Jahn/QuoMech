@@ -94,7 +94,9 @@ def load_model(grammar: ReactionGrammar, ckpt_path: Path, kind: str, device: tor
     arch = ckpt.get("arch", "p2_256")
     head = ckpt.get("head_type", kind)
     net = build_model(grammar, head_type=head, arch=arch).to(device)
-    net.load_state_dict(ckpt["model_state"])
+    # train_class_mask is a training-only buffer saved by OOD held-out checkpoints
+    state = {k: v for k, v in ckpt["model_state"].items() if k != "train_class_mask"}
+    net.load_state_dict(state)
     net.eval()
     return net, ckpt, True
 

@@ -1,0 +1,3981 @@
+{
+  "ckpt": "results/phase2/models/quomech_s42/best.pt",
+  "real_literature": {
+    "n_cases": 11,
+    "n_in_library": 9,
+    "n_ood": 2,
+    "median_local_overlap_ms": 120.35623705014586,
+    "median_warmstart_lm_ms": 1951.6501119360328,
+    "mean_in_lib_loo_ppe": 0.0679849961070943,
+    "cases": [
+      {
+        "case_id": "elsby_2021_mn_hydroboration",
+        "in_library": true,
+        "reaction_type": "bimolecular",
+        "n_runs": 4,
+        "observed_species": [
+          "A",
+          "B",
+          "P"
+        ],
+        "expected_modules": [],
+        "ref_conversion_pct": 49.41,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.014147640337545349,
+            "C2": 0.29069264496570224,
+            "C3": 0.06015792917391408,
+            "C4": 0.6350017855228381
+          },
+          "module_probs": {
+            "M1": 0.9622236724677582,
+            "M2": 0.8306183640012896,
+            "M3": 0.09421946900189157,
+            "M4": 0.008553436466259091,
+            "M5": 0.3202244150680714,
+            "M6": 0.654073818436631,
+            "M7": 0.01363381419869471,
+            "M8": 0.06296588398152186
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 0.00011665644390190498,
+          "top5": [
+            {
+              "mech_id": 498,
+              "name": "C4+M1+M2:complex+M6",
+              "prob": 0.4953995873975126
+            },
+            {
+              "mech_id": 496,
+              "name": "C4+M1+M2:free1+M6",
+              "prob": 0.09550745822533138
+            },
+            {
+              "mech_id": 223,
+              "name": "C2+M1+M3+M5",
+              "prob": 0.08159670374109403
+            },
+            {
+              "mech_id": 210,
+              "name": "C2+M1+M2:free1+M5",
+              "prob": 0.07872243387257269
+            },
+            {
+              "mech_id": 212,
+              "name": "C2+M1+M2:complex+M5",
+              "prob": 0.03198414803950227
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 286,
+              "prob": 0.4953995873975126,
+              "size": 1,
+              "rep_names": [
+                "C4+M1+M2:complex+M6"
+              ]
+            },
+            {
+              "class_id": 9,
+              "prob": 0.10526387358471109,
+              "size": 4,
+              "rep_names": [
+                "C2+M1+M5",
+                "C2+M1+M2:free1+M5",
+                "C2+M1+M2:free2+M5",
+                "C2+M1+M5+M8"
+              ]
+            },
+            {
+              "class_id": 285,
+              "prob": 0.09550745822533138,
+              "size": 1,
+              "rep_names": [
+                "C4+M1+M2:free1+M6"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.6326235339311406
+            },
+            {
+              "class_id": 24,
+              "label": "M1(act)+M2(deact)+M5(dimer)",
+              "prob": 0.19058531534043924
+            },
+            {
+              "class_id": 27,
+              "label": "M1(act)+M3(subInh)+M5(dimer)",
+              "prob": 0.0816771971467167
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.012558638364407147,
+            "C2": 0.3711201018666569,
+            "C3": 0.055832588552999184,
+            "C4": 0.5604886712159369
+          },
+          "module_probs": {
+            "M1": 0.852499646534957,
+            "M2": 0.7265409140556649,
+            "M3": 0.08555667377883082,
+            "M4": 0.0076451471507601974,
+            "M5": 0.28786776838857653,
+            "M6": 0.5787637136290192,
+            "M7": 0.015157323750113888,
+            "M8": 0.16013889133848846
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 0.008485024900228419,
+          "top5": [
+            {
+              "mech_id": 498,
+              "name": "C4+M1+M2:complex+M6",
+              "prob": 0.43153254314932693
+            },
+            {
+              "mech_id": 161,
+              "name": "C2+M8",
+              "prob": 0.10125561919690575
+            },
+            {
+              "mech_id": 496,
+              "name": "C4+M1+M2:free1+M6",
+              "prob": 0.08319461175617501
+            },
+            {
+              "mech_id": 223,
+              "name": "C2+M1+M3+M5",
+              "prob": 0.07107723537472874
+            },
+            {
+              "mech_id": 210,
+              "name": "C2+M1+M2:free1+M5",
+              "prob": 0.06857351712866319
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 286,
+              "prob": 0.43153254314932693,
+              "size": 1,
+              "rep_names": [
+                "C4+M1+M2:complex+M6"
+              ]
+            },
+            {
+              "class_id": 192,
+              "prob": 0.10125561919690575,
+              "size": 1,
+              "rep_names": [
+                "C2+M8"
+              ]
+            },
+            {
+              "class_id": 9,
+              "prob": 0.09619619650770787,
+              "size": 4,
+              "rep_names": [
+                "C2+M1+M5",
+                "C2+M1+M2:free1+M5",
+                "C2+M1+M2:free2+M5",
+                "C2+M1+M5+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.5510655426411651
+            },
+            {
+              "class_id": 24,
+              "label": "M1(act)+M2(deact)+M5(dimer)",
+              "prob": 0.1660150066895052
+            },
+            {
+              "class_id": 6,
+              "label": "M6/8(bg/bimet)",
+              "prob": 0.11146938419554384
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C4+M1+M2:complex+M6"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 139.7286900319159,
+          "amortized_min_z_best": 2.8300109482050226,
+          "amortized_min_z_med": 3.452246486968119,
+          "amortized_alert_3sigma": false
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 1735.6898738071322,
+          "n_candidates": 9,
+          "best_fit_mech": "C4+M1+M2:complex+M6",
+          "best_fit_z_sig": 1.657308107317049,
+          "best_core_mech": "C3",
+          "best_core_z_sig": 2.368403893310154,
+          "bic_winner_mech": "C4+M1+M2:complex+M6",
+          "bic_winner_z_sig": 1.657308107317049,
+          "bic_winner_raw_rmse": 0.016990442011166753,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": false,
+          "combined_ood_alert": false
+        },
+        "loo_ppe": {
+          "by_run": {
+            "standard": 0.09613040582052189,
+            "de_hbpin": 0.11149159104394436,
+            "de_ketone": 0.13261811321631622,
+            "de_catalyst": 0.11701516936650666
+          },
+          "mean": 0.11431381986182229
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "standard",
+          "top3_recommended": [
+            {
+              "design": "D8",
+              "eig_quotient": 0.8272303377192327
+            },
+            {
+              "design": "D3",
+              "eig_quotient": 0.7635344587355246
+            },
+            {
+              "design": "D4",
+              "eig_quotient": 0.7007146482095448
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "de_hbpin",
+              "role": "different_excess_B",
+              "A0": 0.9933507422886757,
+              "B0": 1.630781979393973,
+              "P0": 0.06903465288681984,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_ketone",
+              "role": "different_excess_A",
+              "A0": 1.6359067140632206,
+              "B0": 0.9984754769579232,
+              "P0": 0.06390991821757229,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_catalyst",
+              "role": "varying_catalyst",
+              "A0": 1.0094212336844164,
+              "B0": 1.0094212336844164,
+              "P0": 0.05296416149107915,
+              "cat_mult": 2.6666666666666665
+            }
+          ]
+        },
+        "elapsed_s": 2.909805596806109
+      },
+      {
+        "case_id": "herbort_2021_co_hydroalkenylation",
+        "in_library": true,
+        "reaction_type": "bimolecular",
+        "n_runs": 6,
+        "observed_species": [
+          "A",
+          "B"
+        ],
+        "expected_modules": [],
+        "ref_conversion_pct": 99.4,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.016128653081373484,
+            "C2": 0.37788204357647337,
+            "C3": 0.5520947312665485,
+            "C4": 0.05389457207560458
+          },
+          "module_probs": {
+            "M1": 0.001141217493632993,
+            "M2": 0.8943730337188417,
+            "M3": 0.6047665163673047,
+            "M4": 0.5087845973445124,
+            "M5": 0.020769745740660355,
+            "M6": 0.019551565124983218,
+            "M7": 0.1387860537611356,
+            "M8": 0.6702987890260996
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 1.0149520229203697e-06,
+          "top5": [
+            {
+              "mech_id": 263,
+              "name": "C2+M2:complex+M4+M8",
+              "prob": 0.2877863298562017
+            },
+            {
+              "mech_id": 401,
+              "name": "C3+M2:free2+M3+M8",
+              "prob": 0.2772698355225873
+            },
+            {
+              "mech_id": 323,
+              "name": "C3+M2:free2+M3",
+              "prob": 0.05593619400451906
+            },
+            {
+              "mech_id": 388,
+              "name": "C3+M2:free1+M3+M4",
+              "prob": 0.03647513625546275
+            },
+            {
+              "mech_id": 260,
+              "name": "C2+M2:complex+M4+M7",
+              "prob": 0.036363384998991
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 216,
+              "prob": 0.2877863298562017,
+              "size": 1,
+              "rep_names": [
+                "C2+M2:complex+M4+M8"
+              ]
+            },
+            {
+              "class_id": 241,
+              "prob": 0.2772698355225873,
+              "size": 1,
+              "rep_names": [
+                "C3+M2:free2+M3+M8"
+              ]
+            },
+            {
+              "class_id": 227,
+              "prob": 0.05593619400451906,
+              "size": 1,
+              "rep_names": [
+                "C3+M2:free2+M3"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 36,
+              "label": "M2(deact)+M4/7(prodEff)+M6/8(bg/bimet)",
+              "prob": 0.3099894591816613
+            },
+            {
+              "class_id": 34,
+              "label": "M2(deact)+M3(subInh)+M6/8(bg/bimet)",
+              "prob": 0.30612491414157683
+            },
+            {
+              "class_id": 32,
+              "label": "M2(deact)+M3(subInh)+M4/7(prodEff)",
+              "prob": 0.11854923092149901
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.01679962335379684,
+            "C2": 0.34232909923554156,
+            "C3": 0.5476469227279873,
+            "C4": 0.09322435468267427
+          },
+          "module_probs": {
+            "M1": 0.0010188114527983694,
+            "M2": 0.8646126885578089,
+            "M3": 0.6352945170685459,
+            "M4": 0.46831641959126025,
+            "M5": 0.01969131146068857,
+            "M6": 0.017275108228513067,
+            "M7": 0.12262378497693664,
+            "M8": 0.5760870798543083
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 7.141926751692826e-05,
+          "top5": [
+            {
+              "mech_id": 263,
+              "name": "C2+M2:complex+M4+M8",
+              "prob": 0.24252335269353814
+            },
+            {
+              "mech_id": 401,
+              "name": "C3+M2:free2+M3+M8",
+              "prob": 0.2336608905131936
+            },
+            {
+              "mech_id": 323,
+              "name": "C3+M2:free2+M3",
+              "prob": 0.10426674960680281
+            },
+            {
+              "mech_id": 470,
+              "name": "C4+M2:free2+M3",
+              "prob": 0.033652308565834205
+            },
+            {
+              "mech_id": 388,
+              "name": "C3+M2:free1+M3+M4",
+              "prob": 0.03073833402388701
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 216,
+              "prob": 0.24252335269353814,
+              "size": 1,
+              "rep_names": [
+                "C2+M2:complex+M4+M8"
+              ]
+            },
+            {
+              "class_id": 241,
+              "prob": 0.2336608905131936,
+              "size": 1,
+              "rep_names": [
+                "C3+M2:free2+M3+M8"
+              ]
+            },
+            {
+              "class_id": 227,
+              "prob": 0.10426674960680281,
+              "size": 1,
+              "rep_names": [
+                "C3+M2:free2+M3"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 36,
+              "label": "M2(deact)+M4/7(prodEff)+M6/8(bg/bimet)",
+              "prob": 0.261234378220669
+            },
+            {
+              "class_id": 34,
+              "label": "M2(deact)+M3(subInh)+M6/8(bg/bimet)",
+              "prob": 0.25797764806178763
+            },
+            {
+              "class_id": 12,
+              "label": "M2(deact)+M3(subInh)",
+              "prob": 0.1718480224547852
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C2+M2:complex+M4+M8",
+            "C3+M2:free1+M3+M4"
+          ],
+          "clique_size": 2,
+          "elapsed_ms": 185.00679777935147,
+          "amortized_min_z_best": 1.280662281499665,
+          "amortized_min_z_med": 1.5139996850265458,
+          "amortized_alert_3sigma": false
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 5774.943856988102,
+          "n_candidates": 9,
+          "best_fit_mech": "C2+M2:complex+M4+M8",
+          "best_fit_z_sig": 1.025484211327896,
+          "best_core_mech": "C3",
+          "best_core_z_sig": 1.1732204249412195,
+          "bic_winner_mech": "C2+M2:complex+M4+M8",
+          "bic_winner_z_sig": 1.025484211327896,
+          "bic_winner_raw_rmse": 0.020888536107945554,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": true,
+          "combined_ood_alert": true
+        },
+        "loo_ppe": {
+          "by_run": {
+            "standard": 0.017651928424926668,
+            "de_co_low": 0.05736243615199435,
+            "de_enyne_high": 0.02479005208711532,
+            "de_enyne_low": 0.010610579046318493,
+            "de_acrylate_high": 0.061054966824891144,
+            "de_acrylate_low": 0.06289246048755937
+          },
+          "mean": 0.039060403837134224
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "standard",
+          "top3_recommended": [
+            {
+              "design": "D4",
+              "eig_quotient": 0.5075792406792878
+            },
+            {
+              "design": "D1",
+              "eig_quotient": -0.07212019179806721
+            },
+            {
+              "design": "D3",
+              "eig_quotient": -0.10242672384575616
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "de_co_low",
+              "role": "varying_catalyst_low",
+              "A0": 1.0,
+              "B0": 1.2,
+              "P0": 0.0,
+              "cat_mult": 0.5
+            },
+            {
+              "run_id": "de_enyne_high",
+              "role": "different_excess_A_high",
+              "A0": 1.1,
+              "B0": 1.2,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_enyne_low",
+              "role": "different_excess_A_low",
+              "A0": 0.9,
+              "B0": 1.2,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_acrylate_high",
+              "role": "different_excess_B_high",
+              "A0": 1.0,
+              "B0": 1.32,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_acrylate_low",
+              "role": "different_excess_B_low",
+              "A0": 1.0,
+              "B0": 1.04,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            }
+          ]
+        },
+        "elapsed_s": 7.02601895481348
+      },
+      {
+        "case_id": "wei_2020_rh_cyclopropanation_dcm",
+        "in_library": true,
+        "reaction_type": "bimolecular",
+        "n_runs": 6,
+        "observed_species": [
+          "A",
+          "B"
+        ],
+        "expected_modules": [
+          "M3",
+          "M2"
+        ],
+        "ref_conversion_pct": 98.22,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 5.363724067199899e-10,
+            "C2": 0.9997782431383626,
+            "C3": 0.00022175632375770498,
+            "C4": 1.5072691877416537e-12
+          },
+          "module_probs": {
+            "M1": 0.04293219648338796,
+            "M2": 0.9964953076464608,
+            "M3": 0.9997258151865316,
+            "M4": 0.013880743640395647,
+            "M5": 0.0019382471801133944,
+            "M6": 1.559653075406799e-05,
+            "M7": 0.009251400642952832,
+            "M8": 0.8951298666989016
+          },
+          "expected_module_probs": {
+            "M3": 0.9997258151865316,
+            "M2": 0.9964953076464608
+          },
+          "clean_core_prob": 6.406235093704747e-11,
+          "top5": [
+            {
+              "mech_id": 251,
+              "name": "C2+M2:complex+M3+M8",
+              "prob": 0.6517717337357716
+            },
+            {
+              "mech_id": 249,
+              "name": "C2+M2:free1+M3+M8",
+              "prob": 0.23774102799213248
+            },
+            {
+              "mech_id": 206,
+              "name": "C2+M1+M2:complex+M3",
+              "prob": 0.0370773983182807
+            },
+            {
+              "mech_id": 173,
+              "name": "C2+M2:complex+M3",
+              "prob": 0.03584522523183483
+            },
+            {
+              "mech_id": 239,
+              "name": "C2+M2:complex+M3+M4",
+              "prob": 0.009331698821479157
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 100,
+              "prob": 0.6518236578745882,
+              "size": 2,
+              "rep_names": [
+                "C2+M3+M8",
+                "C2+M2:complex+M3+M8"
+              ]
+            },
+            {
+              "class_id": 215,
+              "prob": 0.23774102799213248,
+              "size": 1,
+              "rep_names": [
+                "C2+M2:free1+M3+M8"
+              ]
+            },
+            {
+              "class_id": 202,
+              "prob": 0.0370773983182807,
+              "size": 1,
+              "rep_names": [
+                "C2+M1+M2:complex+M3"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 34,
+              "label": "M2(deact)+M3(subInh)+M6/8(bg/bimet)",
+              "prob": 0.8922140481001607
+            },
+            {
+              "class_id": 22,
+              "label": "M1(act)+M2(deact)+M3(subInh)",
+              "prob": 0.04236112929613799
+            },
+            {
+              "class_id": 12,
+              "label": "M2(deact)+M3(subInh)",
+              "prob": 0.040293134498247646
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 5.851575772708734e-10,
+            "C2": 0.9996840602182046,
+            "C3": 0.00031593919512403097,
+            "C4": 1.5137314854690378e-12
+          },
+          "module_probs": {
+            "M1": 0.04096518677016129,
+            "M2": 0.9963798010619695,
+            "M3": 0.9996084781496112,
+            "M4": 0.013381540005761099,
+            "M5": 0.0018526961149428838,
+            "M6": 1.4921746438772795e-05,
+            "M7": 0.00881880981430996,
+            "M8": 0.853300718737106
+          },
+          "expected_module_probs": {
+            "M3": 0.9996084781496112,
+            "M2": 0.9963798010619695
+          },
+          "clean_core_prob": 5.098115354669301e-09,
+          "top5": [
+            {
+              "mech_id": 251,
+              "name": "C2+M2:complex+M3+M8",
+              "prob": 0.6211776654572104
+            },
+            {
+              "mech_id": 249,
+              "name": "C2+M2:free1+M3+M8",
+              "prob": 0.2265814994846331
+            },
+            {
+              "mech_id": 173,
+              "name": "C2+M2:complex+M3",
+              "prob": 0.0755650794705624
+            },
+            {
+              "mech_id": 206,
+              "name": "C2+M1+M2:complex+M3",
+              "prob": 0.03533699075375021
+            },
+            {
+              "mech_id": 171,
+              "name": "C2+M2:free1+M3",
+              "prob": 0.009348441046645251
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 100,
+              "prob": 0.621287126386825,
+              "size": 2,
+              "rep_names": [
+                "C2+M3+M8",
+                "C2+M2:complex+M3+M8"
+              ]
+            },
+            {
+              "class_id": 215,
+              "prob": 0.2265814994846331,
+              "size": 1,
+              "rep_names": [
+                "C2+M2:free1+M3+M8"
+              ]
+            },
+            {
+              "class_id": 197,
+              "prob": 0.0755650794705624,
+              "size": 1,
+              "rep_names": [
+                "C2+M2:complex+M3"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 34,
+              "label": "M2(deact)+M3(subInh)+M6/8(bg/bimet)",
+              "prob": 0.8503336533334037
+            },
+            {
+              "class_id": 12,
+              "label": "M2(deact)+M3(subInh)",
+              "prob": 0.08494168723409326
+            },
+            {
+              "class_id": 22,
+              "label": "M1(act)+M2(deact)+M3(subInh)",
+              "prob": 0.04037270418507233
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C2+M2:complex+M3+M8"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 203.55999004095793,
+          "amortized_min_z_best": 3.5776600342444302,
+          "amortized_min_z_med": 3.836879532034486,
+          "amortized_alert_3sigma": true
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 5483.280300628394,
+          "n_candidates": 9,
+          "best_fit_mech": "C3",
+          "best_fit_z_sig": 3.1209506441742274,
+          "best_core_mech": "C3",
+          "best_core_z_sig": 3.1209506441742274,
+          "bic_winner_mech": "C3",
+          "bic_winner_z_sig": 3.1209506441742274,
+          "bic_winner_raw_rmse": 0.047672547558051975,
+          "resid_alert_3sigma": true,
+          "regime_ood_alert": false,
+          "combined_ood_alert": true
+        },
+        "loo_ppe": {
+          "by_run": {
+            "standard": 0.05595973136323635,
+            "de_styrene_high": 0.04167756191584279,
+            "de_styrene_low": 0.06453707380368646,
+            "same_excess": 0.03510775321758428,
+            "de_diazo_low": 0.05828084424707172,
+            "de_catalyst_4x": 0.32537663073678813
+          },
+          "mean": 0.09682326588070163
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "standard",
+          "top3_recommended": [
+            {
+              "design": "D1",
+              "eig_quotient": 0.6213990269450265
+            },
+            {
+              "design": "D4",
+              "eig_quotient": 0.5335203233396429
+            },
+            {
+              "design": "D2",
+              "eig_quotient": 0.4387315969204325
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "de_styrene_high",
+              "role": "different_excess_B_high",
+              "A0": 1.0,
+              "B0": 4.64,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_styrene_low",
+              "role": "different_excess_B_low",
+              "A0": 1.0,
+              "B0": 1.4999999999999998,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "same_excess",
+              "role": "same_excess",
+              "A0": 0.5,
+              "B0": 1.8199999999999998,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_diazo_low",
+              "role": "different_excess_A_low",
+              "A0": 0.5,
+              "B0": 2.32,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_catalyst_4x",
+              "role": "varying_catalyst_high",
+              "A0": 1.0,
+              "B0": 2.32,
+              "P0": 0.0,
+              "cat_mult": 4.0
+            }
+          ]
+        },
+        "elapsed_s": 6.762380079831928
+      },
+      {
+        "case_id": "antico_2023_mn_silane_oxidation",
+        "in_library": true,
+        "reaction_type": "bimolecular",
+        "n_runs": 7,
+        "observed_species": [
+          "A",
+          "B",
+          "P"
+        ],
+        "expected_modules": [
+          "M1",
+          "M3"
+        ],
+        "ref_conversion_pct": 96.65,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 1.8299180201928593e-12,
+            "C2": 0.9994081677931296,
+            "C3": 0.0005918322050114136,
+            "C4": 2.8904940119064066e-14
+          },
+          "module_probs": {
+            "M1": 0.9999951802878435,
+            "M2": 0.999985523693976,
+            "M3": 0.9994091173803675,
+            "M4": 2.603749408000863e-06,
+            "M5": 5.521090680905278e-06,
+            "M6": 4.541661205188194e-08,
+            "M7": 6.255963590933511e-06,
+            "M8": 0.0005871671119657946
+          },
+          "expected_module_probs": {
+            "M1": 0.9999951802878435,
+            "M3": 0.9994091173803675
+          },
+          "clean_core_prob": 2.0406866708873885e-16,
+          "top5": [
+            {
+              "mech_id": 206,
+              "name": "C2+M1+M2:complex+M3",
+              "prob": 0.9975991561206415
+            },
+            {
+              "mech_id": 204,
+              "name": "C2+M1+M2:free1+M3",
+              "prob": 0.001790350931700458
+            },
+            {
+              "mech_id": 370,
+              "name": "C3+M1+M2:free1+M8",
+              "prob": 0.0005607517597383383
+            },
+            {
+              "mech_id": 371,
+              "name": "C3+M1+M2:free2+M8",
+              "prob": 1.3061376473498703e-05
+            },
+            {
+              "mech_id": 313,
+              "name": "C3+M1+M2:free1",
+              "prob": 5.323773196214751e-06
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 202,
+              "prob": 0.9975991561206415,
+              "size": 1,
+              "rep_names": [
+                "C2+M1+M2:complex+M3"
+              ]
+            },
+            {
+              "class_id": 93,
+              "prob": 0.0017908076383434605,
+              "size": 2,
+              "rep_names": [
+                "C2+M1+M3",
+                "C2+M1+M2:free1+M3"
+              ]
+            },
+            {
+              "class_id": 67,
+              "prob": 0.0005607517614103788,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M2:free1+M8",
+                "C3+M1+M2:free1+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 22,
+              "label": "M1(act)+M2(deact)+M3(subInh)",
+              "prob": 0.9993947643142524
+            },
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.0005758435153265651
+            },
+            {
+              "class_id": 7,
+              "label": "M1(act)+M2(deact)",
+              "prob": 5.519427201692453e-06
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 1.8304623899577645e-12,
+            "C2": 0.9993983938420615,
+            "C3": 0.0006016061560761455,
+            "C4": 3.1719008318034517e-14
+          },
+          "module_probs": {
+            "M1": 0.9999950606433087,
+            "M2": 0.9999818796347762,
+            "M3": 0.9993993543459458,
+            "M4": 2.6123371559329655e-06,
+            "M5": 5.526361006874992e-06,
+            "M6": 4.5417277286409297e-08,
+            "M7": 6.278193693679301e-06,
+            "M8": 0.000590135256604336
+          },
+          "expected_module_probs": {
+            "M1": 0.9999950606433087,
+            "M3": 0.9993993543459458
+          },
+          "clean_core_prob": 1.703955559023374e-14,
+          "top5": [
+            {
+              "mech_id": 206,
+              "name": "C2+M1+M2:complex+M3",
+              "prob": 0.99758872848951
+            },
+            {
+              "mech_id": 204,
+              "name": "C2+M1+M2:free1+M3",
+              "prob": 0.001790332217651837
+            },
+            {
+              "mech_id": 370,
+              "name": "C3+M1+M2:free1+M8",
+              "prob": 0.0005607458983535615
+            },
+            {
+              "mech_id": 371,
+              "name": "C3+M1+M2:free2+M8",
+              "prob": 1.3061239946502765e-05
+            },
+            {
+              "mech_id": 313,
+              "name": "C3+M1+M2:free1",
+              "prob": 1.177564013988111e-05
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 202,
+              "prob": 0.99758872848951,
+              "size": 1,
+              "rep_names": [
+                "C2+M1+M2:complex+M3"
+              ]
+            },
+            {
+              "class_id": 93,
+              "prob": 0.0017913424058922593,
+              "size": 2,
+              "rep_names": [
+                "C2+M1+M3",
+                "C2+M1+M2:free1+M3"
+              ]
+            },
+            {
+              "class_id": 67,
+              "prob": 0.0005607459000255846,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M2:free1+M8",
+                "C3+M1+M2:free1+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 22,
+              "label": "M1(act)+M2(deact)+M3(subInh)",
+              "prob": 0.9993843179141195
+            },
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.0005758374961917947
+            },
+            {
+              "class_id": 7,
+              "label": "M1(act)+M2(deact)",
+              "prob": 1.2208406727697033e-05
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C2+M1+M2:complex+M3"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 218.05030293762684,
+          "amortized_min_z_best": 2.1137395073347056,
+          "amortized_min_z_med": 2.272680381695018,
+          "amortized_alert_3sigma": false
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 8786.157172173262,
+          "n_candidates": 9,
+          "best_fit_mech": "C3+M1+M2:free1+M8",
+          "best_fit_z_sig": 1.7791304760426083,
+          "best_core_mech": "C3",
+          "best_core_z_sig": 3.205041293319402,
+          "bic_winner_mech": "C3+M1+M2:free1+M8",
+          "bic_winner_z_sig": 1.7791304760426083,
+          "bic_winner_raw_rmse": 0.026550340330255443,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": false,
+          "combined_ood_alert": false
+        },
+        "loo_ppe": {
+          "by_run": {
+            "standard": 0.033487959322944176,
+            "de_cat_low": 0.07488397127121288,
+            "de_cat_high": 0.06839021382351894,
+            "de_silane_0.5x": 0.03597828585647851,
+            "de_silane_0.25x": 0.029352774481402416,
+            "de_water_0.5x": 0.07323449061814717,
+            "de_water_2x": 0.047593668888555395
+          },
+          "mean": 0.05184590918032278
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "standard",
+          "top3_recommended": [
+            {
+              "design": "D2",
+              "eig_quotient": 0.770262591678198
+            },
+            {
+              "design": "D8",
+              "eig_quotient": 0.6452212392701369
+            },
+            {
+              "design": "D5",
+              "eig_quotient": 0.6026995476109334
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "de_cat_low",
+              "role": "varying_catalyst_low",
+              "A0": 1.0,
+              "B0": 3.0,
+              "P0": 0.0,
+              "cat_mult": 0.5
+            },
+            {
+              "run_id": "de_cat_high",
+              "role": "varying_catalyst_high",
+              "A0": 1.0,
+              "B0": 3.0,
+              "P0": 0.0,
+              "cat_mult": 2.0
+            },
+            {
+              "run_id": "de_silane_0.5x",
+              "role": "different_excess_A_low",
+              "A0": 0.5,
+              "B0": 3.0,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_silane_0.25x",
+              "role": "different_excess_A_very_low",
+              "A0": 0.25,
+              "B0": 3.0,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_water_0.5x",
+              "role": "different_excess_B_low",
+              "A0": 1.0,
+              "B0": 1.5,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_water_2x",
+              "role": "different_excess_B_high",
+              "A0": 1.0,
+              "B0": 6.0,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            }
+          ]
+        },
+        "elapsed_s": 10.16435416880995
+      },
+      {
+        "case_id": "aikonen_2018_au_ynone_transposition",
+        "in_library": true,
+        "reaction_type": "pseudo_unimolecular",
+        "n_runs": 4,
+        "observed_species": [
+          "A",
+          "P"
+        ],
+        "expected_modules": [
+          "M4",
+          "M2"
+        ],
+        "ref_conversion_pct": 87.32,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.08339243632216806,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.9166075636778318
+          },
+          "module_probs": {
+            "M1": 0.0007230581907452285,
+            "M2": 0.8914558965364916,
+            "M3": 0.07076318736114026,
+            "M4": 0.5270100189350967,
+            "M5": 0.9574330402399974,
+            "M6": 0.2272232215302354,
+            "M7": 0.01408564650613747,
+            "M8": 0.044615073739477304
+          },
+          "expected_module_probs": {
+            "M4": 0.5270100189350967,
+            "M2": 0.8914558965364916
+          },
+          "clean_core_prob": 1.9148176235663435e-06,
+          "top5": [
+            {
+              "mech_id": 515,
+              "name": "C4+M2:free2+M4+M5",
+              "prob": 0.1710844223078534
+            },
+            {
+              "mech_id": 514,
+              "name": "C4+M2:free1+M4+M5",
+              "prob": 0.14602441143647674
+            },
+            {
+              "mech_id": 521,
+              "name": "C4+M2:free2+M5+M6",
+              "prob": 0.12704062015384993
+            },
+            {
+              "mech_id": 476,
+              "name": "C4+M2:free2+M5",
+              "prob": 0.12006578377546996
+            },
+            {
+              "mech_id": 516,
+              "name": "C4+M2:complex+M4+M5",
+              "prob": 0.07655102408713248
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 145,
+              "prob": 0.2225754355236092,
+              "size": 2,
+              "rep_names": [
+                "C4+M2:free1+M4+M5",
+                "C4+M2:complex+M4+M5"
+              ]
+            },
+            {
+              "class_id": 141,
+              "prob": 0.2200557950932998,
+              "size": 2,
+              "rep_names": [
+                "C4+M4+M5",
+                "C4+M2:free2+M4+M5"
+              ]
+            },
+            {
+              "class_id": 142,
+              "prob": 0.12713853519739987,
+              "size": 2,
+              "rep_names": [
+                "C4+M5+M6",
+                "C4+M2:free2+M5+M6"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 35,
+              "label": "M2(deact)+M4/7(prodEff)+M5(dimer)",
+              "prob": 0.4163756287672327
+            },
+            {
+              "class_id": 37,
+              "label": "M2(deact)+M5(dimer)+M6/8(bg/bimet)",
+              "prob": 0.2129137921224349
+            },
+            {
+              "class_id": 14,
+              "label": "M2(deact)+M5(dimer)",
+              "prob": 0.17946237120887037
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.06963203836312412,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.9303679616368757
+          },
+          "module_probs": {
+            "M1": 0.0005318938738837077,
+            "M2": 0.8712275307256077,
+            "M3": 0.05364195208735822,
+            "M4": 0.43537346785777553,
+            "M5": 0.9031030335609654,
+            "M6": 0.17418615642505766,
+            "M7": 0.010507584360369259,
+            "M8": 0.03535433525691473
+          },
+          "expected_module_probs": {
+            "M4": 0.43537346785777553,
+            "M2": 0.8712275307256077
+          },
+          "clean_core_prob": 0.00011660470685419174,
+          "top5": [
+            {
+              "mech_id": 476,
+              "name": "C4+M2:free2+M5",
+              "prob": 0.19368276202275844
+            },
+            {
+              "mech_id": 515,
+              "name": "C4+M2:free2+M4+M5",
+              "prob": 0.12477071323384127
+            },
+            {
+              "mech_id": 514,
+              "name": "C4+M2:free1+M4+M5",
+              "prob": 0.10649461662673393
+            },
+            {
+              "mech_id": 521,
+              "name": "C4+M2:free2+M5+M6",
+              "prob": 0.09264986591089393
+            },
+            {
+              "mech_id": 475,
+              "name": "C4+M2:free1+M5",
+              "prob": 0.08431178291435172
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 141,
+              "prob": 0.20376832973105036,
+              "size": 2,
+              "rep_names": [
+                "C4+M4+M5",
+                "C4+M2:free2+M4+M5"
+              ]
+            },
+            {
+              "class_id": 139,
+              "prob": 0.19418661641640272,
+              "size": 2,
+              "rep_names": [
+                "C4+M5",
+                "C4+M2:free2+M5"
+              ]
+            },
+            {
+              "class_id": 145,
+              "prob": 0.16232276126602552,
+              "size": 2,
+              "rep_names": [
+                "C4+M2:free1+M4+M5",
+                "C4+M2:complex+M4+M5"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 35,
+              "label": "M2(deact)+M4/7(prodEff)+M5(dimer)",
+              "prob": 0.3036599327611137
+            },
+            {
+              "class_id": 14,
+              "label": "M2(deact)+M5(dimer)",
+              "prob": 0.28949769569562384
+            },
+            {
+              "class_id": 37,
+              "label": "M2(deact)+M5(dimer)+M6/8(bg/bimet)",
+              "prob": 0.15527659001376284
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C4+M2:free2+M5",
+            "C4+M2:free2+M5+M6",
+            "C4+M2:free1+M5"
+          ],
+          "clique_size": 3,
+          "elapsed_ms": 106.56260885298252,
+          "amortized_min_z_best": 2.428074659963243,
+          "amortized_min_z_med": 2.6980622894723045,
+          "amortized_alert_3sigma": false
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 2119.618346914649,
+          "n_candidates": 7,
+          "best_fit_mech": "C4+M2:free2+M5",
+          "best_fit_z_sig": 2.3452080301927385,
+          "best_core_mech": "C4",
+          "best_core_z_sig": 4.1788244159245345,
+          "bic_winner_mech": "C4+M2:free2+M5",
+          "bic_winner_z_sig": 2.3452080301927385,
+          "bic_winner_raw_rmse": 0.05272717273935964,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": false,
+          "combined_ood_alert": false
+        },
+        "loo_ppe": {
+          "by_run": {
+            "standard": 0.09343743511088981,
+            "de_product_added": 0.034583057547002465,
+            "de_ynone_2x": 0.19465567612156415,
+            "de_catalyst_1.5x": 0.025602919200734247
+          },
+          "mean": 0.08706977199504767
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "standard",
+          "top3_recommended": [
+            {
+              "design": "D2",
+              "eig_quotient": 0.695528132110514
+            },
+            {
+              "design": "D1",
+              "eig_quotient": 0.308270955659129
+            },
+            {
+              "design": "D4",
+              "eig_quotient": 0.037062370884843404
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "de_product_added",
+              "role": "product_pre_addition",
+              "A0": 0.9998160567906451,
+              "B0": 10.0,
+              "P0": 0.5003572352498402,
+              "cat_mult": 1.0014448506904123
+            },
+            {
+              "run_id": "de_ynone_2x",
+              "role": "different_excess_A_high",
+              "A0": 1.960451070561368,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.009634007897582
+            },
+            {
+              "run_id": "de_catalyst_1.5x",
+              "role": "varying_catalyst_high",
+              "A0": 0.947668231249063,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.5240850197439548
+            }
+          ]
+        },
+        "elapsed_s": 2.851955442689359
+      },
+      {
+        "case_id": "thiel_2013_ru_rcm",
+        "in_library": true,
+        "reaction_type": "pseudo_unimolecular",
+        "n_runs": 3,
+        "observed_species": [
+          "P"
+        ],
+        "expected_modules": [
+          "M2",
+          "M4"
+        ],
+        "ref_conversion_pct": 91.74,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.7254682640026635,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.27453173599733643
+          },
+          "module_probs": {
+            "M1": 0.2103466536511436,
+            "M2": 0.8559085120952047,
+            "M3": 0.2977873995039169,
+            "M4": 0.44033789806489654,
+            "M5": 0.3994507805708187,
+            "M6": 0.11619056329964089,
+            "M7": 0.15263583872750636,
+            "M8": 0.06324176896171765
+          },
+          "expected_module_probs": {
+            "M2": 0.8559085120952047,
+            "M4": 0.44033789806489654
+          },
+          "clean_core_prob": 7.319722859520511e-06,
+          "top5": [
+            {
+              "mech_id": 101,
+              "name": "C1+M2:free1+M4+M5",
+              "prob": 0.05903548243807801
+            },
+            {
+              "mech_id": 27,
+              "name": "C1+M2:free2+M5",
+              "prob": 0.03758933062138227
+            },
+            {
+              "mech_id": 23,
+              "name": "C1+M2:free1+M4",
+              "prob": 0.03698805466964546
+            },
+            {
+              "mech_id": 463,
+              "name": "C4+M1+M2:free2",
+              "prob": 0.036922995884202565
+            },
+            {
+              "mech_id": 86,
+              "name": "C1+M2:free1+M3+M4",
+              "prob": 0.03164591801019862
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 80,
+              "prob": 0.08308507033227523,
+              "size": 2,
+              "rep_names": [
+                "C1+M2:free1+M4+M5",
+                "C1+M2:free1+M5+M7"
+              ]
+            },
+            {
+              "class_id": 22,
+              "prob": 0.08278404455338759,
+              "size": 3,
+              "rep_names": [
+                "C1+M2:free1+M4",
+                "C1+M2:free1+M7",
+                "C1+M2:free1+M4+M7"
+              ]
+            },
+            {
+              "class_id": 18,
+              "prob": 0.04797969249181888,
+              "size": 3,
+              "rep_names": [
+                "C1+M5",
+                "C1+M2:free2+M5",
+                "C1+M2:free2+M5+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 35,
+              "label": "M2(deact)+M4/7(prodEff)+M5(dimer)",
+              "prob": 0.1341380262874158
+            },
+            {
+              "class_id": 13,
+              "label": "M2(deact)+M4/7(prodEff)",
+              "prob": 0.10858847937572526
+            },
+            {
+              "class_id": 14,
+              "label": "M2(deact)+M5(dimer)",
+              "prob": 0.08549510548736167
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.7788104480837321,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.22118955191626793
+          },
+          "module_probs": {
+            "M1": 0.14230979819582656,
+            "M2": 0.869462615238211,
+            "M3": 0.1850525288966721,
+            "M4": 0.3156437787874744,
+            "M5": 0.27818001742375276,
+            "M6": 0.08173685427265107,
+            "M7": 0.10244708769399473,
+            "M8": 0.039945726384561474
+          },
+          "expected_module_probs": {
+            "M2": 0.869462615238211,
+            "M4": 0.3156437787874744
+          },
+          "clean_core_prob": 0.0003196836948387544,
+          "top5": [
+            {
+              "mech_id": 2,
+              "name": "C1+M2:free1",
+              "prob": 0.1434402106861846
+            },
+            {
+              "mech_id": 3,
+              "name": "C1+M2:free2",
+              "prob": 0.094669096383432
+            },
+            {
+              "mech_id": 27,
+              "name": "C1+M2:free2+M5",
+              "prob": 0.04348840544843515
+            },
+            {
+              "mech_id": 23,
+              "name": "C1+M2:free1+M4",
+              "prob": 0.042792768363569114
+            },
+            {
+              "mech_id": 463,
+              "name": "C4+M1+M2:free2",
+              "prob": 0.04271749958935705
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 50,
+              "prob": 0.1434402106861846,
+              "size": 2,
+              "rep_names": [
+                "C1+M2:free1",
+                "C3+M2:free1"
+              ]
+            },
+            {
+              "class_id": 146,
+              "prob": 0.094669096383432,
+              "size": 1,
+              "rep_names": [
+                "C1+M2:free2"
+              ]
+            },
+            {
+              "class_id": 22,
+              "prob": 0.08422760948014918,
+              "size": 3,
+              "rep_names": [
+                "C1+M2:free1+M4",
+                "C1+M2:free1+M7",
+                "C1+M2:free1+M4+M7"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 2,
+              "label": "M2(deact)",
+              "prob": 0.26862869286659513
+            },
+            {
+              "class_id": 13,
+              "label": "M2(deact)+M4/7(prodEff)",
+              "prob": 0.10978794356613916
+            },
+            {
+              "class_id": 14,
+              "label": "M2(deact)+M5(dimer)",
+              "prob": 0.09891226445985576
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C1+M2:free1"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 126.31651014089584,
+          "amortized_min_z_best": 1.43987890002957,
+          "amortized_min_z_med": 1.724028212368812,
+          "amortized_alert_3sigma": false
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 1951.6501119360328,
+          "n_candidates": 7,
+          "best_fit_mech": "C1+M2:free1+M4",
+          "best_fit_z_sig": 1.1414348797907816,
+          "best_core_mech": "C4",
+          "best_core_z_sig": 4.082096501023305,
+          "bic_winner_mech": "C4+M1+M2:free2",
+          "bic_winner_z_sig": 1.1514953254679392,
+          "bic_winner_raw_rmse": 0.021577050369061802,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": false,
+          "combined_ood_alert": false
+        },
+        "loo_ppe": {
+          "by_run": {
+            "cat_0.1molpct": 0.059928003286440414,
+            "cat_0.2molpct": 0.009555518664884835,
+            "cat_0.3molpct": 0.021532985816068564
+          },
+          "mean": 0.030338835922464603
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "cat_0.2molpct",
+          "top3_recommended": [
+            {
+              "design": "D2",
+              "eig_quotient": 0.361657434879742
+            },
+            {
+              "design": "D1",
+              "eig_quotient": 0.15754788163205172
+            },
+            {
+              "design": "D5",
+              "eig_quotient": 0.0643340542828062
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "cat_0.1molpct",
+              "role": "varying_catalyst_low",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 0.5
+            },
+            {
+              "run_id": "cat_0.3molpct",
+              "role": "varying_catalyst_high",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.4999999999999998
+            }
+          ]
+        },
+        "elapsed_s": 2.737029390409589
+      },
+      {
+        "case_id": "joannou_2020_fe_cycloaddition",
+        "in_library": true,
+        "reaction_type": "pseudo_unimolecular",
+        "n_runs": 4,
+        "observed_species": [
+          "A",
+          "P"
+        ],
+        "expected_modules": [
+          "M2"
+        ],
+        "ref_conversion_pct": 40.58,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.96058494219019,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.039415057809810035
+          },
+          "module_probs": {
+            "M1": 0.017453867556646734,
+            "M2": 0.3488327400163631,
+            "M3": 0.5612400853262903,
+            "M4": 0.010080034455808675,
+            "M5": 0.05646356393271078,
+            "M6": 0.01954038394897018,
+            "M7": 0.20901808832092164,
+            "M8": 0.8953801184707026
+          },
+          "expected_module_probs": {
+            "M2": 0.3488327400163631
+          },
+          "clean_core_prob": 0.010517743347020414,
+          "top5": [
+            {
+              "mech_id": 42,
+              "name": "C1+M3+M8",
+              "prob": 0.24399364981344873
+            },
+            {
+              "mech_id": 10,
+              "name": "C1+M8",
+              "prob": 0.14107231292313938
+            },
+            {
+              "mech_id": 140,
+              "name": "C1+M3+M7+M8",
+              "prob": 0.10188391108914378
+            },
+            {
+              "mech_id": 100,
+              "name": "C1+M2:complex+M3+M8",
+              "prob": 0.09497766651018005
+            },
+            {
+              "mech_id": 37,
+              "name": "C1+M2:complex+M8",
+              "prob": 0.0853657230388636
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 159,
+              "prob": 0.24399364981344873,
+              "size": 1,
+              "rep_names": [
+                "C1+M3+M8"
+              ]
+            },
+            {
+              "class_id": 148,
+              "prob": 0.14107231292313938,
+              "size": 1,
+              "rep_names": [
+                "C1+M8"
+              ]
+            },
+            {
+              "class_id": 184,
+              "prob": 0.10188391108914378,
+              "size": 1,
+              "rep_names": [
+                "C1+M3+M7+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 18,
+              "label": "M3(subInh)+M6/8(bg/bimet)",
+              "prob": 0.24654296551652405
+            },
+            {
+              "class_id": 6,
+              "label": "M6/8(bg/bimet)",
+              "prob": 0.1478220536230933
+            },
+            {
+              "class_id": 15,
+              "label": "M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.12314082086545385
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.8936559907092056,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.10634400929079432
+          },
+          "module_probs": {
+            "M1": 0.005630514292651393,
+            "M2": 0.14839363961170282,
+            "M3": 0.3107564537849831,
+            "M4": 0.0036849857722424544,
+            "M5": 0.016453120869054986,
+            "M6": 0.007184693476920003,
+            "M7": 0.07323086562133105,
+            "M8": 0.6419716280531083
+          },
+          "expected_module_probs": {
+            "M2": 0.14839363961170282
+          },
+          "clean_core_prob": 0.2234490656409372,
+          "top5": [
+            {
+              "mech_id": 10,
+              "name": "C1+M8",
+              "prob": 0.31548168772305535
+            },
+            {
+              "mech_id": 0,
+              "name": "C1",
+              "prob": 0.16841575714335427
+            },
+            {
+              "mech_id": 42,
+              "name": "C1+M3+M8",
+              "prob": 0.13731486097944273
+            },
+            {
+              "mech_id": 453,
+              "name": "C4",
+              "prob": 0.055033308497582936
+            },
+            {
+              "mech_id": 5,
+              "name": "C1+M3",
+              "prob": 0.054603034492305025
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 148,
+              "prob": 0.31548168772305535,
+              "size": 1,
+              "rep_names": [
+                "C1+M8"
+              ]
+            },
+            {
+              "class_id": 49,
+              "prob": 0.16841575714335427,
+              "size": 2,
+              "rep_names": [
+                "C1",
+                "C3"
+              ]
+            },
+            {
+              "class_id": 159,
+              "prob": 0.13731486097944273,
+              "size": 1,
+              "rep_names": [
+                "C1+M3+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 6,
+              "label": "M6/8(bg/bimet)",
+              "prob": 0.3193476284713924
+            },
+            {
+              "class_id": 0,
+              "label": "CleanCore",
+              "prob": 0.2234490656409372
+            },
+            {
+              "class_id": 18,
+              "label": "M3(subInh)+M6/8(bg/bimet)",
+              "prob": 0.13798836983793347
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C1+M8"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 52.2402860224247,
+          "amortized_min_z_best": 4.047345463078528,
+          "amortized_min_z_med": 5.972050029153275,
+          "amortized_alert_3sigma": true
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 1069.3220901302993,
+          "n_candidates": 5,
+          "best_fit_mech": "C1+M8",
+          "best_fit_z_sig": 2.625781976924438,
+          "best_core_mech": "C1",
+          "best_core_z_sig": 2.8493659806001994,
+          "bic_winner_mech": "C1+M8",
+          "bic_winner_z_sig": 2.625781976924438,
+          "bic_winner_raw_rmse": 0.0248572164365464,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": false,
+          "combined_ood_alert": false
+        },
+        "loo_ppe": {
+          "by_run": {
+            "cat_2.5molpct": 0.04315035493435856,
+            "cat_5molpct": 0.07510603546635643,
+            "cat_10molpct": 0.0476580323991425,
+            "same_excess_5molpct": 0.0855747664619888
+          },
+          "mean": 0.06287229731546157
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "cat_5molpct",
+          "top3_recommended": [
+            {
+              "design": "D1",
+              "eig_quotient": -0.3464130152385221
+            },
+            {
+              "design": "D2",
+              "eig_quotient": -0.36387204270768025
+            },
+            {
+              "design": "D4",
+              "eig_quotient": -0.6401604971285448
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "cat_2.5molpct",
+              "role": "varying_catalyst_low",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 0.5
+            },
+            {
+              "run_id": "cat_10molpct",
+              "role": "varying_catalyst_high",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 2.0
+            },
+            {
+              "run_id": "same_excess_5molpct",
+              "role": "same_excess",
+              "A0": 0.5,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            }
+          ]
+        },
+        "elapsed_s": 1.6250583110377192
+      },
+      {
+        "case_id": "stroek_2021_fe_ch_amination",
+        "in_library": true,
+        "reaction_type": "pseudo_unimolecular",
+        "n_runs": 4,
+        "observed_species": [
+          "A",
+          "P"
+        ],
+        "expected_modules": [
+          "M1",
+          "M5"
+        ],
+        "ref_conversion_pct": 88.84,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.9999758505558225,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 2.4149444177422584e-05
+          },
+          "module_probs": {
+            "M1": 0.99997842410397,
+            "M2": 0.9623538296561012,
+            "M3": 0.0025287464060943237,
+            "M4": 0.004175899699849687,
+            "M5": 0.016760393545314823,
+            "M6": 0.0002108338503615489,
+            "M7": 0.006009874039303577,
+            "M8": 0.9999712891169783
+          },
+          "expected_module_probs": {
+            "M1": 0.99997842410397,
+            "M5": 0.016760393545314823
+          },
+          "clean_core_prob": 4.816736393424778e-15,
+          "top5": [
+            {
+              "mech_id": 69,
+              "name": "C1+M1+M2:free2+M8",
+              "prob": 0.5174511352638442
+            },
+            {
+              "mech_id": 68,
+              "name": "C1+M1+M2:free1+M8",
+              "prob": 0.441299163686538
+            },
+            {
+              "mech_id": 82,
+              "name": "C1+M1+M5+M8",
+              "prob": 0.016759587643909977
+            },
+            {
+              "mech_id": 19,
+              "name": "C1+M1+M8",
+              "prob": 0.007997138862479986
+            },
+            {
+              "mech_id": 85,
+              "name": "C1+M1+M7+M8",
+              "prob": 0.005997353310394146
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 68,
+              "prob": 0.5174511352638442,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M2:free2+M8",
+                "C3+M1+M2:free2+M8"
+              ]
+            },
+            {
+              "class_id": 67,
+              "prob": 0.441299163686538,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M2:free1+M8",
+                "C3+M1+M2:free1+M8"
+              ]
+            },
+            {
+              "class_id": 2,
+              "prob": 0.01675959456482775,
+              "size": 5,
+              "rep_names": [
+                "C1+M1+M5",
+                "C1+M1+M2:free1+M5",
+                "C1+M1+M2:free2+M5",
+                "C1+M1+M2:complex+M5"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.9623099206783241
+            },
+            {
+              "class_id": 31,
+              "label": "M1(act)+M5(dimer)+M6/8(bg/bimet)",
+              "prob": 0.01675958764454468
+            },
+            {
+              "class_id": 30,
+              "label": "M1(act)+M4/7(prodEff)+M6/8(bg/bimet)",
+              "prob": 0.01017007003864318
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.9999692600119342,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 3.073998806606485e-05
+          },
+          "module_probs": {
+            "M1": 0.9999651994437995,
+            "M2": 0.953106338862561,
+            "M3": 0.002506612665148776,
+            "M4": 0.004136084347739648,
+            "M5": 0.016599453848208635,
+            "M6": 0.00020881318620938645,
+            "M7": 0.005953074240505007,
+            "M8": 0.999963807387006
+          },
+          "expected_module_probs": {
+            "M1": 0.9999651994437995,
+            "M5": 0.016599453848208635
+          },
+          "clean_core_prob": 3.9832840841754674e-13,
+          "top5": [
+            {
+              "mech_id": 69,
+              "name": "C1+M1+M2:free2+M8",
+              "prob": 0.5124733317762563
+            },
+            {
+              "mech_id": 68,
+              "name": "C1+M1+M2:free1+M8",
+              "prob": 0.4370539309169772
+            },
+            {
+              "mech_id": 19,
+              "name": "C1+M1+M8",
+              "prob": 0.01751886971971451
+            },
+            {
+              "mech_id": 82,
+              "name": "C1+M1+M5+M8",
+              "prob": 0.016598362886364796
+            },
+            {
+              "mech_id": 85,
+              "name": "C1+M1+M7+M8",
+              "prob": 0.0059396596574281405
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 68,
+              "prob": 0.5124733317762563,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M2:free2+M8",
+                "C3+M1+M2:free2+M8"
+              ]
+            },
+            {
+              "class_id": 67,
+              "prob": 0.4370539309169772,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M2:free1+M8",
+                "C3+M1+M2:free1+M8"
+              ]
+            },
+            {
+              "class_id": 57,
+              "prob": 0.01751886971971451,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M8",
+                "C3+M1+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.9530526413859509
+            },
+            {
+              "class_id": 11,
+              "label": "M1(act)+M6/8(bg/bimet)",
+              "prob": 0.017727515644741933
+            },
+            {
+              "class_id": 31,
+              "label": "M1(act)+M5(dimer)+M6/8(bg/bimet)",
+              "prob": 0.016598362886993394
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C1+M1+M2:free2+M8"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 120.35623705014586,
+          "amortized_min_z_best": 4.233602868879788,
+          "amortized_min_z_med": 5.781335975540321,
+          "amortized_alert_3sigma": true
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 2015.985397156328,
+          "n_candidates": 7,
+          "best_fit_mech": "C1+M1+M2:free2+M8",
+          "best_fit_z_sig": 3.5976302501358863,
+          "best_core_mech": "C1",
+          "best_core_z_sig": 7.086641494935747,
+          "bic_winner_mech": "C1+M1+M2:free2+M8",
+          "bic_winner_z_sig": 3.5976302501358863,
+          "bic_winner_raw_rmse": 0.0503354849002138,
+          "resid_alert_3sigma": true,
+          "regime_ood_alert": false,
+          "combined_ood_alert": true
+        },
+        "loo_ppe": {
+          "by_run": {
+            "cat_1molpct": 0.13271557024434064,
+            "cat_1.5molpct": 0.017663949159987175,
+            "cat_2molpct": 0.09451806664825221,
+            "same_excess_1molpct": 0.09119968739666542
+          },
+          "mean": 0.08402431836231136
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "cat_1molpct",
+          "top3_recommended": [
+            {
+              "design": "D8",
+              "eig_quotient": 0.27107487675029535
+            },
+            {
+              "design": "D1",
+              "eig_quotient": 0.1708486385258728
+            },
+            {
+              "design": "D4",
+              "eig_quotient": -0.07821976992191064
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "cat_1.5molpct",
+              "role": "varying_catalyst_mid",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.4999999999999998
+            },
+            {
+              "run_id": "cat_2molpct",
+              "role": "varying_catalyst_high",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 2.0
+            },
+            {
+              "run_id": "same_excess_1molpct",
+              "role": "same_excess",
+              "A0": 0.5,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            }
+          ]
+        },
+        "elapsed_s": 2.8277844060212374
+      },
+      {
+        "case_id": "albright_2019_fe_carbonyl_olefin_metathesis",
+        "in_library": true,
+        "reaction_type": "pseudo_unimolecular",
+        "n_runs": 3,
+        "observed_species": [
+          "A"
+        ],
+        "expected_modules": [
+          "M8"
+        ],
+        "ref_conversion_pct": 59.0,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.6068904034156588,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.39310959658434114
+          },
+          "module_probs": {
+            "M1": 0.0011479373426686815,
+            "M2": 0.9224219510881352,
+            "M3": 0.5764589320211668,
+            "M4": 0.48605224590991936,
+            "M5": 0.16655393939051458,
+            "M6": 0.03924018177478268,
+            "M7": 0.25934973013235985,
+            "M8": 0.21006075158184703
+          },
+          "expected_module_probs": {
+            "M8": 0.21006075158184703
+          },
+          "clean_core_prob": 7.471259682556775e-07,
+          "top5": [
+            {
+              "mech_id": 505,
+              "name": "C4+M2:free1+M3+M4",
+              "prob": 0.07164514884343441
+            },
+            {
+              "mech_id": 469,
+              "name": "C4+M2:free1+M3",
+              "prob": 0.06827958025541978
+            },
+            {
+              "mech_id": 95,
+              "name": "C1+M2:free1+M3+M7",
+              "prob": 0.06565246419386461
+            },
+            {
+              "mech_id": 98,
+              "name": "C1+M2:free1+M3+M8",
+              "prob": 0.04969489920691632
+            },
+            {
+              "mech_id": 86,
+              "name": "C1+M2:free1+M3+M4",
+              "prob": 0.04931501112180817
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 74,
+              "prob": 0.11496747531567278,
+              "size": 2,
+              "rep_names": [
+                "C1+M2:free1+M3+M4",
+                "C1+M2:free1+M3+M7"
+              ]
+            },
+            {
+              "class_id": 22,
+              "prob": 0.0915312895417003,
+              "size": 3,
+              "rep_names": [
+                "C1+M2:free1+M4",
+                "C1+M2:free1+M7",
+                "C1+M2:free1+M4+M7"
+              ]
+            },
+            {
+              "class_id": 291,
+              "prob": 0.07164514884343441,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free1+M3+M4"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 32,
+              "label": "M2(deact)+M3(subInh)+M4/7(prodEff)",
+              "prob": 0.24812498560158175
+            },
+            {
+              "class_id": 13,
+              "label": "M2(deact)+M4/7(prodEff)",
+              "prob": 0.19040411792285056
+            },
+            {
+              "class_id": 12,
+              "label": "M2(deact)+M3(subInh)",
+              "prob": 0.12905378262999131
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.5481468119767168,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.4518531880232831
+          },
+          "module_probs": {
+            "M1": 0.0008081540575455793,
+            "M2": 0.8851357050095584,
+            "M3": 0.5020891796021788,
+            "M4": 0.46175723186407547,
+            "M5": 0.1259256038391512,
+            "M6": 0.02930326156312455,
+            "M7": 0.20877049244752738,
+            "M8": 0.15538429383760755
+          },
+          "expected_module_probs": {
+            "M8": 0.15538429383760755
+          },
+          "clean_core_prob": 4.1934697926122015e-05,
+          "top5": [
+            {
+              "mech_id": 469,
+              "name": "C4+M2:free1+M3",
+              "prob": 0.10152045930744948
+            },
+            {
+              "mech_id": 472,
+              "name": "C4+M2:free1+M4",
+              "prob": 0.058547458309663264
+            },
+            {
+              "mech_id": 20,
+              "name": "C1+M2:free1+M3",
+              "prob": 0.05461284703053422
+            },
+            {
+              "mech_id": 505,
+              "name": "C4+M2:free1+M3+M4",
+              "prob": 0.04815928173326922
+            },
+            {
+              "mech_id": 95,
+              "name": "C1+M2:free1+M3+M7",
+              "prob": 0.04413104823754501
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 266,
+              "prob": 0.10152045930744948,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free1+M3"
+              ]
+            },
+            {
+              "class_id": 22,
+              "prob": 0.10000710011528276,
+              "size": 3,
+              "rep_names": [
+                "C1+M2:free1+M4",
+                "C1+M2:free1+M7",
+                "C1+M2:free1+M4+M7"
+              ]
+            },
+            {
+              "class_id": 74,
+              "prob": 0.07728019444819048,
+              "size": 2,
+              "rep_names": [
+                "C1+M2:free1+M3+M4",
+                "C1+M2:free1+M3+M7"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 13,
+              "label": "M2(deact)+M4/7(prodEff)",
+              "prob": 0.23380913223514607
+            },
+            {
+              "class_id": 12,
+              "label": "M2(deact)+M3(subInh)",
+              "prob": 0.19188166123678693
+            },
+            {
+              "class_id": 32,
+              "label": "M2(deact)+M3(subInh)+M4/7(prodEff)",
+              "prob": 0.1667875812884853
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C4+M2:free1+M3"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 77.72722281515598,
+          "amortized_min_z_best": 1.31529756050482,
+          "amortized_min_z_med": 1.433069810365729,
+          "amortized_alert_3sigma": false
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 1579.3261989019811,
+          "n_candidates": 7,
+          "best_fit_mech": "C1+M2:free1+M3",
+          "best_fit_z_sig": 0.8811670260065471,
+          "best_core_mech": "C4",
+          "best_core_z_sig": 6.4619112296415535,
+          "bic_winner_mech": "C4+M2:free1+M3",
+          "bic_winner_z_sig": 0.8867744297189681,
+          "bic_winner_raw_rmse": 0.009909752475855274,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": false,
+          "combined_ood_alert": false
+        },
+        "loo_ppe": {
+          "by_run": {
+            "cat_5molpct": 0.06273419914747744,
+            "cat_7.5molpct": 0.012573852531421199,
+            "cat_10molpct": 0.06124097614684907
+          },
+          "mean": 0.04551634260858257
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "cat_7.5molpct",
+          "top3_recommended": [
+            {
+              "design": "D4",
+              "eig_quotient": 0.5371205121309545
+            },
+            {
+              "design": "D5",
+              "eig_quotient": 0.5266702523485807
+            },
+            {
+              "design": "D1",
+              "eig_quotient": 0.45334813408861424
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "cat_5molpct",
+              "role": "varying_catalyst_low",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 0.6666666666666667
+            },
+            {
+              "run_id": "cat_10molpct",
+              "role": "varying_catalyst_high",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.3333333333333335
+            }
+          ]
+        },
+        "elapsed_s": 2.3561407108791173
+      },
+      {
+        "case_id": "pfeffer_2021_pd_alkyne_dimerization_ood",
+        "in_library": false,
+        "reaction_type": "pseudo_unimolecular",
+        "n_runs": 4,
+        "observed_species": [
+          "A"
+        ],
+        "expected_modules": [],
+        "ref_conversion_pct": 87.0,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.4375295412034429,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.5624704587965571
+          },
+          "module_probs": {
+            "M1": 0.0009051631425670492,
+            "M2": 0.985898691746309,
+            "M3": 0.2605826069952264,
+            "M4": 0.11121179653716359,
+            "M5": 0.5968219414706311,
+            "M6": 0.28295832428047746,
+            "M7": 0.10696583530963465,
+            "M8": 0.19550584279250882
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 7.49219658661701e-06,
+          "top5": [
+            {
+              "mech_id": 475,
+              "name": "C4+M2:free1+M5",
+              "prob": 0.09178746684197613
+            },
+            {
+              "mech_id": 520,
+              "name": "C4+M2:free1+M5+M6",
+              "prob": 0.06497539239567429
+            },
+            {
+              "mech_id": 508,
+              "name": "C4+M2:free1+M3+M5",
+              "prob": 0.06371761789764631
+            },
+            {
+              "mech_id": 476,
+              "name": "C4+M2:free2+M5",
+              "prob": 0.042546101512870846
+            },
+            {
+              "mech_id": 119,
+              "name": "C1+M2:free1+M5+M8",
+              "prob": 0.038501347489878456
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 272,
+              "prob": 0.09178746684197613,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free1+M5"
+              ]
+            },
+            {
+              "class_id": 301,
+              "prob": 0.06497539239567429,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free1+M5+M6"
+              ]
+            },
+            {
+              "class_id": 294,
+              "prob": 0.06371761789764631,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free1+M3+M5"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 37,
+              "label": "M2(deact)+M5(dimer)+M6/8(bg/bimet)",
+              "prob": 0.187004600862951
+            },
+            {
+              "class_id": 14,
+              "label": "M2(deact)+M5(dimer)",
+              "prob": 0.18463652853569437
+            },
+            {
+              "class_id": 33,
+              "label": "M2(deact)+M3(subInh)+M5(dimer)",
+              "prob": 0.12270640594773215
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.3425969687140985,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.6574030312859013
+          },
+          "module_probs": {
+            "M1": 0.0004928341727594732,
+            "M2": 0.9862790182536142,
+            "M3": 0.1708140231520952,
+            "M4": 0.0729096514275933,
+            "M5": 0.44413356881166227,
+            "M6": 0.18922032632762412,
+            "M7": 0.06485299547297126,
+            "M8": 0.12709975118809164
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 0.0003368224943123565,
+          "top5": [
+            {
+              "mech_id": 455,
+              "name": "C4+M2:free1",
+              "prob": 0.15196849367648385
+            },
+            {
+              "mech_id": 475,
+              "name": "C4+M2:free1+M5",
+              "prob": 0.10930961175672098
+            },
+            {
+              "mech_id": 456,
+              "name": "C4+M2:free2",
+              "prob": 0.053411827632348675
+            },
+            {
+              "mech_id": 476,
+              "name": "C4+M2:free2+M5",
+              "prob": 0.05066811404808374
+            },
+            {
+              "mech_id": 478,
+              "name": "C4+M2:free1+M6",
+              "prob": 0.041773640961426765
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 254,
+              "prob": 0.15196849367648385,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free1"
+              ]
+            },
+            {
+              "class_id": 272,
+              "prob": 0.10930961175672098,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free1+M5"
+              ]
+            },
+            {
+              "class_id": 255,
+              "prob": 0.053411827632348675,
+              "size": 1,
+              "rep_names": [
+                "C4+M2:free2"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 2,
+              "label": "M2(deact)",
+              "prob": 0.26167029038967965
+            },
+            {
+              "class_id": 14,
+              "label": "M2(deact)+M5(dimer)",
+              "prob": 0.21988347586814141
+            },
+            {
+              "class_id": 15,
+              "label": "M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.12279823897065922
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C4+M2:free1",
+            "C4+M2:free1+M5",
+            "C4+M2:free2",
+            "C4+M2:free1+M6"
+          ],
+          "clique_size": 4,
+          "elapsed_ms": 74.71075328066945,
+          "amortized_min_z_best": 1.1000944842788698,
+          "amortized_min_z_med": 1.1739758452883544,
+          "amortized_alert_3sigma": false
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 795.3817136585712,
+          "n_candidates": 7,
+          "best_fit_mech": "C4+M2:free1+M5",
+          "best_fit_z_sig": 1.1125493012034797,
+          "best_core_mech": "C4",
+          "best_core_z_sig": 1.6634761548655628,
+          "bic_winner_mech": "C4+M2:free1+M5",
+          "bic_winner_z_sig": 1.1125493012034797,
+          "bic_winner_raw_rmse": 0.013545928691541151,
+          "resid_alert_3sigma": false,
+          "regime_ood_alert": false,
+          "combined_ood_alert": false
+        },
+        "loo_ppe": {
+          "by_run": {
+            "standard": 0.008402578177370086,
+            "same_excess": 0.03151601464466469,
+            "de_catalyst_low": 0.031149194163926423,
+            "de_alkyne_low": 0.011203981769900244
+          },
+          "mean": 0.02056794218896536
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "standard",
+          "top3_recommended": [
+            {
+              "design": "D1",
+              "eig_quotient": 0.38553310153245723
+            },
+            {
+              "design": "D2",
+              "eig_quotient": 0.2329821043199281
+            },
+            {
+              "design": "D4",
+              "eig_quotient": 0.08104382050394812
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "same_excess",
+              "role": "same_excess",
+              "A0": 0.5,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            },
+            {
+              "run_id": "de_catalyst_low",
+              "role": "varying_catalyst_low",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 0.725
+            },
+            {
+              "run_id": "de_alkyne_low",
+              "role": "different_excess_A_low",
+              "A0": 0.84,
+              "B0": 10.0,
+              "P0": 0.0,
+              "cat_mult": 1.0
+            }
+          ]
+        },
+        "elapsed_s": 1.46275424817577
+      },
+      {
+        "case_id": "ser_2025_pd_protodeboronation_ood",
+        "in_library": false,
+        "reaction_type": "pseudo_unimolecular",
+        "n_runs": 3,
+        "observed_species": [
+          "P"
+        ],
+        "expected_modules": [],
+        "ref_conversion_pct": 3.35,
+        "posterior_uniform": {
+          "core_probs": {
+            "C1": 0.8365192732601696,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.16348072673983016
+          },
+          "module_probs": {
+            "M1": 0.46385982330203285,
+            "M2": 0.6008407524617896,
+            "M3": 0.10801321094691277,
+            "M4": 0.3140042755542761,
+            "M5": 0.22739154210369697,
+            "M6": 0.0005605240382082053,
+            "M7": 0.22603479431535803,
+            "M8": 0.7040701922327656
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 0.001284757912772184,
+          "top5": [
+            {
+              "mech_id": 69,
+              "name": "C1+M1+M2:free2+M8",
+              "prob": 0.06745958313656496
+            },
+            {
+              "mech_id": 36,
+              "name": "C1+M2:free2+M8",
+              "prob": 0.06399778955563372
+            },
+            {
+              "mech_id": 129,
+              "name": "C1+M2:free2+M7+M8",
+              "prob": 0.054226495682461164
+            },
+            {
+              "mech_id": 111,
+              "name": "C1+M2:free2+M4+M8",
+              "prob": 0.05230431282064966
+            },
+            {
+              "mech_id": 68,
+              "name": "C1+M1+M2:free1+M8",
+              "prob": 0.04663515034714812
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 84,
+              "prob": 0.10653080850311082,
+              "size": 2,
+              "rep_names": [
+                "C1+M2:free2+M4+M8",
+                "C1+M2:free2+M7+M8"
+              ]
+            },
+            {
+              "class_id": 68,
+              "prob": 0.06745958313656496,
+              "size": 2,
+              "rep_names": [
+                "C1+M1+M2:free2+M8",
+                "C3+M1+M2:free2+M8"
+              ]
+            },
+            {
+              "class_id": 157,
+              "prob": 0.06399778955563372,
+              "size": 1,
+              "rep_names": [
+                "C1+M2:free2+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 36,
+              "label": "M2(deact)+M4/7(prodEff)+M6/8(bg/bimet)",
+              "prob": 0.1428039618659011
+            },
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.12792169659119762
+            },
+            {
+              "class_id": 15,
+              "label": "M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.08744519683601332
+            }
+          ]
+        },
+        "posterior_hierarchical": {
+          "core_probs": {
+            "C1": 0.7509173491200297,
+            "C2": 0.0,
+            "C3": 0.0,
+            "C4": 0.24908265087997028
+          },
+          "module_probs": {
+            "M1": 0.38203227219433483,
+            "M2": 0.4717340112701604,
+            "M3": 0.07150440558260104,
+            "M4": 0.24636195552592718,
+            "M5": 0.17955141953234244,
+            "M6": 0.00034048663290685657,
+            "M7": 0.15498574273665502,
+            "M8": 0.5779765795161294
+          },
+          "expected_module_probs": {},
+          "clean_core_prob": 0.06203493407197394,
+          "top5": [
+            {
+              "mech_id": 36,
+              "name": "C1+M2:free2+M8",
+              "prob": 0.08185836044909402
+            },
+            {
+              "mech_id": 10,
+              "name": "C1+M8",
+              "prob": 0.0594508725035943
+            },
+            {
+              "mech_id": 453,
+              "name": "C4",
+              "prob": 0.044179734020236616
+            },
+            {
+              "mech_id": 69,
+              "name": "C1+M1+M2:free2+M8",
+              "prob": 0.039009663270748424
+            },
+            {
+              "mech_id": 19,
+              "name": "C1+M1+M8",
+              "prob": 0.03677764692904667
+            }
+          ],
+          "quotient_basic_top3": [
+            {
+              "class_id": 157,
+              "prob": 0.08185836044909402,
+              "size": 1,
+              "rep_names": [
+                "C1+M2:free2+M8"
+              ]
+            },
+            {
+              "class_id": 84,
+              "prob": 0.06160327079481189,
+              "size": 2,
+              "rep_names": [
+                "C1+M2:free2+M4+M8",
+                "C1+M2:free2+M7+M8"
+              ]
+            },
+            {
+              "class_id": 148,
+              "prob": 0.0594508725035943,
+              "size": 1,
+              "rep_names": [
+                "C1+M8"
+              ]
+            }
+          ],
+          "c_macro_top3": [
+            {
+              "class_id": 15,
+              "label": "M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.11183235817089685
+            },
+            {
+              "class_id": 36,
+              "label": "M2(deact)+M4/7(prodEff)+M6/8(bg/bimet)",
+              "prob": 0.08257884509662959
+            },
+            {
+              "class_id": 25,
+              "label": "M1(act)+M2(deact)+M6/8(bg/bimet)",
+              "prob": 0.07397291944338519
+            }
+          ]
+        },
+        "local_overlap": {
+          "clique_names": [
+            "C1+M2:free2+M8"
+          ],
+          "clique_size": 1,
+          "elapsed_ms": 60.2939915843308,
+          "amortized_min_z_best": 21.64340662254268,
+          "amortized_min_z_med": 106.25166827366152,
+          "amortized_alert_3sigma": true
+        },
+        "warmstart_local_lm": {
+          "elapsed_ms": 843.902531079948,
+          "n_candidates": 6,
+          "best_fit_mech": "C1+M1+M2:free2+M8",
+          "best_fit_z_sig": 8.352285257237233,
+          "best_core_mech": "C1",
+          "best_core_z_sig": 8.792340949799389,
+          "bic_winner_mech": "C1+M1+M2:free2+M8",
+          "bic_winner_z_sig": 8.352285257237233,
+          "bic_winner_raw_rmse": 0.009613955943221467,
+          "resid_alert_3sigma": true,
+          "regime_ood_alert": true,
+          "combined_ood_alert": true
+        },
+        "loo_ppe": {
+          "by_run": {
+            "cat_5molpct": 0.034243028352865496,
+            "cat_10molpct": 0.10873756043797847,
+            "cat_15molpct": 0.22482539532655613
+          },
+          "mean": 0.12260199470580002
+        },
+        "boed_next_exp_from_ref": {
+          "reference_run_id": "cat_10molpct",
+          "top3_recommended": [
+            {
+              "design": "D5",
+              "eig_quotient": -1.3260977320161491
+            },
+            {
+              "design": "D2",
+              "eig_quotient": -1.9278086340774625
+            },
+            {
+              "design": "D6",
+              "eig_quotient": -1.94186909224585
+            }
+          ],
+          "actual_paper_followups": [
+            {
+              "run_id": "cat_5molpct",
+              "role": "varying_catalyst_low",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0005,
+              "cat_mult": 0.5
+            },
+            {
+              "run_id": "cat_15molpct",
+              "role": "varying_catalyst_high",
+              "A0": 1.0,
+              "B0": 10.0,
+              "P0": 0.0141,
+              "cat_mult": 1.5
+            }
+          ]
+        },
+        "elapsed_s": 1.4355334397405386
+      }
+    ]
+  },
+  "synthetic_misspecification": {
+    "designs": [
+      "D0",
+      "D2",
+      "D5",
+      "D6"
+    ],
+    "sigma_rel": 0.01,
+    "elapsed_s": 248.18187678419054,
+    "in_dist_control": {
+      "n": 100,
+      "amort_best_rate_gt3sigma": 0.0,
+      "amort_best_median_z": 0.9908698098674451,
+      "amort_med_rate_gt3sigma": 0.0,
+      "amort_med_median_z": 0.9879424379694737,
+      "warmstart_lm_rate_gt3sigma": 0.0,
+      "warmstart_lm_median_z": 0.966241833458978,
+      "z_amort_best_values": [
+        0.925,
+        0.928,
+        1.024,
+        0.996,
+        0.961,
+        0.995,
+        1.057,
+        0.927,
+        0.965,
+        0.939,
+        1.058,
+        0.925,
+        1.063,
+        1.065,
+        1.049,
+        1.062,
+        0.999,
+        1.055,
+        0.971,
+        0.963,
+        0.966,
+        0.948,
+        0.938,
+        1.052,
+        0.926,
+        1.045,
+        1.082,
+        1.003,
+        1.056,
+        0.953,
+        1.045,
+        0.994,
+        0.983,
+        1.016,
+        0.965,
+        1.025,
+        0.999,
+        0.969,
+        1.023,
+        0.952,
+        0.966,
+        1.072,
+        0.901,
+        0.876,
+        1.083,
+        0.955,
+        0.898,
+        0.991,
+        0.913,
+        0.966,
+        0.943,
+        1.066,
+        1.004,
+        0.977,
+        1.109,
+        0.978,
+        1.021,
+        1.119,
+        0.991,
+        1.038,
+        1.034,
+        1.069,
+        0.975,
+        0.955,
+        0.969,
+        1.016,
+        0.97,
+        0.995,
+        1.08,
+        1.031,
+        0.959,
+        1.013,
+        0.925,
+        0.956,
+        0.883,
+        1.049,
+        0.988,
+        0.991,
+        0.966,
+        0.964,
+        1.045,
+        1.022,
+        1.038,
+        0.963,
+        1.047,
+        0.93,
+        0.893,
+        1.027,
+        1.064,
+        0.908,
+        1.067,
+        0.975,
+        0.908,
+        1.006,
+        0.944,
+        0.927,
+        1.06,
+        0.995,
+        0.955,
+        0.869
+      ],
+      "z_lm_values": [
+        0.893,
+        0.923,
+        0.978,
+        0.983,
+        0.945,
+        0.979,
+        1.04,
+        0.907,
+        0.934,
+        0.932,
+        1.043,
+        0.914,
+        1.039,
+        1.05,
+        1.011,
+        1.05,
+        0.986,
+        1.009,
+        0.953,
+        0.941,
+        0.951,
+        0.912,
+        0.928,
+        1.04,
+        0.905,
+        1.014,
+        1.051,
+        0.989,
+        1.046,
+        0.943,
+        1.032,
+        0.979,
+        0.972,
+        0.994,
+        0.95,
+        0.999,
+        0.99,
+        0.95,
+        1.017,
+        0.915,
+        0.958,
+        1.056,
+        0.896,
+        0.854,
+        1.077,
+        0.949,
+        0.88,
+        0.969,
+        0.894,
+        0.951,
+        0.936,
+        1.046,
+        0.99,
+        0.967,
+        0.981,
+        0.964,
+        1.008,
+        1.09,
+        0.983,
+        1.011,
+        1.022,
+        0.909,
+        0.961,
+        0.939,
+        0.93,
+        0.988,
+        0.948,
+        0.965,
+        1.037,
+        0.981,
+        0.919,
+        0.951,
+        0.916,
+        0.933,
+        0.847,
+        1.007,
+        0.973,
+        0.952,
+        0.916,
+        0.953,
+        1.014,
+        1.003,
+        1.0,
+        0.925,
+        1.014,
+        0.923,
+        0.884,
+        1.018,
+        1.044,
+        0.894,
+        1.05,
+        0.958,
+        0.894,
+        0.983,
+        0.917,
+        0.909,
+        1.045,
+        0.981,
+        0.949,
+        0.858
+      ]
+    },
+    "temp_drift": {
+      "n": 100,
+      "amort_best_rate_gt3sigma": 0.0,
+      "amort_best_median_z": 1.0544459369269599,
+      "amort_med_rate_gt3sigma": 0.0,
+      "amort_med_median_z": 1.0588362899472414,
+      "warmstart_lm_rate_gt3sigma": 0.0,
+      "warmstart_lm_median_z": 1.0186710962252123,
+      "z_amort_best_values": [
+        1.16,
+        0.935,
+        1.027,
+        0.979,
+        1.047,
+        1.029,
+        1.151,
+        1.105,
+        1.196,
+        1.411,
+        0.993,
+        0.906,
+        1.046,
+        0.991,
+        1.075,
+        1.054,
+        1.099,
+        1.052,
+        0.949,
+        1.056,
+        1.276,
+        1.042,
+        1.051,
+        1.068,
+        1.131,
+        1.047,
+        1.087,
+        1.109,
+        1.27,
+        0.967,
+        1.147,
+        1.139,
+        1.138,
+        1.085,
+        1.283,
+        1.011,
+        1.195,
+        0.991,
+        1.603,
+        1.012,
+        1.002,
+        0.996,
+        1.005,
+        0.971,
+        1.069,
+        1.095,
+        1.015,
+        1.027,
+        1.049,
+        1.035,
+        1.054,
+        1.029,
+        1.034,
+        1.184,
+        1.267,
+        0.923,
+        0.969,
+        1.047,
+        1.406,
+        0.975,
+        1.074,
+        1.187,
+        1.107,
+        1.022,
+        1.036,
+        1.037,
+        1.105,
+        1.086,
+        0.994,
+        1.219,
+        1.152,
+        1.186,
+        1.163,
+        1.111,
+        1.062,
+        1.634,
+        1.098,
+        0.935,
+        1.028,
+        1.212,
+        0.86,
+        0.948,
+        1.389,
+        1.269,
+        1.176,
+        0.953,
+        1.081,
+        0.941,
+        0.985,
+        1.041,
+        1.12,
+        1.007,
+        1.054,
+        0.944,
+        0.984,
+        1.085,
+        1.118,
+        0.923,
+        1.066,
+        1.158
+      ],
+      "z_lm_values": [
+        1.129,
+        0.884,
+        0.983,
+        0.972,
+        1.006,
+        0.972,
+        1.01,
+        1.075,
+        1.134,
+        1.264,
+        0.986,
+        0.878,
+        1.04,
+        0.978,
+        1.03,
+        1.029,
+        1.073,
+        0.998,
+        0.936,
+        0.999,
+        1.237,
+        0.978,
+        0.992,
+        1.033,
+        1.108,
+        1.025,
+        1.031,
+        1.095,
+        1.237,
+        0.96,
+        1.132,
+        1.012,
+        1.119,
+        1.027,
+        1.059,
+        0.979,
+        1.127,
+        0.955,
+        1.215,
+        0.997,
+        0.991,
+        0.975,
+        0.99,
+        0.949,
+        1.028,
+        1.063,
+        0.986,
+        0.973,
+        0.997,
+        0.986,
+        1.039,
+        1.022,
+        1.021,
+        1.069,
+        1.161,
+        0.9,
+        0.923,
+        1.018,
+        1.05,
+        0.958,
+        1.048,
+        1.08,
+        0.996,
+        0.951,
+        1.025,
+        0.958,
+        1.079,
+        1.037,
+        0.966,
+        1.095,
+        1.088,
+        1.02,
+        1.122,
+        1.014,
+        1.014,
+        1.25,
+        1.069,
+        0.902,
+        0.985,
+        1.139,
+        0.838,
+        0.92,
+        1.144,
+        1.161,
+        1.133,
+        0.931,
+        0.983,
+        0.925,
+        0.963,
+        1.028,
+        1.081,
+        0.977,
+        1.039,
+        0.934,
+        0.942,
+        1.068,
+        1.101,
+        0.888,
+        1.034,
+        0.994
+      ],
+      "auroc_amort_best": 0.7584999999999998,
+      "auroc_warmstart_lm": 0.7149
+    },
+    "sensor_bias_8pct": {
+      "n": 100,
+      "amort_best_rate_gt3sigma": 0.79,
+      "amort_best_median_z": 3.5777604299800414,
+      "amort_med_rate_gt3sigma": 0.84,
+      "amort_med_median_z": 3.833185223247413,
+      "warmstart_lm_rate_gt3sigma": 0.65,
+      "warmstart_lm_median_z": 3.303444243635672,
+      "z_amort_best_values": [
+        3.793,
+        3.551,
+        4.215,
+        4.852,
+        3.356,
+        5.295,
+        3.774,
+        3.511,
+        4.01,
+        3.058,
+        3.044,
+        3.468,
+        5.245,
+        3.176,
+        2.962,
+        3.605,
+        2.719,
+        2.51,
+        4.556,
+        4.49,
+        2.766,
+        4.102,
+        3.653,
+        3.036,
+        3.71,
+        4.546,
+        2.541,
+        4.598,
+        2.446,
+        2.795,
+        4.425,
+        3.469,
+        3.707,
+        3.605,
+        2.942,
+        3.642,
+        2.884,
+        3.456,
+        2.392,
+        3.858,
+        3.513,
+        3.931,
+        5.603,
+        2.284,
+        3.341,
+        3.501,
+        4.834,
+        4.3,
+        4.186,
+        3.163,
+        2.528,
+        3.245,
+        5.336,
+        2.646,
+        2.704,
+        3.512,
+        2.047,
+        3.548,
+        4.001,
+        5.133,
+        4.857,
+        5.118,
+        3.236,
+        4.223,
+        3.632,
+        4.731,
+        2.606,
+        3.938,
+        3.315,
+        4.052,
+        4.187,
+        4.935,
+        5.394,
+        4.219,
+        2.565,
+        3.204,
+        4.219,
+        3.205,
+        5.038,
+        3.403,
+        4.757,
+        4.757,
+        3.488,
+        4.257,
+        2.599,
+        4.801,
+        2.966,
+        3.257,
+        4.118,
+        3.437,
+        5.004,
+        4.15,
+        3.024,
+        5.507,
+        3.104,
+        4.105,
+        3.032,
+        3.101,
+        2.905,
+        2.964
+      ],
+      "z_lm_values": [
+        3.053,
+        3.389,
+        3.154,
+        4.396,
+        3.083,
+        5.203,
+        3.514,
+        2.878,
+        3.535,
+        2.911,
+        2.98,
+        3.337,
+        5.19,
+        3.105,
+        2.82,
+        3.087,
+        2.632,
+        2.248,
+        4.539,
+        4.393,
+        2.565,
+        3.988,
+        3.326,
+        2.597,
+        3.579,
+        4.242,
+        2.401,
+        4.488,
+        2.391,
+        2.626,
+        4.399,
+        3.428,
+        3.537,
+        3.217,
+        2.428,
+        3.128,
+        2.802,
+        3.204,
+        2.329,
+        3.465,
+        3.286,
+        3.903,
+        5.586,
+        2.239,
+        3.284,
+        3.328,
+        4.724,
+        3.818,
+        4.011,
+        2.737,
+        2.483,
+        2.901,
+        5.299,
+        2.505,
+        2.621,
+        2.984,
+        2.016,
+        3.32,
+        3.492,
+        5.105,
+        4.819,
+        4.968,
+        3.095,
+        3.998,
+        3.123,
+        4.516,
+        2.519,
+        3.731,
+        2.916,
+        3.449,
+        3.948,
+        4.782,
+        5.325,
+        4.082,
+        2.502,
+        3.155,
+        3.909,
+        2.994,
+        4.743,
+        2.993,
+        4.59,
+        4.478,
+        3.108,
+        3.882,
+        2.494,
+        4.76,
+        2.754,
+        3.166,
+        3.886,
+        3.363,
+        4.515,
+        4.134,
+        2.925,
+        5.486,
+        2.994,
+        3.938,
+        2.901,
+        2.799,
+        2.716,
+        2.882
+      ],
+      "auroc_amort_best": 1.0,
+      "auroc_warmstart_lm": 1.0
+    },
+    "unmodeled_side_rxn": {
+      "n": 100,
+      "amort_best_rate_gt3sigma": 0.67,
+      "amort_best_median_z": 3.636948650260556,
+      "amort_med_rate_gt3sigma": 0.71,
+      "amort_med_median_z": 4.022263221937823,
+      "warmstart_lm_rate_gt3sigma": 0.54,
+      "warmstart_lm_median_z": 3.1386662437518016,
+      "z_amort_best_values": [
+        4.356,
+        4.092,
+        4.479,
+        6.909,
+        3.416,
+        2.392,
+        2.782,
+        2.203,
+        6.229,
+        2.255,
+        5.063,
+        6.133,
+        5.185,
+        3.624,
+        6.121,
+        3.84,
+        6.786,
+        3.496,
+        4.022,
+        2.309,
+        6.232,
+        3.307,
+        2.868,
+        1.644,
+        2.939,
+        4.014,
+        5.057,
+        6.196,
+        5.348,
+        3.131,
+        3.173,
+        6.874,
+        4.105,
+        4.515,
+        2.219,
+        2.018,
+        3.701,
+        1.918,
+        4.474,
+        6.585,
+        3.052,
+        3.641,
+        3.954,
+        7.586,
+        2.59,
+        4.637,
+        1.976,
+        2.462,
+        3.633,
+        1.334,
+        3.514,
+        2.14,
+        3.189,
+        4.516,
+        2.462,
+        5.842,
+        4.078,
+        4.174,
+        2.462,
+        6.114,
+        6.702,
+        3.085,
+        2.175,
+        2.551,
+        3.652,
+        4.171,
+        7.163,
+        3.263,
+        2.255,
+        1.944,
+        2.162,
+        6.567,
+        4.352,
+        3.338,
+        4.389,
+        3.073,
+        3.567,
+        1.875,
+        4.213,
+        6.694,
+        2.498,
+        1.917,
+        7.181,
+        3.397,
+        5.189,
+        2.617,
+        1.297,
+        5.031,
+        4.128,
+        1.235,
+        2.721,
+        4.794,
+        3.958,
+        4.36,
+        5.855,
+        4.714,
+        2.884,
+        1.226,
+        3.346,
+        1.901
+      ],
+      "z_lm_values": [
+        3.228,
+        3.916,
+        3.072,
+        5.378,
+        3.147,
+        2.033,
+        2.414,
+        1.685,
+        5.384,
+        2.061,
+        4.068,
+        5.347,
+        4.184,
+        2.719,
+        5.827,
+        3.378,
+        5.287,
+        3.361,
+        2.924,
+        2.002,
+        5.797,
+        2.732,
+        2.439,
+        1.406,
+        2.242,
+        3.756,
+        4.621,
+        6.054,
+        4.014,
+        2.367,
+        2.869,
+        6.461,
+        3.19,
+        3.878,
+        1.804,
+        1.536,
+        3.321,
+        1.663,
+        3.5,
+        5.905,
+        2.623,
+        3.187,
+        2.99,
+        7.076,
+        2.198,
+        3.86,
+        1.639,
+        2.159,
+        3.294,
+        1.269,
+        2.965,
+        1.693,
+        2.56,
+        3.585,
+        2.346,
+        5.416,
+        3.984,
+        3.759,
+        1.944,
+        4.892,
+        5.858,
+        2.97,
+        1.884,
+        2.229,
+        3.23,
+        3.66,
+        5.521,
+        2.789,
+        1.862,
+        1.689,
+        1.972,
+        4.805,
+        3.511,
+        3.042,
+        3.938,
+        2.978,
+        3.131,
+        1.577,
+        3.873,
+        5.542,
+        2.016,
+        1.517,
+        5.345,
+        2.938,
+        4.147,
+        2.346,
+        1.139,
+        3.772,
+        3.595,
+        1.175,
+        1.747,
+        3.75,
+        3.359,
+        3.748,
+        4.524,
+        4.078,
+        2.415,
+        1.119,
+        3.025,
+        1.697
+      ],
+      "auroc_amort_best": 1.0,
+      "auroc_warmstart_lm": 1.0
+    }
+  }
+}

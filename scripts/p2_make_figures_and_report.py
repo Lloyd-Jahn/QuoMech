@@ -31,6 +31,7 @@ import numpy as np
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl_quomech")
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -40,9 +41,18 @@ from quomech.grammar import build_multicore_grammar
 from quomech.simulator import ODESimulator
 
 
-# Clean publication typography (NeurIPS / ICML / Nature-ready)
+# Load local Times New Roman TTF fonts explicitly (ICML 2027 requirement)
+_FONT_DIR = Path(__file__).resolve().parents[1] / "fonts"
+for _ttf in ["Times New Roman.ttf", "Times New Roman Italic.ttf"]:
+    _fp = _FONT_DIR / _ttf
+    if _fp.exists():
+        fm.fontManager.addfont(str(_fp))
+
+# Clean publication typography (ICML 2027 — Times New Roman + STIX math, PDF-only)
 plt.rcParams.update({
-    "font.family": "DejaVu Sans",
+    "font.family": "Times New Roman",
+    "font.serif": ["Times New Roman"],
+    "mathtext.fontset": "stix",
     "font.size": 9.5,
     "axes.titlesize": 10.5,
     "axes.titleweight": "bold",
@@ -77,9 +87,8 @@ COLORS = {
 def save_fig(fig, fig_dir: Path, name: str):
     fig_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(fig_dir / f"{name}.pdf", bbox_inches="tight")
-    fig.savefig(fig_dir / f"{name}.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
-    print(f"  Saved {name}.pdf & .png", flush=True)
+    print(f"  Saved {name}.pdf (Times New Roman)", flush=True)
 
 
 def load_json_opt(p: Path) -> Optional[Dict]:
@@ -176,7 +185,7 @@ def make_fig1(res_dir: Path, fig_dir: Path, e3_data: Optional[Dict]):
     ax2 = fig.add_subplot(gs[2])
     if e3_data is not None:
         s_d = get_primary_seed_dict(e3_data)
-        labels = ["$\\Xi_{\\mathrm{full}}$\n(392 cls)", "$\\Xi_{\\mathrm{basic}}$\n(306 cls)", "$\\Xi_{\\mathrm{no\\text{-}P}}$", "$\\mathcal{X}_{\\mathrm{basic}}$\n(LHS-128)", "$C_{\\mathrm{macro}}$\n(42 cls)"]
+        labels = ["$\\Xi_{\\mathrm{full}}$\n(392 cls)", "$\\Xi_{\\mathrm{basic}}$\n(306 cls)", "$\\Xi_{\\mathrm{no-P}}$", "$\\mathcal{X}_{\\mathrm{basic}}$\n(LHS-128)", "$C_{\\mathrm{macro}}$\n(42 cls)"]
         vals_all = [
             s_d["discrete_3tier"]["full"]["same_state_counterfactual"]["intra_class_eig_frac_mean"] * 100,
             s_d["discrete_3tier"]["basic"]["same_state_counterfactual"]["intra_class_eig_frac_mean"] * 100,
@@ -217,7 +226,7 @@ def make_fig2(equiv_dir: Path, fig_dir: Path):
         return
     eq = json.loads(idx_path.read_text())
     order = ["D0", "D0_D5", "Xi_noP", "Xi_basic", "X_basic_ref", "Xi_full"]
-    nice = ["$D_0$\n(1)", "$\\{D_0,D_5\\}$\n(2)", "$\\Xi_{\\mathrm{no\\text{-}P}}$\n(6)", "$\\Xi_{\\mathrm{basic}}$\n(7)", "$\\mathcal{X}_{\\mathrm{basic}}^{\\mathrm{ref}}$\n(9 cont.)", "$\\Xi_{\\mathrm{full}}$\n(10)"]
+    nice = ["$D_0$\n(1)", "$\\{D_0,D_5\\}$\n(2)", "$\\Xi_{\\mathrm{no-P}}$\n(6)", "$\\Xi_{\\mathrm{basic}}$\n(7)", "$\\mathcal{X}_{\\mathrm{basic}}^{\\mathrm{ref}}$\n(9 cont.)", "$\\Xi_{\\mathrm{full}}$\n(10)"]
 
     n_cls = [eq[k]["n_classes"] for k in order]
     n_sing = [eq[k]["n_singleton"] for k in order]
@@ -320,11 +329,20 @@ def make_fig3(e1_data: Optional[Dict], cpu_data: Optional[Dict], fig_dir: Path):
         order_p = np.argsort(pvals)[::-1]
         pnames_s = [pnames[i] for i in order_p]
         pvals_s = [pvals[i] for i in order_p]
+        def _fmt_param(pn: str) -> str:
+            if "_" in pn:
+                head, sub = pn.split("_", 1)
+                if sub.isalpha():
+                    return f"${head}_{{\\mathrm{{{sub}}}}}$"
+                return f"${head}_{{{sub}}}$"
+            return f"${pn}$"
+
+        pnames_fmt = [_fmt_param(p) for p in pnames_s]
         y_pos = np.arange(len(pnames_s))
         ax1.barh(y_pos, pvals_s, color=COLORS["teal"], alpha=0.85, height=0.72)
         ax1.axvline(0.05, color=COLORS["accent"], ls="--", lw=1.3, label="KS = 0.05 target")
         ax1.set_yticks(y_pos)
-        ax1.set_yticklabels(pnames_s, fontsize=6.6)
+        ax1.set_yticklabels(pnames_fmt, fontsize=7.4)
         ax1.invert_yaxis()
         ax1.set_xlabel("SBC Kolmogorov–Smirnov Statistic")
         ax1.set_title(f"(b) 19D Parameter Calibration\n(Median KS = {np.median(pvals):.3f})")
@@ -351,16 +369,23 @@ def make_fig3(e1_data: Optional[Dict], cpu_data: Optional[Dict], fig_dir: Path):
         smc = cpu_data["smc_abc_50"]["full527_top20_local_consistency"]
         pts.append(("SMC-ABC\n(Top-20)", smc["mean_s_per_case"] * 1000.0, smc["smc_class_top1"] * 100, COLORS["gold"], "P"))
 
+    offsets = {
+        "QuoMech": (2.0, +2.6, "left"),
+        "Flat NPE": (2.0, -3.4, "left"),
+        "BL-527 CNN": (2.0, -1.0, "left"),
+        "Enum+LM+BIC\n(64-CPU)": (0.48, -2.5, "right"),
+        "SMC-ABC\n(Top-20)": (0.48, +1.8, "right"),
+    }
     for lbl, ms, acc, col, mk in pts:
-        ax2.scatter([ms], [acc], color=col, marker=mk, s=75, zorder=5, edgecolors="white", lw=0.7)
-        dx = 1.35 if ms < 50 else 0.72
-        ha = "left" if ms < 50 else "right"
-        ax2.annotate(lbl, (ms, acc), xytext=(ms * dx, acc - 2.5), fontsize=7.6, color=col, fontweight="bold", ha=ha)
+        ax2.scatter([ms], [acc], color=col, marker=mk, s=78, zorder=5, edgecolors="white", lw=0.7)
+        dx, dy, ha = offsets.get(lbl, (1.5, 0.0, "left"))
+        ax2.annotate(lbl, (ms, acc), xytext=(ms * dx, acc + dy), fontsize=7.6, color=col, fontweight="bold", ha=ha, va="center")
     ax2.set_xscale("log")
+    ax2.set_xlim(0.02, 8e5)
     ax2.set_xlabel("Inference Time per Case (ms, log scale)")
     ax2.set_ylabel("Quotient Class Top-1 (%)")
     ax2.set_title("(c) Accuracy vs. Inference Speed")
-    ax2.set_ylim(max(0, min(p[2] for p in pts) - 12) if pts else 0, 102)
+    ax2.set_ylim(20, 56)
 
     save_fig(fig, fig_dir, "fig_app_e1_calibration_and_speed")
 
@@ -395,8 +420,8 @@ def make_fig4(e3_data: Optional[Dict], fig_dir: Path):
     ax0.set_xlabel("Follow-up Experiments Added After $D_0$")
     ax0.set_ylabel("True Quotient-Class Posterior $q(C^* \\mid D)$ (%)")
     ax0.set_xticks(steps_d)
-    ax0.set_ylim(25, 100)
-    ax0.legend(frameon=False, loc="lower right", fontsize=7.6)
+    ax0.set_ylim(0, 72)
+    ax0.legend(frameon=False, loc="upper left", fontsize=7.6)
 
     # Panel B: Continuous X_basic LHS-128 BOED + inset spatial clustering bar
     ax1 = fig.add_subplot(gs[0, 1])
@@ -416,8 +441,8 @@ def make_fig4(e3_data: Optional[Dict], fig_dir: Path):
     ax1.set_xlabel("Follow-up Experiments Added After $D_0$")
     ax1.set_ylabel("True Quotient-Class Posterior (%)")
     ax1.set_xticks(steps_c)
-    ax1.set_ylim(25, 100)
-    ax1.legend(frameon=False, loc="lower right", fontsize=7.6)
+    ax1.set_ylim(0, 78)
+    ax1.legend(frameon=False, loc="upper left", fontsize=7.6)
 
     # Panel C: Cost-Normalized Xi_full (cost <= 6) + 1-Shot Upgrade Inset
     ax2 = fig.add_subplot(gs[1, 0])
@@ -433,8 +458,8 @@ def make_fig4(e3_data: Optional[Dict], fig_dir: Path):
     ax2.set_xlabel("Cumulative Experimental Cost Budget")
     ax2.set_ylabel("True $\\Xi_{\\mathrm{full}}$ Class Posterior (%)")
     ax2.set_xticks(costs_x)
-    ax2.set_ylim(25, 95)
-    ax2.legend(frameon=False, loc="lower right", fontsize=7.6)
+    ax2.set_ylim(0, 74)
+    ax2.legend(frameon=False, loc="upper left", fontsize=7.6)
 
     # Panel D: Zero-Retrain Coarse Task Quotient C_macro Pure Selection (Xi_full & LHS-128)
     ax3 = fig.add_subplot(gs[1, 1])
@@ -455,7 +480,7 @@ def make_fig4(e3_data: Optional[Dict], fig_dir: Path):
     ax3.set_xlabel("Follow-up Experiments Added After $D_0$")
     ax3.set_ylabel("True $C_{\\mathrm{macro}}$ Posterior $q(C_{\\mathrm{macro}}^* \\mid D)$ (%)")
     ax3.set_xticks(st_m)
-    ax3.set_ylim(25, 100)
+    ax3.set_ylim(0, 96)
     ax3.legend(frameon=False, loc="lower right", fontsize=7.3)
 
     save_fig(fig, fig_dir, "fig3_e3_quotient_boed")
@@ -474,10 +499,10 @@ def make_fig5(e4_data: Optional[Dict], plot_curves: Optional[Dict], fig_dir: Pat
 
     # Top row: 4 representative published catalysis systems (3 in-library + 1 OOD!)
     showcase = [
-        ("antico_2023_mn_silane_oxidation", "Antico 2023 (Mn, M1+M3)", "P"),
-        ("aikonen_2018_au_ynone_transposition", "Aikonen 2018 (Au, M2+M4)", "P"),
-        ("stroek_2021_fe_ch_amination", "Stroek 2021 (Fe, M1+M5)", "P"),
-        ("ser_2025_pd_protodeboronation_ood", "Ser 2025 [OOD] (Pd)", "P"),
+        ("antico_2023_mn_silane_oxidation", "(a) Antico 2023 (Mn, M1+M3)", "P"),
+        ("aikonen_2018_au_ynone_transposition", "(b) Aikonen 2018 (Au, M2+M4)", "P"),
+        ("stroek_2021_fe_ch_amination", "(c) Stroek 2021 (Fe, M1+M5)", "P"),
+        ("ser_2025_pd_protodeboronation_ood", "(d) Ser 2025 [OOD] (Pd)", "P"),
     ]
     run_palette = ["#1B5E9E", "#D95F02", "#008080", "#7570B3", "#E7298A", "#66A61E", "#A6761D"]
     cases_by_id = {c["case_id"]: c for c in e4_data["real_literature"]["cases"]}
@@ -496,18 +521,18 @@ def make_fig5(e4_data: Optional[Dict], plot_curves: Optional[Dict], fig_dir: Pat
                 y_lm = np.array(rd.get("y_lm_bic_fit", rd["y_pred_med"]), dtype=float)[:, ch_i]
                 y_p05 = np.array(rd["y_pred_p05"], dtype=float)[:, ch_i]
                 y_p95 = np.array(rd["y_pred_p95"], dtype=float)[:, ch_i]
-                ax.scatter(t, y_obs, s=16, color=col, alpha=0.85, zorder=4, label=rid[:12])
+                ax.scatter(t, y_obs, s=16, color=col, alpha=0.85, zorder=4, label=rid.replace("_", " ")[:15])
                 ax.plot(t, y_lm, "-", color=col, lw=1.6, alpha=0.95)
                 if r_i == 0:
                     ax.fill_between(t, y_p05, y_p95, color=col, alpha=0.14)
             c_info = cases_by_id[cid]
             z_lm = c_info["warmstart_local_lm"]["best_fit_z_sig"]
             alert = c_info["warmstart_local_lm"]["combined_ood_alert"]
-            badge = f"z={z_lm:.2f}$\\sigma$ {'[ALERT]' if alert else '[OK]'}"
-            ax.set_title(f"{title}\n{badge}", fontsize=8.8, color=COLORS["accent"] if alert else "#111111")
+            badge = f"$z={z_lm:.2f}\\sigma$ {'[ALERT]' if alert else '[OK]'}"
+            ax.set_title(f"{title}\n{badge}", fontsize=8.6, color=COLORS["accent"] if alert else "#111111")
             ax.set_xlabel("$t / t_{\\mathrm{ref}}$")
             ax.set_ylabel(f"$[{sp_use}] / A_{{\\mathrm{{ref}}}}$")
-            ax.legend(frameon=False, fontsize=6.5, loc="best")
+            ax.legend(frameon=False, fontsize=6.4, loc="best")
 
     # Bottom-left (cols 0-1): All 11 Real Literature Systems z_sig & LOO-PPE
     ax_bl = fig.add_subplot(gs[1, 0:2])
@@ -524,10 +549,10 @@ def make_fig5(e4_data: Optional[Dict], plot_curves: Optional[Dict], fig_dir: Pat
     ax_bl.set_yticks(y_pos)
     ax_bl.set_yticklabels(c_names, fontsize=8.0)
     ax_bl.invert_yaxis()
-    ax_bl.set_xlim(0, max(z_vals) * 1.38 + 1.0)
+    ax_bl.set_xlim(0, max(z_vals) * 1.48 + 1.0)
     ax_bl.set_xlabel("Signal-Normalized Residual $z_{\\mathrm{sig}}$ ($\\sigma$ multiples)")
     ax_bl.set_title("(e) All 11 Published Catalysis Benchmarks (9 In-Library + 2 OOD)")
-    ax_bl.legend(frameon=False, loc="lower right", fontsize=7.6)
+    ax_bl.legend(frameon=False, loc="upper right", fontsize=7.6)
 
     # Bottom-right (cols 2-3): 3x100 Synthetic Misspecification Stress Tests
     ax_br = fig.add_subplot(gs[1, 2:4])
@@ -554,13 +579,13 @@ def make_fig5(e4_data: Optional[Dict], plot_curves: Optional[Dict], fig_dir: Pat
         r_a = ms[k]["amort_best_rate_gt3sigma"] * 100
         r_l = ms[k]["warmstart_lm_rate_gt3sigma"] * 100
         tag_m = "FPR" if i == 0 else "TPR"
-        ax_br.text(i, 16.5, f"{tag_m}: {r_a:.0f}% / {r_l:.0f}%", ha="center", fontsize=7.6, fontweight="bold")
+        ax_br.text(i, 8.2, f"{tag_m}: {r_a:.0f}% / {r_l:.0f}%", ha="center", fontsize=7.6, fontweight="bold")
     ax_br.set_xticks(pos)
     ax_br.set_xticklabels([lbl for _, lbl in reg_order], fontsize=8.2)
-    ax_br.set_ylim(0, 18.5)
+    ax_br.set_ylim(0, 11.2)
     ax_br.set_ylabel("Posterior Predictive Residual ($\\sigma$ multiples)")
     ax_br.set_title("(f) 3$\\times$100 Synthetic Misspecification Stress Test (TPR / FPR)")
-    ax_br.legend(frameon=False, loc="upper left", fontsize=7.5)
+    ax_br.legend(frameon=False, loc="upper center", ncol=2, fontsize=7.4)
 
     save_fig(fig, fig_dir, "fig4_e4_real_kinetics_and_misspec")
 

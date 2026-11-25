@@ -1,0 +1,151 @@
+{
+  "enum_lm_bic_200": {
+    "n_cases": 200,
+    "designs": [
+      "D0",
+      "D2",
+      "D5",
+      "D6"
+    ],
+    "tier": "basic",
+    "n_classes": 306,
+    "sigma_rel": 0.01,
+    "Enum_LM_BIC": {
+      "mech_top1": 0.235,
+      "mech_top3": 0.44,
+      "mech_ece": 0.28752442657692784,
+      "class_top1": 0.32,
+      "class_top3": 0.54,
+      "class_ece": 0.24134595008473014,
+      "total_time_s": 2947.2359656132758,
+      "ms_per_case": 14736.179828066379
+    },
+    "neural_head_to_head": {
+      "QuoMech_s42": {
+        "mech_top1": 0.355,
+        "mech_top3": 0.61,
+        "mech_ece": 0.07247046750038862,
+        "class_top1": 0.425,
+        "class_top3": 0.75,
+        "class_ece": 0.08138497568892063,
+        "device": "cpu",
+        "total_time_s": 0.4091718830168247,
+        "ms_per_case": 2.0458594150841236,
+        "speedup_vs_enum_bic": 7202.928861786157
+      },
+      "Flat_NPE_s42": {
+        "mech_top1": 0.37,
+        "mech_top3": 0.625,
+        "mech_ece": 0.09515759602189067,
+        "class_top1": 0.435,
+        "class_top3": 0.745,
+        "class_ece": 0.10174292756765503,
+        "device": "cpu",
+        "total_time_s": 0.303282487206161,
+        "ms_per_case": 1.516412436030805,
+        "speedup_vs_enum_bic": 9717.791464859116
+      },
+      "BL_527_s42": {
+        "mech_top1": 0.23,
+        "mech_top3": 0.48,
+        "mech_ece": 0.0873283376917243,
+        "class_top1": 0.3,
+        "class_top3": 0.61,
+        "class_ece": 0.09442495408577553,
+        "device": "cpu",
+        "total_time_s": 0.16400589095428586,
+        "ms_per_case": 0.8200294547714293,
+        "speedup_vs_enum_bic": 17970.305508323312
+      }
+    }
+  },
+  "smc_abc_50": {
+    "designs": [
+      "D0",
+      "D2",
+      "D5",
+      "D6"
+    ],
+    "sigma_rel": 0.01,
+    "canonical_20_sublibrary": {
+      "n_cases": 50,
+      "n_particles_per_mech": 300,
+      "mean_tv_mech": 0.14126822480536927,
+      "median_tv_mech": 0.06264745841814418,
+      "mean_js_mech": 0.04229996069969394,
+      "mean_tv_class": 0.11941818122965113,
+      "median_tv_class": 0.048687323910518374,
+      "map_agreement_rate": 0.82,
+      "smc_mech_top1": 0.72,
+      "quomech_mech_top1": 0.78,
+      "smc_class_top1": 0.76,
+      "quomech_class_top1": 0.78,
+      "ess_joint_min": 220.86254353310187,
+      "ess_joint_median": 298.12872808866194,
+      "ess_mech_min": 1.0000000000345608,
+      "frac_ess_ge_200": 1.0,
+      "mean_temper_stages": 20.775,
+      "mean_mh_accept_rate": 0.15747845494231588,
+      "mean_s_per_case": 162.99057435257362,
+      "total_time_s": 8149.887799412943,
+      "smc_ece": 0.14639242974401853,
+      "quomech_ece": 0.13404497369245622,
+      "quomech_ms_per_case": 1.7839740961790085,
+      "speedup_quomech_vs_smc": 91363.75617878855
+    },
+    "full527_top20_local_consistency": {
+      "n_cases": 50,
+      "n_particles_per_mech": 300,
+      "mean_tv_mech": 0.47880803835392965,
+      "median_tv_mech": 0.4724853520036907,
+      "mean_js_mech": 0.18397164150843845,
+      "mean_tv_class": 0.3922230142155809,
+      "median_tv_class": 0.4083180615808614,
+      "map_agreement_rate": 0.4,
+      "smc_mech_top1": 0.22,
+      "quomech_mech_top1": 0.44,
+      "smc_class_top1": 0.36,
+      "quomech_class_top1": 0.48,
+      "ess_joint_min": 259.66109244785383,
+      "ess_joint_median": 551.7335551866158,
+      "ess_mech_min": 1.0001183112840772,
+      "frac_ess_ge_200": 1.0,
+      "mean_temper_stages": 19.336,
+      "mean_mh_accept_rate": 0.1490597761636042,
+      "mean_s_per_case": 239.5540251899138,
+      "total_time_s": 11978.040602980182,
+      "smc_ece": 0.42476109022504405,
+      "quomech_ece": 0.2007383538245694,
+      "quomech_ms_per_case": 71.45615673623979,
+      "speedup_quomech_vs_smc": 3352.461651053524,
+      "mean_top20_mass_captured": 0.9764657020568848
+    }
+  },
+  "appendix_sindy_ppe_100": {
+    "n_cases": 100,
+    "train_designs": [
+      "D0",
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6"
+    ],
+    "heldout_design": "D7",
+    "sindy_stlsq": {
+      "n_converged": 99,
+      "diverge_rate": 0.01,
+      "ppe_rmse_median": 0.058689418307520703,
+      "ppe_rmse_mean": 0.07337592593637028,
+      "ppe_rmse_p90": 0.12047779283153973
+    },
+    "quomech_s42": {
+      "n_converged": 100,
+      "ppe_rmse_median": 0.0016487932378870815,
+      "ppe_rmse_mean": 0.00203498373137262,
+      "ppe_rmse_p90": 0.003367195231944163
+    },
+    "elapsed_s": 10.124057529028505
+  }
+}

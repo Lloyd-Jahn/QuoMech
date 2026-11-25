@@ -134,24 +134,84 @@ def sample_mechanism_pools(
     return {"lib": lib_thetas, "s1": s1_thetas, "s2": s2_thetas}
 
 
-def _bron_kerbosch_all_maximal_cliques(adj: Dict[int, set]) -> List[List[int]]:
-    """Deterministic Bron-Kerbosch with pivoting to enumerate all maximal cliques."""
+def _bron_kerbosch_all_maximal_cliques(
+    adj: Dict[int, set], max_cliques_cap: int = 50000
+) -> Optional[List[List[int]]]:
+    """Deterministic Bron-Kerbosch with pivoting to enumerate all maximal cliques.
+
+    Returns None if the number of maximal cliques exceeds `max_cliques_cap` so dense
+    graphs safely fall back to polynomial-time deterministic multi-start clique search.
+    """
     cliques: List[List[int]] = []
+    aborted = False
 
     def recurse(R: set, P: set, X: set):
+        nonlocal aborted
+        if aborted:
+            return
         if not P and not X:
             cliques.append(sorted(R))
+            if len(cliques) >= max_cliques_cap:
+                aborted = True
             return
         # Pivot from P U X with max neighbors in P
         union_px = P | X
         pivot = max(union_px, key=lambda u: len(adj[u] & P))
         for v in sorted(P - adj[pivot]):
             recurse(R | {v}, P & adj[v], X & adj[v])
+            if aborted:
+                return
             P = P - {v}
             X = X | {v}
 
     recurse(set(), set(adj.keys()), set())
-    return cliques
+    return None if aborted else cliques
+
+
+def _greedy_multistart_best_clique(
+    sub_adj: Dict[int, set],
+    edge_weight: Dict[Tuple[int, int], float],
+) -> List[int]:
+    """Deterministic polynomial-time multi-start maximal clique finder for dense components.
+
+    Starts from every remaining vertex u in sorted order and greedily extends a clique by
+    adding the common neighbor maximizing (neighbors inside candidate pool, -mean edge residual, -id),
+    then selects the overall best clique by (-size, mean edge residual, lexicographic).
+    """
+    best_clq: Optional[List[int]] = None
+    best_key = None
+
+    for u in sorted(sub_adj.keys()):
+        clq = [u]
+        cands = set(sub_adj[u])
+        while cands:
+            best_v = None
+            best_v_score = None
+            for v in sorted(cands):
+                deg_in = len(sub_adj[v] & cands)
+                avg_w = float(sum(edge_weight[(v, w)] for w in clq)) / len(clq)
+                score = (-deg_in, avg_w, v)
+                if best_v_score is None or score < best_v_score:
+                    best_v_score = score
+                    best_v = v
+            clq.append(best_v)
+            cands &= sub_adj[best_v]
+        clq.sort()
+        if len(clq) <= 1:
+            avg_w = 0.0
+        else:
+            ws = [
+                edge_weight[(clq[a], clq[b])]
+                for a in range(len(clq))
+                for b in range(a + 1, len(clq))
+            ]
+            avg_w = float(np.mean(ws))
+        key = (-len(clq), avg_w, clq)
+        if best_key is None or key < best_key:
+            best_key = key
+            best_clq = clq
+
+    return best_clq if best_clq is not None else [min(sub_adj.keys())]
 
 
 def partition_equivalence_graph(
@@ -236,26 +296,31 @@ def partition_equivalence_graph(
             classes.append(comp)
         else:
             n_non_trans += 1
-            # Deterministic max-clique partition ordered by largest size, then lowest mean edge residual
+            # Deterministic max-clique partition ordered by largest size, then lowest mean edge residual.
+            # Exact Bron-Kerbosch for components <= 24 nodes; deterministic multi-start greedy fallback
+            # for dense coarse-tier components (prevents exponential blowup on D0/D0_D5 at 2% noise).
             rem = set(comp)
             sub_cliques = []
+
+            def clique_key(clq: List[int]):
+                if len(clq) <= 1:
+                    avg_w = 0.0
+                else:
+                    ws = [
+                        edge_weight[(clq[a], clq[b])]
+                        for a in range(len(clq))
+                        for b in range(a + 1, len(clq))
+                    ]
+                    avg_w = float(np.mean(ws))
+                return (-len(clq), avg_w, clq)
+
             while rem:
                 sub_adj = {u: (adj[u] & rem) for u in rem}
-                max_cliques = _bron_kerbosch_all_maximal_cliques(sub_adj)
-
-                def clique_key(clq: List[int]):
-                    if len(clq) <= 1:
-                        avg_w = 0.0
-                    else:
-                        ws = [
-                            edge_weight[(clq[a], clq[b])]
-                            for a in range(len(clq))
-                            for b in range(a + 1, len(clq))
-                        ]
-                        avg_w = float(np.mean(ws))
-                    return (-len(clq), avg_w, clq)
-
-                best = min(max_cliques, key=clique_key)
+                max_cliques = _bron_kerbosch_all_maximal_cliques(sub_adj) if len(rem) <= 24 else None
+                if max_cliques is not None:
+                    best = min(max_cliques, key=clique_key)
+                else:
+                    best = _greedy_multistart_best_clique(sub_adj, edge_weight)
                 sub_cliques.append(best)
                 rem -= set(best)
             classes.extend(sub_cliques)

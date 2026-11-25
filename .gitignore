@@ -12,6 +12,8 @@ quomech/csrc/*.so
 # Large datasets, model checkpoints, and cached binary pools
 data/
 papers/
+QuoMech_paper/
+fonts/
 *.npy
 *.npz
 *.pt
@@ -20,6 +22,8 @@ papers/
 *.zarr/
 *.ckpt
 
-# Logs & temporary files
+# Logs & temporary files & AI
 *.log
 .DS_Store
+GEMINI.md
+CLAUDE.md
